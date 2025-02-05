@@ -1,60 +1,8 @@
 import datetime
-#import itertools
+import inspect
+from views import *
 
-#Funções de Ações de Páginas
-def changePageAction(page):
-	if page in pages:
-		globals()["currentPage"] = page
-	else:
-		print("ERROR 404")
-
-def newUserAction():
-	
-	while True:
-		ans = input ("Qual o nome do usuário a ser criado?")
-	
-		Profile(ans)
-
-		if not ans in globals()["users"].keys():
-			print("usuário criado com sucesso!")
-			return
-
-		else:
-			print("Já existe usuário com esse nome!")
-		 
-
-def loginAction(userId):
-	globals()["currentUserId"] = userId
-
-def logoutAction():
-	globals()["currentUserId"] = None
-
-def addFriendAction(friendId):
-	currentUserId.addFriendById(friendId)
-
-def removeFriendAction(friendId):
-	pass
-	
-def addTaskAction(name, startTime, endTime, peopleId=[]):
-	pass
-
-def removeTaskAction(Taskid):
-	pass
-
-
-class Page:
-	def __init__(self, title, actions={"changePage":changePageAction}):
-	    self.id = None
-	    self.title = title
-	    self.actions = actions
-
-	def __str__(self):
-		s = f"Página: {self.title}\r\n"
-		s += f"Ações: {self.actions}"
-
-		return s
-
-#------------------#
+from fastapi import FastAPI
 
 class DataBaseElements:
 	def __init__(self):
@@ -133,7 +81,7 @@ class DataBase:
 
 	def __init__(self, load=False):
 		#tables = {pages, users, friendship, tasks}
-		self.tables = {'users':{}, 'friendship':{}, 'tasks':{}, 'pages':{}}
+		self.tables = {'users':{}, 'friendship':{}, 'tasks':{}}
 
 	#DATABASE FUNCTIONS
 	def create (self, tableName, obj):
@@ -181,29 +129,51 @@ class DataBase:
 
 		return s
 
+class State:
+
+	def __init__(self):
+		self.currentUserId = None
+		self.currentUserName = None	
+		self.currentPage = "Login"
+
+	def seeView(self):
+
+		print("...................................................")
+
+		print(f"  CURRENT PAGE:   {self.currentUserName}")
+		print(f"  CURRENT USER:   {self.currentUserName}({self.currentUserId})")
+
+		print()
+		print("  Actions")
+		for a in views[self.currentPage].actions:
+			print("   |_ " + a)
+
+		print()
+
+	def doAction(self):
+		while True:
+			act = input	("Qual ação você quer fazer?")
+			if act == "":
+				return
+			elif act in views[self.currentPage].actions.keys():
+				paramsList = (inspect.signature(views[self.currentPage].actions[act]).parameters.keys())
+				print(paramsList)
+				params = {value: None for value in (paramsList)}
+				del params['st']
+
+				print(f"Os parametros para essa página são: {params}")
+				for p in params:
+					val = input(f"Qual valor de {p}?")
+					params[p] = val
+
+				params['st'] = self
+				print(params)
+				self = views[self.currentPage].actions[act](**params)
+
+				return
+	
+
 db = DataBase()
-
-db.create('pages',
-		Page("Login", actions={
-			"changePage":	changePageAction,
-			"newUser": 		newUserAction,
-			"login": 		loginAction,
-			"logout": 		logoutAction,
-		}))
-
-db.create('pages',
-		Page("Friends", actions={
-			"changePage":	changePageAction,
-			"addFriend": 	addFriendAction,
-			"removeFriend": removeFriendAction,
-		}))
-
-db.create('pages',
-		Page("Calendar", actions={
-			"changePage":	changePageAction,
-			"addTask": 		addTaskAction,
-			"removeTask": 	removeTaskAction,
-		}))
 
 db.create('users', Profile("Adailton"))
 db.create('users', Profile("Barbaro"))
@@ -231,9 +201,12 @@ db.create('tasks',
 	peopleId	= [0, 1, 3, 4]
 	))
 
-#db.printAllUsers()
-print(db)
-#db.strTable('pages')
+st = State()
 
-currentUserId = None
-currentPage = "login"
+
+app = FastAPI()
+
+print(db)
+
+st.seeView()
+st.doAction()
