@@ -3,10 +3,9 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 
 
-function Greeting({ name }) {
-  return <h1>Hello, {name}</h1>;
-}
+// Clear the existing HTML content
+document.body.innerHTML = '<div id="app"></div>';
 
-export default function App() {
-  return <Greeting name="world" />
-}
+// Render your React component instead
+const root = createRoot(document.getElementById('app'));
+root.render(<h1>Hello, world</h1>);
