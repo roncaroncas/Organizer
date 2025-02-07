@@ -194,7 +194,7 @@ export default function Todos() {
       <AddTodo />
         <Stack gap={5}>
           {todos.map((todo: Todo) => (
-            <TodoHelper item={todo.item} id={todo.id} fetchTodos={fetchTodos}/>
+            <TodoHelper item={todo.item} key={todo.id} id={todo.id} fetchTodos={fetchTodos}/>
           ))}
         </Stack>
       </Container>
