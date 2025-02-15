@@ -1,19 +1,27 @@
-import React from "react";
+import React, {useState} from "react";
 
 
+function LoginForm({onLogin}) {
 
-const LoginForm = () => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    onLogin({ username, password })
+  }
+
   return (
-    <form className = "loginform">
+    <form onSubmit={handleSubmit} className = "loginform">
       <div>
         <p> Faça o seu login! </p>
       </div>
 
       <label><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" name="uname" required/>
+      <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
 
       <label><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" name="psw" required/>
+      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
       <div className = "centralized-button">
         <button type="submit">Login</button><br/>
@@ -25,4 +33,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default LoginForm

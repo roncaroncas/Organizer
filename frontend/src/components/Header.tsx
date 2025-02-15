@@ -1,6 +1,6 @@
 import React from "react";
 
-const Header = () => {
+const Header = ({user}) => {
   return (
     <div>
       <div className="topnav"> 
@@ -12,7 +12,9 @@ const Header = () => {
         </h1>
         <br/>
       </div>
-      <h3> UserName (Id) </h3>
+
+      <h3> {user.username} (Id) </h3>
+            
     </div>
         
   );
