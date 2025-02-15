@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-#from database import db
-
+from .database import db
 
 app = FastAPI()
 
@@ -71,3 +70,21 @@ async def delete_todo(id: int) -> dict:
     return {
         "data": f"Todo with id {id} not found."
     }
+
+@app.post("/login", tags=["login"])
+async def generate_token(body: dict) -> dict:
+
+    #TODO: ao receber um body (formato: {"username": str, "password":str}:
+
+    # 1) verificar se o usuário existe
+    # 2) Se existe, criar um SESSION_ID no DB e retorna-lo como token <----- falta essa parte!!
+
+    query = db.cursor.execute(f"SELECT id FROM users where (name == ?) AND (password == ?)", [body['username'], body['password']]).fetchall()
+
+    if len(query):
+        userId = query[0][0]
+        return {"token": userId}
+    else:
+        return None #funciona! mas com erro kkkkk <--- corrigir
+
+    

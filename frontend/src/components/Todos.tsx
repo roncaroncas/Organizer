@@ -91,7 +91,7 @@ function AddTodo() {
 const UpdateTodo = ({ item, id, fetchTodos }: UpdateTodoProps) => {
   const [todo, setTodo] = useState(item);
   const updateTodo = async () => {
-    await fetch(`http://localhost:8000/todo/${id}`, {
+    await fetch("http://localhost:8000/todo/${id}", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ item: todo }),

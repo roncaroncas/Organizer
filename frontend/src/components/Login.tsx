@@ -1,14 +1,42 @@
 import React, {useState} from "react";
 
 
-function LoginForm({onLogin}) {
+async function loginUser(credentials) {
+
+  console.log(JSON.stringify(credentials))
+  console.log(credentials)
+
+  const results = await fetch('http://localhost:8000/login', {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials)
+    })
+  .then(data => data.text())
+
+  return results
+}
+
+
+function Login({setToken}) {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  function handleSubmit(event) {
+
+  async function handleSubmit(event) {
     event.preventDefault()
-    onLogin({ username, password })
+
+    const credentials = {
+      "username": username,
+      "password": password
+    }
+
+    const token = await loginUser(credentials)
+
+    setToken(token)
+    
+
+
   }
 
   return (
@@ -33,4 +61,4 @@ function LoginForm({onLogin}) {
   );
 };
 
-export default LoginForm
+export default Login
