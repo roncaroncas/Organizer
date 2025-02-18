@@ -2,6 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import db
 
+import logging
+import sys
+
+logger = logging.getLogger('uvicorn.error')
+logger.setLevel(logging.DEBUG)
+
 app = FastAPI()
 
 origins = [
@@ -79,12 +85,34 @@ async def generate_token(body: dict) -> dict:
     # 1) verificar se o usuário existe
     # 2) Se existe, criar um SESSION_ID no DB e retorna-lo como token <----- falta essa parte!!
 
-    query = db.cursor.execute(f"SELECT id FROM users where (name == ?) AND (password == ?)", [body['username'], body['password']]).fetchall()
+    query = db.cursor.execute("SELECT id FROM users where (name == ?) AND (password == ?)", [body['username'], body['password']]).fetchall()
 
     if len(query):
         userId = query[0][0]
         return {"token": userId}
     else:
         return None #funciona! mas com erro kkkkk <--- corrigir
+
+
+@app.post("/createAccount", tags=["login"])
+async def create_account(body: dict) -> (bool):
+
+    #TODO: ao receber um body (formato: {"username": str, "password":str}:
+
+    # 1) verificar se o usuário existe
+
+    nextId = db.cursor.execute(f"SELECT max(id) FROM users").fetchall()[0][0]+1
+
+    logger.debug(nextId)
+    logger.debug(body['username'])
+    logger.debug(body['password'])
+
+    logger.debug((nextId, body['username'], body['password']))
+
+    db.cursor.execute("INSERT INTO users (id, name, password) VALUES (?, ?, ?)", (nextId, body['username'], body['password']))
+    #db.cursor.execute("INSERT INTO users (id, name, password) VALUES (?, ?, ?)", (10, 'username', 'password'))
+    db.connection.commit()
+
+    return True
 
     

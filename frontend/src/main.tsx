@@ -5,8 +5,12 @@ import App from './App.tsx'
 import LoginForm from "./components/Login";
 import Header from "./components/Header";
 
+import { BrowserRouter} from 'react-router-dom'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>,
 )
