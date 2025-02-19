@@ -2,63 +2,59 @@ import { CookiesProvider, useCookies } from 'react-cookie'
 import React, {useEffect, createContext} from "react";
 import { BrowserRouter, Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 
+import Home from "./components/Home";
+import Friends from "./components/Friends";
+import Calendar from "./components/Calendar";
+import Profile from "./components/Profile";
 
-import Header from "./components/Header";
-import Todos from "./components/Todos";
 import Login from "./components/Login";
 import CreateAccount from "./components/CreateAccount";
 
-import useToken from "./hooks/useToken"
+import Error404 from "./components/Error404";
 
-
+//import useToken from "./hooks/useToken"
 
 function App() {
 
-  const UserContext = createContext()
-  const {token, setToken} = useToken()
+  // Cookies
+  const [cookie, setCookie, removeCookie] = useCookies(['token'])
 
-  let navigate = useNavigate()
-  
-  //Resolvendo a questão do login!
-  // useEffect (() => {
-  //   if(!localStorage.token) {
-  //     console.log ("Sem token no storage!")
-
-  //     if ((useLocation()["pathname"]) != "/login"){
-  //       console.log("quero irt para /login")
-  //       navigate('/login') 
-  //     }
-  //   }
-  // })
-
+  let navigate = useNavigate()  
   let locationPath = useLocation()["pathname"]
-  console.log("locationPath: " + locationPath)
 
+  // Handle Login Navigation
   useEffect(() => {
-    if (!localStorage.token) {
+    if (!cookie.token) {
       if ((locationPath != "/login") && (locationPath != "/createAccount")){
         navigate('/login')
       }
     } else {
-      navigate ('/')
+
+      if ((locationPath == "/login") || (locationPath == "/createAccount")){
+        navigate ('/home')
+      } else if (locationPath == "/"){
+        navigate ('/home')
+      }   
     }
   }, []);
 
 
   return (
 
-    <UserContext.Provider value={token}>
+      <CookiesProvider>
 
-      <h1> Organizer </h1>
+        <h1> Organizer </h1>
+        <Routes>
+          <Route path="/login" element=<Login setCookie={setCookie} />/>
+          <Route path="/createAccount" element=<CreateAccount/>/>
+          <Route path="/home" element = <Home removeCookie={removeCookie} />/>
+          <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
+          <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
+          <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
+          <Route path="*" element = <Error404/>/>
+        </Routes>
 
-      <Routes>
-        <Route path="/login" element=<Login setToken={setToken} />/>
-        <Route path="/createAccount" element=<CreateAccount/>/>
-        <Route path="/" element = <Header setToken={setToken}/>/>
-
-      </Routes>
-
-    </UserContext.Provider>
+      </CookiesProvider>
   )
 }
 

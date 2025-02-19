@@ -1,31 +1,46 @@
 import React from "react";
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useLocation} from 'react-router-dom'
 
 
-
-
-function Header ({setToken})  {
+function Header ({removeCookie})  {
 
   let navigate = useNavigate()
+  let locationPath = useLocation()["pathname"]
 
-  function handleClick () {
-    console.log("Ai! fui clicado")
-    localStorage.removeItem("token")
+  function navigateToPage(path){
+    navigate(path)
+  }
+
+  function handleLogout () {
+    console.log("Ai! fui clicado u.u")
+    removeCookie("token", {path: '/'})
     navigate(0)
   }
+
+  const test = [10, 11]
+  console.log (test[0])
+
+  const menuPages = [["Home", "/home"], ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"]]
+
+  let structuredMenu = menuPages.map( function (item) {
+
+    if (locationPath == item[1]) {
+      return (<a key={item[0]} className="active">{item[0]}</a>)
+    } else {
+      return (<a key={item[0]} href={item[1]}>{item[0]}</a>)
+    }
+  })
+
 
   return (
     <div>
       <div className="topnav"> 
         <h1>
-          <span className="active" href="#home">Home</span>
-          <span href="#news">Friends</span>
-          <span href="#contact">Calendar</span>
 
-          <span href="#profile">Profile</span>
+          {structuredMenu}
 
-          <div onClick={handleClick}>
-            <span>Logout</span>
+          <div onClick={handleLogout}>
+            <a>Logout</a>
           </div>
 
         </h1>

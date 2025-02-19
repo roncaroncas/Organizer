@@ -110,7 +110,6 @@ async def create_account(body: dict) -> (bool):
     logger.debug((nextId, body['username'], body['password']))
 
     db.cursor.execute("INSERT INTO users (id, name, password) VALUES (?, ?, ?)", (nextId, body['username'], body['password']))
-    #db.cursor.execute("INSERT INTO users (id, name, password) VALUES (?, ?, ?)", (10, 'username', 'password'))
     db.connection.commit()
 
     return True

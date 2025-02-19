@@ -19,7 +19,8 @@ async function loginUser(credentials) {
 }
 
 
-function Login({setToken}) {
+// function Login({setToken}) {
+function Login({setCookie}) {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -44,7 +45,8 @@ function Login({setToken}) {
     const token = await loginUser(credentials)
 
     console.log("lido do forms o token: " + token)
-    setToken(token)
+    // setToken(token)
+    setCookie("token", token, {path: "/"})
     navigate(0) //força um refresh para trocar de página...
     
   }

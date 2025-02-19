@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import {useNavigate} from 'react-router-dom'
 
 
 async function createUser(credentials) {
@@ -20,7 +21,7 @@ function Login() {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-
+  let navigate = useNavigate()
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -31,6 +32,8 @@ function Login() {
     }
 
     await createUser(credentials)
+
+    navigate("/login")
     
   }
 

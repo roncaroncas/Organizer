@@ -87,7 +87,7 @@ button:focus-visible {
 }
 
 /* Style the links inside the navigation bar */
-.topnav span {
+.topnav a {
   float: left;
   color: #f2f2f2;
   text-align: center;
@@ -97,13 +97,13 @@ button:focus-visible {
 }
 
 /* Change the color of links on hover */
-.topnav span:hover {
+.topnav a:hover {
   background-color: #ddd;
   color: black;
 }
 
 /* Add a color to the active/current link */
-.topnav span.active {
+.topnav a.active {
   background-color: #ff8000;
   color: white;
 }
@@ -176,7 +176,7 @@ div {
 }
 
 /* Style the links inside the navigation bar */
-.topnav span {
+.topnav a {
   float: left;
   color: #f2f2f2;
   text-align: center;
@@ -186,13 +186,13 @@ div {
 }
 
 /* Change the color of links on hover */
-.topnav span:hover {
+.topnav a:hover {
   background-color: #ddd;
   color: black;
 }
 
 /* Add a color to the active/current link */
-.topnav span.active {
+.topnav a.active {
   background-color: #ff8000;
   color: white;
 }
