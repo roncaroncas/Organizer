@@ -4,9 +4,8 @@ import {useNavigate} from 'react-router-dom'
 
 async function loginUser(credentials) {
 
-  console.log(JSON.stringify(credentials))
   console.log(credentials)
-
+  
   const results = await fetch('http://localhost:8000/login', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -48,7 +47,7 @@ function Login({setCookie}) {
     // setToken(token)
     setCookie("token", token, {path: "/"})
     navigate(0) //força um refresh para trocar de página...
-    
+
   }
 
   return (
