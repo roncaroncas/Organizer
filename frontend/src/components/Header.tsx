@@ -13,8 +13,9 @@ function Header ({removeCookie})  {
 
   function handleLogout () {
     console.log("Ai! fui clicado u.u")
-    removeCookie("token", {path: '/'})
     navigate(0)
+    removeCookie("token", {path: '/'})
+    
   }
 
   const test = [10, 11]

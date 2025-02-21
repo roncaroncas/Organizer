@@ -49,7 +49,7 @@ function App() {
           <Route path="/login" element=<Login setCookie={setCookie} />/>
           <Route path="/createAccount" element=<CreateAccount/>/>
           <Route path="/home" element = <Home removeCookie={removeCookie} />/>
-          <Route path="/friends" element = <Friends cookie={cookie} setCookie={setCookie} removeCookie={removeCookie} />/>
+          <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
           <Route path="*" element = <Error404/>/>

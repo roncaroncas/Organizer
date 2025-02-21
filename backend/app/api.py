@@ -139,10 +139,6 @@ async def create_account(body: dict) -> (bool):
 @app.get("/myFriends", tags=["friends"])
 async def my_friends(request: Request):
 
-    fields = "users.id"
-    table = "tokenAuth"
-    tableJoin = "users"
-
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
         f"INNER JOIN users "
@@ -175,5 +171,36 @@ async def my_friends(request: Request):
     #token = request.cookies.get("token")
     
     return {"friends": friends}
+
+@app.post("/addFriend", tags=["friends"])
+async def add_friend(body: dict, request: Request) -> (bool):
+
+    #Check if friendId exists:
+
+    friendId = body["friendId"]
+
+    sql = (f"SELECT 1 from users WHERE id = ?")
+    existFriend = bool(db.cursor.execute(sql, [friendId]).fetchall())
+    logger.debug(existFriend)
+
+    if not existFriend:
+        return False
+
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+
+    sql = (f"INSERT INTO friendship "
+        f"(userId1, userId2) "
+        f"VALUES (?, ?)")
+
+    db.cursor.execute(sql, [userId, friendId])
+    db.connection.commit()
+
+    return True
+
 
     
