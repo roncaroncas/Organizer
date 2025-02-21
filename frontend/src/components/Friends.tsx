@@ -6,11 +6,9 @@ import Header from "./Header";
 
 function Friends ({cookie, removeCookie})  {
 
-
 ///////////ADICIONAR AMIGO //////////////////////////////
 
   const [friendId, setFriendId] = useState('')
-
   let navigate = useNavigate()
 
   async function addFriend(friendId) {

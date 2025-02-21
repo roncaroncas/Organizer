@@ -202,5 +202,31 @@ async def add_friend(body: dict, request: Request) -> (bool):
 
     return True
 
+@app.get("/myTasks", tags=["Calendar"])
+async def my_tasks(request: Request):
 
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+    
+    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime " 
+        f"FROM tasks t "
+        f"LEFT JOIN usersTasks ut ON t.id = ut.taskId "
+        f"LEFT JOIN users u ON u.id = ut.userId "
+        # )
+        f"WHERE u.id = ?")
+
+    logger.debug(sql)
+    logger.debug(userId)
+
+    tasks = db.cursor.execute(sql, [userId]).fetchall()
+    # tasks = db.cursor.execute(sql).fetchall()
+
+    logger.debug(tasks)
+    
+    return {"tasks": tasks}
     
