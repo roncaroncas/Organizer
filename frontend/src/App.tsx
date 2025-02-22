@@ -5,7 +5,9 @@ import { BrowserRouter, Route, Routes, useNavigate, useLocation} from 'react-rou
 import Home from "./components/Home";
 import Friends from "./components/Friends";
 import Calendar from "./components/Calendar";
+import Task_id from "./components/Task_id";
 import Profile from "./components/Profile";
+import Profile_id from "./components/Profile_id";
 
 import Login from "./components/Login";
 import CreateAccount from "./components/CreateAccount";
@@ -51,7 +53,9 @@ function App() {
           <Route path="/home" element = <Home removeCookie={removeCookie} />/>
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
+          <Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
+          <Route path="/profile/:id" element = <Profile_id removeCookie={removeCookie} />/>
           <Route path="*" element = <Error404/>/>
         </Routes>
 

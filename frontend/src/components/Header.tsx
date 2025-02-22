@@ -18,8 +18,6 @@ function Header ({removeCookie})  {
     
   }
 
-  const test = [10, 11]
-  console.log (test[0])
 
   const menuPages = [["Home", "/home"], ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"]]
 

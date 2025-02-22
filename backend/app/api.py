@@ -38,46 +38,46 @@ todos = [
 ]
 #----------------------
 
-@app.get("/", tags=["root"])
-async def read_root() -> dict:
-    return {"message": "Welcome to your todo list."}
+# @app.get("/", tags=["root"])
+# async def read_root() -> dict:
+#     return {"message": "Welcome to your todo list."}
 
-@app.get("/todo", tags=["todos"])
-async def get_todos() -> dict:
-    return { "data": todos }
+# @app.get("/todo", tags=["todos"])
+# async def get_todos() -> dict:
+#     return { "data": todos }
 
-@app.post("/todo", tags=["todos"])
-async def add_todo(todo: dict) -> dict:
-    todos.append(todo)
-    return {
-        "data": { "Todo added." }
-    }
+# @app.post("/todo", tags=["todos"])
+# async def add_todo(todo: dict) -> dict:
+#     todos.append(todo)
+#     return {
+#         "data": { "Todo added." }
+#     }
 
-@app.put("/todo/{id}", tags=["todos"])
-async def update_todo(id: int, body: dict) -> dict:
-    for todo in todos:
-        if int(todo["id"]) == id:
-            todo["item"] = body["item"]
-            return {
-                "data": f"Todo with id {id} has been updated."
-            }
+# @app.put("/todo/{id}", tags=["todos"])
+# async def update_todo(id: int, body: dict) -> dict:
+#     for todo in todos:
+#         if int(todo["id"]) == id:
+#             todo["item"] = body["item"]
+#             return {
+#                 "data": f"Todo with id {id} has been updated."
+#             }
 
-    return {
-        "data": f"Todo with id {id} not found."
-    }
+#     return {
+#         "data": f"Todo with id {id} not found."
+#     }
 
-@app.delete("/todo/{id}", tags=["todos"])
-async def delete_todo(id: int) -> dict:
-    for todo in todos:
-        if int(todo["id"]) == id:
-            todos.remove(todo)
-            return {
-                "data": f"Todo with id {id} has been removed."
-            }
+# @app.delete("/todo/{id}", tags=["todos"])
+# async def delete_todo(id: int) -> dict:
+#     for todo in todos:
+#         if int(todo["id"]) == id:
+#             todos.remove(todo)
+#             return {
+#                 "data": f"Todo with id {id} has been removed."
+#             }
 
-    return {
-        "data": f"Todo with id {id} not found."
-    }
+#     return {
+#         "data": f"Todo with id {id} not found."
+#     }
 
 @app.post("/login", tags=["login"])
 async def generate_token(body: dict, response: Response) -> dict:
@@ -113,7 +113,6 @@ async def generate_token(body: dict, response: Response) -> dict:
         return {"token": token}
     else:
         return None #funciona! mas com erro kkkkk <--- corrigir
-
 
 @app.post("/createAccount", tags=["login"])
 async def create_account(body: dict) -> (bool):
@@ -202,7 +201,7 @@ async def add_friend(body: dict, request: Request) -> (bool):
 
     return True
 
-@app.get("/myTasks", tags=["Calendar"])
+@app.get("/myTasks", tags=["tasks"])
 async def my_tasks(request: Request):
 
     sql = (f"SELECT users.id " 
@@ -230,3 +229,123 @@ async def my_tasks(request: Request):
     
     return {"tasks": tasks}
     
+@app.post("/createTask", tags=["tasks"])
+async def create_task(body: dict, request: Request) -> (bool):
+
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+
+    #CRIANDO EVENTO
+    sql = (f"INSERT INTO tasks "
+        f"(taskName, startTime, endTime) "
+        f"VALUES (?, ?, ?)")
+
+    val = [body["taskName"], body["startTime"], body["endTime"]]
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+
+    #CONECTANDO EVENTO AO USUARIO QUE O CRIOU
+    sql = (f"SELECT id " 
+        f"FROM tasks "
+        f"WHERE taskName = ? AND startTime = ? and endTime = ? "
+        f"ORDER BY id DESC "
+        f"LIMIT 1")
+
+    #TO PERGUNTANDO O ID DE UM JEITO NAO OTIMIZADO CTZ
+    taskId = db.cursor.execute(sql, val).fetchall()[0][0]
+
+    logger.debug(taskId)
+
+    sql = (f"INSERT INTO usersTasks  "
+        f"(userId, taskId, statusId) "
+        f"VALUES (?, ?, ?)")
+
+    val = [userId, taskId, 0]
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+
+    return True
+
+@app.get("/task/{taskId}", tags=["tasks"])
+async def get_Task_by_id(taskId: int, request: Request):
+
+    logger.debug(taskId)
+
+    sql = (f"SELECT tasks.taskName, tasks.startTime, tasks.endTime " 
+        f"FROM tasks "
+        f"WHERE tasks.id = ?")
+
+    taskData = db.cursor.execute(sql, [taskId]).fetchall()[0]
+
+    logger.debug(taskData)
+    
+    return taskData
+
+@app.get("/task/{taskId}/users", tags=["tasks"])
+async def get_Task_by_id(taskId: int, request: Request):
+
+    logger.debug(taskId)
+
+    sql = (f"SELECT u.id, u.name " 
+        f"FROM usersTasks ut "
+        f"LEFT JOIN users u "
+        f"ON u.id = ut.userId "
+        f"WHERE ut.taskId = ?")
+
+    taskData = db.cursor.execute(sql, [taskId]).fetchall()
+
+    logger.debug(taskData)
+    
+    return taskData
+
+@app.post("/task/{taskId}/addUser/{userId}", tags=["tasks"])
+async def add_user_to_task_by_id(taskId: int, userId: int, request: Request):
+
+    logger.debug(userId)
+
+    sql = (f"INSERT INTO usersTasks "
+        f"(userId, taskId) "
+        f"VALUES (?, ?)")
+
+    val = [userId, taskId]
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+    
+    return True
+
+@app.get("/profile", tags=["profile"])
+async def my_profile(request: Request):
+
+    sql = (f"SELECT users.id, users.name, users.dateOfBirth " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    userData = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0]
+
+    logger.debug(userData)
+    
+    return userData
+
+@app.get("/profile/{id}", tags=["profile"])
+async def get_profile_by_id(id: int, request: Request):
+
+    logger.debug(id)
+
+    sql = (f"SELECT users.id, users.name, users.dateOfBirth " 
+        f"FROM users "
+        f"WHERE users.id = ?")
+
+    userData = db.cursor.execute(sql, [id]).fetchall()[0]
+
+    logger.debug(userData)
+    
+    return userData
+

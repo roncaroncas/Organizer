@@ -66,7 +66,7 @@ function Friends ({cookie, removeCookie})  {
     return (
       <tr key={friend[0]+Math.random()}>
         <td>{friend[0]}</td>
-        <td>{friend[1]}</td>
+        <td><a href={"/profile/"+friend[0]}>{friend[1]}</a></td>
       </tr>
     )
   })
@@ -91,6 +91,8 @@ function Friends ({cookie, removeCookie})  {
         </div>
       </form>
 
+      <br/>
+
       <table key="tableFriends">
         <thead>
           <tr>
@@ -103,10 +105,8 @@ function Friends ({cookie, removeCookie})  {
         </tbody>
       </table>
 
-      
-
     </div>  
-  );
-};
+  )
+}
 
 export default Friends;
