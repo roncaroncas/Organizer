@@ -1,10 +1,38 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
+import { Box, Button, Container, Flex, Stack, Text, 
+  Input, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogRoot,
+  DialogTitle, DialogTrigger, DialogActionTrigger} from "@chakra-ui/react";
+
 import Header from "./Header";
 
 
 function Friends ({cookie, removeCookie})  {
+
+/////////////TABELA DE AMIGOS ///////////////////////////////
+
+  const [friendList, setFriendList] = useState([])
+
+  useEffect(() => {
+    fetch('http://localhost:8000/myFriends', {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setFriendList(data['friends'])
+        })}, [])
+
+  let structuredFriends = friendList.map( function (friend){
+    return (
+      <tr key={friend[0]+Math.random()}>
+        <td>{friend[0]}</td>
+        <td><a href={"/profile/"+friend[0]}>{friend[1]}</a></td>
+      </tr>
+    )
+  })
 
 ///////////ADICIONAR AMIGO //////////////////////////////
 
@@ -43,70 +71,64 @@ function Friends ({cookie, removeCookie})  {
 
   }
 
-
-
-/////////////TABELA DE AMIGOS ///////////////////////////////
-
-  const [friendList, setFriendList] = useState([])
-
-  useEffect(() => {
-    fetch('http://localhost:8000/myFriends', {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setFriendList(data['friends'])
-        })}, [])
-
-  console.log('a' + friendList)
-
-  let structuredFriends = friendList.map( function (friend){
-    return (
-      <tr key={friend[0]+Math.random()}>
-        <td>{friend[0]}</td>
-        <td>{friend[1]}</td>
-      </tr>
-    )
-  })
-
-
 ///////////////////////////////////////////////////
   return (
+
     <div>
       <Header removeCookie={removeCookie}/>
+
       <br/>
 
-      <form onSubmit={handleSubmit} className = "loginform">
-        <div>
-          <p> Adicione um amigo! </p>
-        </div>
+          <DialogRoot key={"top"} placement={"top"} motionPreset="slide-in-bottom">
 
-        <label><b>Friend Id</b></label>
-        <input type="text" value={friendId} onChange={(e) => setFriendId(e.target.value)} />
+        <table key="tableFriends">
+          <thead>
+            <tr>
+              <th>Friend_Id</th>
+              <th>Friend_Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {structuredFriends}
+          </tbody>
+        </table>
+
+        <br/>
 
         <div className = "centralized-button">
-          <button type="submit">Adicionar!</button><br/>
-        </div>
-      </form>
 
-      <table key="tableFriends">
-        <thead>
-          <tr>
-            <th>Friend_Id</th>
-            <th>Friend_Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {structuredFriends}
-        </tbody>
-      </table>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              Adicionar Amigo!
+            </Button>
+          </DialogTrigger>
 
-      
+          <DialogContent color="white">
+            <DialogHeader>
+              <DialogTitle>Adicionar Amigo</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <Stack gap="4">
+              <Input placeholder="Friend Id" onChange={(e) => setFriendId(e.target.value)}/>
+              </Stack>
+            </DialogBody>
+
+            <DialogFooter>
+              <DialogActionTrigger asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogActionTrigger>
+              <Button onClick={handleSubmit}>Adicionar</Button>
+            </DialogFooter>
+
+            {/*<DialogCloseTrigger />*/}
+          </DialogContent>
+
+        </div>  
+      </DialogRoot>
+
 
     </div>  
-  );
-};
+  )
+}
 
 export default Friends;

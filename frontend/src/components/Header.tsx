@@ -1,7 +1,6 @@
 import React from "react";
 import {useNavigate, useLocation} from 'react-router-dom'
 
-
 function Header ({removeCookie})  {
 
   let navigate = useNavigate()
@@ -18,35 +17,34 @@ function Header ({removeCookie})  {
     
   }
 
-  const test = [10, 11]
-  console.log (test[0])
 
   const menuPages = [["Home", "/home"], ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"]]
 
   let structuredMenu = menuPages.map( function (item) {
 
     if (locationPath == item[1]) {
-      return (<a key={item[0]} className="active">{item[0]}</a>)
+      return (<li className="active" key={item[0]}><a href={item[1]}>{item[0]}</a></li>)
     } else {
-      return (<a key={item[0]} href={item[1]}>{item[0]}</a>)
+      return (<li key={item[0]}><a href={item[1]}>{item[0]}</a></li>)
     }
   })
 
 
   return (
-    <div>
-      <div className="topnav"> 
-        <h1>
+    <div className="header">
 
-          {structuredMenu}
+      <h1> <a href="/">Organizer</a> </h1>
+      <nav>
+      <ul className="menu">
+        {structuredMenu}
+      </ul>
+      </nav>
+      <nav>
 
-          <div onClick={handleLogout}>
-            <a>Logout</a>
-          </div>
-
-        </h1>
-        <br/>
-      </div>
+      <ul className="logout">
+        <li onClick={handleLogout}><a href="/">Logout</a></li>
+      </ul>
+      </nav>
         
     </div>
         
