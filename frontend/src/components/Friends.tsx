@@ -1,10 +1,23 @@
-import React, {useEffect, useState} from "react";
-import {useNavigate} from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom'
 
 import Header from "./Header";
 
+interface Cookie {
+  (name: string): void;
+}
 
-function Friends ({cookie, removeCookie})  {
+interface RemoveCookie {
+  (name: string): void;
+}
+
+interface FriendsProps {
+    removeCookie: RemoveCookie;
+    cookie: Cookie;
+}
+
+
+function Friends ( {cookie, removeCookie}: FriendsProps )  {
 
 /////////////TABELA DE AMIGOS ///////////////////////////////
 
@@ -32,10 +45,10 @@ function Friends ({cookie, removeCookie})  {
 
 ///////////ADICIONAR AMIGO //////////////////////////////
 
-  const [friendId, setFriendId] = useState('')
+  const [friendId, setFriendId] = useState<string>("")
   let navigate = useNavigate()
 
-  async function addFriend(friendId) {
+  async function addFriend(friendId: string) {
 
     console.log(friendId)
     
@@ -51,7 +64,7 @@ function Friends ({cookie, removeCookie})  {
     return results
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: any) {
 
     event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
     const response = await addFriend (friendId)
@@ -88,6 +101,12 @@ function Friends ({cookie, removeCookie})  {
         </tbody>
       </table>
       <br/>
+
+      <form>
+        <label>First name:</label>
+        <input type="text" onChange={(e) => setFriendId(e.target.value)}/>
+      </form> 
+
 
       {/*<DialogRoot key={"top"} placement={"top"} motionPreset="slide-in-bottom">
 

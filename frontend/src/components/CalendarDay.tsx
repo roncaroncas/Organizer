@@ -1,10 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate, useParams } from 'react-router-dom'
 
-import { Box, Button, Container, Flex, Stack, Text, 
-  Input, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogRoot,
-  DialogTitle, DialogTrigger, DialogActionTrigger} from "@chakra-ui/react";
-
 import Header from "./Header";
 
 
@@ -14,7 +10,9 @@ function CalendarDay ({removeCookie})  {
 
   let navigate = useNavigate()
 
-  const { yyyy, mm, dd } = useParams()
+  const { yyyy } = useParams<string>()
+  const { mm } = useParams<string>()
+  const { dd } = useParams<string>()
   let pageDate = new Date (yyyy, mm, dd)
   let pageDateStr = pageDate.toString()
 
@@ -108,47 +106,11 @@ function CalendarDay ({removeCookie})  {
     )
   }
 
-  function handleClickDay(i){
-    console.log("me clicou u.U: " + i.toString())
+  function handleClickDay(i: string){
+    console.log("me clicou u.U: " + i)
   }
 
-  let calendarGrid = Array.from(Array(42).keys()).map(function (i){
-
-    let d = new Date(i*86400*1000+day1)  
-    let dStr = dateStr(d)
-
-    if (d.getMonth() == calendarDate.getMonth()) {
-
-      return (        
-        <div key={dateStr(d)} className="dayInMonthCal">
-
-          <div onClick={() => handleClickDay(dStr)}>
-            {dStr}
-          </div>
-
-          <div onClick={() => console.log("Voce quer adicionar tarefa do dia: " + dStr)}>
-            <a> (+) </a>
-          </div>
-
-        </div>
-      )
-    } else {
-      return (        
-        <div key={dateStr(d)} className="dayOutMonthCal">
-
-          <div onClick={() => handleClickDay(dStr)}>
-            {dStr}
-          </div>
-
-          <div onClick={() => console.log("Voce quer adicionar tarefa do dia: " + dStr)}>
-            <a> (+) </a>
-          </div>
-
-        </div>
-      )
-    }
-  })
-
+  
   return (
     <div>
 

@@ -1,10 +1,13 @@
-import React, {useEffect, useState} from "react";
-import {useNavigate, useParams} from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { useParams } from 'react-router-dom'
 
 import Header from "./Header";
 
+interface RemoveCookie {
+  (name: string): void;
+}
 
-function Profile_id ({removeCookie})  {
+function Profile_id ({removeCookie }: { removeCookie: RemoveCookie })  {
 
   const [profileData, setProfileData] = useState([])
 
@@ -14,7 +17,7 @@ function Profile_id ({removeCookie})  {
   console.log(id)
 
   useEffect(() => {
-    fetch('http://localhost:8000/profile/'+ id.toString(), {
+    fetch('http://localhost:8000/profile/'+ id!.toString(), {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

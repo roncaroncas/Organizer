@@ -1,16 +1,12 @@
 import {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
-import { Box, Button, Container, Flex, Stack, Text, 
-  Input, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogRoot,
-  DialogTitle, DialogTrigger, DialogActionTrigger} from "@chakra-ui/react";
-
 import Header from "./Header";
 
 
-function Calendar ({removeCookie})  {
+function Calendar ({ removeCookie })  {
 
-///////////ADICIONAR TASK NOVA//////////////////////////////
+///////////ADICIONAR TASK NOVA////////////////
 
   let navigate = useNavigate()
 

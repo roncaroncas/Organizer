@@ -1,12 +1,16 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate, useParams} from 'react-router-dom'
 
 import Header from "./Header";
 
+interface RemoveCookie {
+  (name: string): void;
+}
 
-function Calendar ({removeCookie})  {
+function Calendar ({removeCookie }: { removeCookie: RemoveCookie })  {
 
 ///////////DADOS DA TASK//////////////////////////////
+
 
   const { id } = useParams()
 
@@ -15,7 +19,7 @@ function Calendar ({removeCookie})  {
   let navigate = useNavigate()  
 
   useEffect(() => {
-    fetch('http://localhost:8000/task/'+ id.toString(), {
+    fetch('http://localhost:8000/task/'+ id!.toString(), {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -32,7 +36,7 @@ function Calendar ({removeCookie})  {
   const [userList, serUserList] = useState([])
 
   useEffect(() => {
-    fetch('http://localhost:8000/task/'+ id.toString()+"/users", {
+    fetch('http://localhost:8000/task/'+ id!.toString()+"/users", {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -55,13 +59,13 @@ function Calendar ({removeCookie})  {
 
   //////////// CONVIDAR AMIGO //////////////////////
 
-  const [newTaskUserId, setNewTaskUserId] = useState('')
+  const [newTaskUserId, setNewTaskUserId] = useState<number>(0)
 
-  async function addNewTaskUser(userId) {
+  async function addNewTaskUser(userId: number) {
 
     console.log(newTaskUserId)
     
-    const results = await fetch('http://localhost:8000/task/'+ id.toString()+"/addUser/" + userId.toString(), {
+    const results = await fetch('http://localhost:8000/task/'+ id!.toString()+"/addUser/" + userId.toString(), {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -73,7 +77,7 @@ function Calendar ({removeCookie})  {
     return results
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: any) {
 
     event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
     const response = await addNewTaskUser (newTaskUserId)
@@ -140,7 +144,7 @@ function Calendar ({removeCookie})  {
       </div>
 
       <label><b>User Id</b></label>
-      <input type="text" value={newTaskUserId} onChange={(e) => setNewTaskUserId(e.target.value)} />
+      <input type="text" value={newTaskUserId} onChange={(e) => setNewTaskUserId(parseInt(e.target.value))} />
 
       <div className = "centralized-button">
         <button type="submit">Adicionar!</button><br/>

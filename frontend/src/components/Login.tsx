@@ -2,6 +2,7 @@ import {useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
 
+
 async function loginUser(credentials) {
 
   console.log(credentials)
@@ -19,7 +20,7 @@ async function loginUser(credentials) {
 
 
 // function Login({setToken}) {
-function Login({setCookie}) {
+function Login({ setCookie } ) {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -32,7 +33,7 @@ function Login({setCookie}) {
   }
 
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: any) {
 
     event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
 

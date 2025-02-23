@@ -1,6 +1,6 @@
 import { CookiesProvider, useCookies } from 'react-cookie'
-import React, {useEffect, createContext} from "react";
-import { BrowserRouter, Route, Routes, useNavigate, useLocation} from 'react-router-dom'
+import { useEffect } from "react";
+import { Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 
 import Home from "./components/Home";
 import Friends from "./components/Friends";
@@ -14,7 +14,7 @@ import Login from "./components/Login";
 import CreateAccount from "./components/CreateAccount";
 
 import Error404 from "./components/Error404";
-import Test from "./components/Test";
+// import Test from "./components/Test";
 
 //import useToken from "./hooks/useToken"
 

@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 import {useNavigate, useLocation} from 'react-router-dom'
 
 function Header ({removeCookie})  {
@@ -6,9 +6,6 @@ function Header ({removeCookie})  {
   let navigate = useNavigate()
   let locationPath = useLocation()["pathname"]
 
-  function navigateToPage(path){
-    navigate(path)
-  }
 
   function handleLogout () {
     console.log("Ai! fui clicado u.u")
