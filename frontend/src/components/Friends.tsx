@@ -15,7 +15,7 @@ function Friends ({cookie, removeCookie})  {
   const [friendList, setFriendList] = useState([])
 
   useEffect(() => {
-    fetch('http://localhost:8000/myFriends', {
+    fetch('http://192.168.0.60:8000/myFriends', {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -43,7 +43,7 @@ function Friends ({cookie, removeCookie})  {
 
     console.log(friendId)
     
-    const results = await fetch('http://localhost:8000/addFriend', {
+    const results = await fetch('192.168.0.60:8000/addFriend', {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

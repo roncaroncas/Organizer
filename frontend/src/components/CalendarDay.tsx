@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useParams} from 'react-router-dom'
 
 import { Box, Button, Container, Flex, Stack, Text, 
   Input, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogRoot,
@@ -12,6 +12,8 @@ function Calendar ({removeCookie})  {
 
 ///////////ADICIONAR TASK NOVA//////////////////////////////
 
+  const { yyyy, mm, dd } = useParams()
+
   let navigate = useNavigate()
 
   const [taskName, setTaskName] = useState('')
@@ -22,7 +24,7 @@ function Calendar ({removeCookie})  {
 
     let message = {'taskName': taskName, 'startTime': startTime, 'endTime': endTime}
     console.log(message)
-    const results = await fetch('http://192.168.0.60:8000/createTask', {
+    const results = await fetch('http://192192.168.0.60:8000/createTask', {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -58,7 +60,7 @@ function Calendar ({removeCookie})  {
   const [taskList, setTaskList] = useState([])
 
   useEffect(() => {
-    fetch('http://192.168.0.60:8000/myTasks', {
+    fetch('http://192192.168.0.60:8000/myTasks', {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

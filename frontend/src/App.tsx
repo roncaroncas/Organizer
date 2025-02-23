@@ -55,6 +55,7 @@ function App() {
           <Route path="/home" element = <Home removeCookie={removeCookie} />/>
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
+          <Route path="/calendar/:yyyy/:mm/:dd" element = <Calendar removeCookie={removeCookie} />/>
           <Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
           <Route path="/profile/:id" element = <Profile_id removeCookie={removeCookie} />/>
