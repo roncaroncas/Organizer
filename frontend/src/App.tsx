@@ -1,5 +1,5 @@
 import { CookiesProvider, useCookies } from 'react-cookie'
-import { useEffect } from "react";
+import { useEffect } from "react"
 import { Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 
 import Home from "./components/Home";
@@ -56,7 +56,7 @@ function App() {
           <Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
           <Route path="/profile/:id" element = <Profile_id removeCookie={removeCookie} />/>
-          <Route path="/test" element = <Test/>/>
+          {/*<Route path="/test" element = <Test/>/>*/}
 
           <Route path="*" element = <Error404/>/>
         </Routes>

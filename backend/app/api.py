@@ -109,10 +109,10 @@ async def generate_token(body: dict, response: Response) -> dict:
 
         logger.debug("salvei o token em tokenAuth!")
 
-
         return {"token": token}
+
     else:
-        return None #funciona! mas com erro kkkkk <--- corrigir
+        return {}
 
 @app.post("/createAccount", tags=["login"])
 async def create_account(body: dict) -> (bool):

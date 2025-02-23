@@ -2,7 +2,6 @@ import {useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
 
-
 async function loginUser(credentials) {
 
   console.log(credentials)
@@ -18,7 +17,6 @@ async function loginUser(credentials) {
   return results
 }
 
-
 // function Login({setToken}) {
 function Login({ setCookie } ) {
 
@@ -32,7 +30,6 @@ function Login({ setCookie } ) {
     console.log("routeChange!")
   }
 
-
   async function handleSubmit(event: any) {
 
     event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
@@ -44,11 +41,11 @@ function Login({ setCookie } ) {
 
     const token = await loginUser(credentials)
 
-    console.log("lido do forms o token: " + token)
-    // setToken(token)
-    setCookie("token", token, {path: "/"})
-    navigate(0) //força um refresh para trocar de página...
-
+    if (token){
+      // console.log("lido do forms o token: " + token)
+      setCookie("token", token, {path: "/"})
+      navigate(0) //força um refresh para trocar de página...
+    }
   }
 
   return (

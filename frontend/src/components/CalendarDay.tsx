@@ -13,6 +13,7 @@ function CalendarDay ({removeCookie})  {
   const { yyyy } = useParams<string>()
   const { mm } = useParams<string>()
   const { dd } = useParams<string>()
+  
   let pageDate = new Date (yyyy, mm, dd)
   let pageDateStr = pageDate.toString()
 
