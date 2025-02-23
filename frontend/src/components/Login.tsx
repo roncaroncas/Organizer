@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import {useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
 
@@ -53,18 +53,18 @@ function Login({setCookie}) {
   return (
     <div>
 
-      <form onSubmit={handleSubmit} className = "loginform">
+      <form onSubmit={handleSubmit} className="loginform">
         <div>
           <p> Faça o seu login! </p>
         </div>
 
         <label><b>Username</b></label>
-        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <input className="login-input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
 
         <label><b>Password</b></label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input className="login-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-        <div className = "centralized-button">
+        <div className="centralized-button">
           <button type="submit">Login</button><br/>
         </div>
 
