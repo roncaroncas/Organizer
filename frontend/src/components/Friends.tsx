@@ -1,10 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
-import { Box, Button, Container, Flex, Stack, Text, 
-  Input, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogRoot,
-  DialogTitle, DialogTrigger, DialogActionTrigger} from "@chakra-ui/react";
-
 import Header from "./Header";
 
 
@@ -80,21 +76,20 @@ function Friends ({cookie, removeCookie})  {
 
       <br/>
 
-          <DialogRoot key={"top"} placement={"top"} motionPreset="slide-in-bottom">
+      <table key="tableFriends">
+        <thead>
+          <tr>
+            <th>Friend_Id</th>
+            <th>Friend_Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {structuredFriends}
+        </tbody>
+      </table>
+      <br/>
 
-        <table key="tableFriends">
-          <thead>
-            <tr>
-              <th>Friend_Id</th>
-              <th>Friend_Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {structuredFriends}
-          </tbody>
-        </table>
-
-        <br/>
+      {/*<DialogRoot key={"top"} placement={"top"} motionPreset="slide-in-bottom">
 
         <div className = "centralized-button">
 
@@ -121,11 +116,11 @@ function Friends ({cookie, removeCookie})  {
               <Button onClick={handleSubmit}>Adicionar</Button>
             </DialogFooter>
 
-            {/*<DialogCloseTrigger />*/}
+            <DialogCloseTrigger />
           </DialogContent>
 
         </div>  
-      </DialogRoot>
+      </DialogRoot>*/}
 
 
       <br/>
