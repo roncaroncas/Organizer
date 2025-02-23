@@ -58,7 +58,10 @@ function App() {
           <Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
           <Route path="/profile/:id" element = <Profile_id removeCookie={removeCookie} />/>
+<<<<<<< HEAD
           <Route path="/test" element = <Test/>/>
+=======
+>>>>>>> origin/main
           <Route path="*" element = <Error404/>/>
         </Routes>
       </CookiesProvider>
