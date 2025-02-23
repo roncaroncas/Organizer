@@ -22,7 +22,7 @@ function Calendar ({removeCookie})  {
 
     let message = {'taskName': taskName, 'startTime': startTime, 'endTime': endTime}
     console.log(message)
-    const results = await fetch('http://192.168.0.60:8000/createTask', {
+    const results = await fetch('http://localhost:8000/createTask', {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -58,7 +58,7 @@ function Calendar ({removeCookie})  {
   const [taskList, setTaskList] = useState([])
 
   useEffect(() => {
-    fetch('http://192.168.0.60:8000/myTasks', {
+    fetch('http://localhost:8000/myTasks', {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

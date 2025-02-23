@@ -14,7 +14,7 @@ function Profile_id ({removeCookie})  {
   console.log(id)
 
   useEffect(() => {
-    fetch('192.168.0.60/:8000/profile/'+ id.toString(), {
+    fetch('http://localhost:8000/profile/'+ id.toString(), {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

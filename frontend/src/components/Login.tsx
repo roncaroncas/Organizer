@@ -6,7 +6,7 @@ async function loginUser(credentials) {
 
   console.log(credentials)
   
-  const results = await fetch('http://192.168.0.60:8000/login', {
+  const results = await fetch('http://localhost:8000/login', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials)
