@@ -12,18 +12,11 @@ function Calendar ({removeCookie})  {
 
 ///////////ADICIONAR TASK NOVA//////////////////////////////
 
-<<<<<<< HEAD
   let navigate = useNavigate()
 
   const [taskName, setTaskName] = useState('')
   const [startTime, setStartTime] = useState<number>('')
   const [endTime, setEndTime] = useState<number>('')
-=======
-  const [taskName, setTaskName] = useState('')
-  const [startTime, setStartTime] = useState<number>('')
-  const [endTime, setEndTime] = useState<number>('')
-  let navigate = useNavigate()
->>>>>>> origin/main
 
   async function createTask(){
 
@@ -39,16 +32,9 @@ function Calendar ({removeCookie})  {
     // .then(data => data.blabla)
 
     return results
-<<<<<<< HEAD
-  }
-
-=======
-
 
   }
 
-
->>>>>>> origin/main
   async function handleSubmit(event) {
 
     event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
@@ -66,10 +52,7 @@ function Calendar ({removeCookie})  {
 
   }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/main
   /////////////TABELA DE TASKS ///////////////////////////
 
   const [taskList, setTaskList] = useState([])
@@ -168,7 +151,6 @@ function Calendar ({removeCookie})  {
       <Header removeCookie={removeCookie}/>
       <br/>
 
-<<<<<<< HEAD
 
       {/*COLUNA2      */}
       <h1> Calendar </h1>
@@ -257,40 +239,8 @@ function Calendar ({removeCookie})  {
       </div>  
 
       <br/>
-=======
-    <form onSubmit={handleSubmit} className = "loginform">
-      <div>
-        <p> Crie um evento! </p>
-      </div>
-      <label> Nome do Evento </label>
-      <input type="text" value={taskName} onChange={(e) => setTaskName(e.target.value)} />
-      <label> Início do Evento </label>
-      <input type="number" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-      <label> Final do Evento </label>
-      <input type="number" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
 
-      <div className = "centralized-button">
-        <button type="submit">Adicionar!</button><br/>
-      </div>
-    </form>
-
-    <br/>
-
-    <table key="tableFriends">
-      <thead>
-        <tr>
-          <th>Task_Id</th>
-          <th>Task_Name</th>
-          <th>Task_StartTime</th>
-          <th>Task_EndTime</th>
-        </tr>
-      </thead>
-      <tbody>
-        {structuredTasks}
-      </tbody>
-    </table>
->>>>>>> origin/main
-
+   
     </div>
 
   );

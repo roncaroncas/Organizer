@@ -71,38 +71,7 @@ function Friends ({cookie, removeCookie})  {
 
   }
 
-<<<<<<< HEAD
-=======
 
-
-/////////////TABELA DE AMIGOS ///////////////////////////////
-
-  const [friendList, setFriendList] = useState([])
-
-  useEffect(() => {
-    fetch('http://localhost:8000/myFriends', {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setFriendList(data['friends'])
-        })}, [])
-
-  console.log('a' + friendList)
-
-  let structuredFriends = friendList.map( function (friend){
-    return (
-      <tr key={friend[0]+Math.random()}>
-        <td>{friend[0]}</td>
-        <td><a href={"/profile/"+friend[0]}>{friend[1]}</a></td>
-      </tr>
-    )
-  })
-
-
->>>>>>> origin/main
 ///////////////////////////////////////////////////
   return (
 
@@ -129,7 +98,6 @@ function Friends ({cookie, removeCookie})  {
 
         <div className = "centralized-button">
 
-<<<<<<< HEAD
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
               Adicionar Amigo!
@@ -160,22 +128,9 @@ function Friends ({cookie, removeCookie})  {
       </DialogRoot>
 
 
-=======
       <br/>
 
-      <table key="tableFriends">
-        <thead>
-          <tr>
-            <th>Friend_Id</th>
-            <th>Friend_Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {structuredFriends}
-        </tbody>
-      </table>
 
->>>>>>> origin/main
     </div>  
   )
 }
