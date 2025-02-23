@@ -47,7 +47,6 @@ function App() {
 
 
   return (
-    <ChakraProvider value={defaultSystem} resetCSS={false}>
       <CookiesProvider>
         <Routes>
           <Route path="/login" element=<Login setCookie={setCookie} />/>
@@ -63,7 +62,6 @@ function App() {
           <Route path="*" element = <Error404/>/>
         </Routes>
       </CookiesProvider>
-    </ChakraProvider>
   )
 }
 
