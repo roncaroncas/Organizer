@@ -1,7 +1,9 @@
 import {useEffect, useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
-import Header from "./Header";
+import Header from "../../components/Header";
+
+import AllTasksTable from "./allTasksTable"
 
 
 function Calendar ({ removeCookie })  {
@@ -13,10 +15,19 @@ function Calendar ({ removeCookie })  {
   const [taskName, setTaskName] = useState('')
   const [startTime, setStartTime] = useState<number>('')
   const [endTime, setEndTime] = useState<number>('')
+  const [place, setPlace] = useState<string>('')
+  const [withHour, setWithHour] = useState<bool>('')
+  const [longDescription, setLongDescription] = useState<string>('')
 
   async function createTask(){
 
-    let message = {'taskName': taskName, 'startTime': startTime, 'endTime': endTime}
+    let message = {
+      'taskName': taskName,
+      'startTime': startTime,
+      'endTime': endTime,
+      'place': place,
+      'withHour': withHour,
+    }
     console.log(message)
     const results = await fetch('http://localhost:8000/createTask', {
     method: "POST",
@@ -66,12 +77,16 @@ function Calendar ({ removeCookie })  {
 
   
   let structuredTasks = taskList.map( function (task){
+    console.log(task)
     return (
       <tr key={task[0]+Math.random()}>
         <td>{task[0]}</td>
         <td><a href={"/task/"+task[0]}>{task[1]}</a></td>
         <td>{task[2]}</td>
         <td>{task[3]}</td>
+        <td>{task[4]}</td>
+        <td>{task[5]}</td>
+        <td>{task[6]}</td>
       </tr>
     )
   })
@@ -150,7 +165,6 @@ function Calendar ({ removeCookie })  {
       <Header removeCookie={removeCookie}/>
       <br/>
 
-
       {/*COLUNA2      */}
       <h1> Calendar </h1>
       <h2> {calendarDate.getFullYear()} </h2>
@@ -168,77 +182,28 @@ function Calendar ({ removeCookie })  {
       <br/>
       
       {/*COLUNA3      */}
-      <table key="tableFriends">
-        <thead>
-          <tr>
-            <th>Task_Id</th>
-            <th>Task_Name</th>
-            <th>Task_StartTime</th>
-            <th>Task_EndTime</th>
-          </tr>
-        </thead>
-        <tbody>
-          {structuredTasks}
-        </tbody>
-      </table>
-
+      <AllTasksTable/>
       <br/>
-
 
       <div className = "centralized-button">
-
-        {/*<DialogRoot>
-
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              Crie um Evento!
-            </Button>
-          </DialogTrigger>
-
-          <DialogContent
-            position="fixed"
-            top="50%"
-            left="50%"
-            transform="translate(-50%, -50%)"
-            bg="black"
-            color="white"
-            p={6}
-            rounded="md"
-            shadow="xl"
-            maxW="md"
-            w="90%"
-            zIndex={1000}
-            >
-
-            <DialogHeader>
-              <DialogTitle>Crie um Evento</DialogTitle>
-            </DialogHeader>
-            <DialogBody>
-              <Stack gap="4">
-              <label> Nome do Evento </label>
-              <Input placeholder="Nome do Evento" onChange={(e) => setTaskName(e.target.value)}/>
-              <label> Início do Evento </label>
-              <Input placeholder="Início do Evento" onChange={(e) => setStartTime(e.target.value)}/>
-              <label> Fim do Evento </label>
-              <Input placeholder="Fim do Evento" onChange={(e) => setEndTime(e.target.value)}/>
-              </Stack>
-            </DialogBody>
-
-            <DialogFooter>
-              <DialogActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogActionTrigger>
-              <Button onClick={handleSubmit}>Adicionar</Button>
-            </DialogFooter>
-
-          </DialogContent>
-
-        </DialogRoot>*/}
-
+        <form>
+          <input placeholder="taskName" onChange={(e) => setTaskName(e.target.value)}></input>
+          <br/>
+          <input placeholder = "startTime" onChange={(e) => setStartTime(e.target.value)}></input>
+          <br/>
+          <input placeholder = "endTime" onChange={(e) => setEndTime(e.target.value)}></input>
+          <br/>
+          <input placeholder = "place" onChange={(e) => setPlace(e.target.value)}></input>
+          <br/>
+          <input placeholder = "withHour" onChange={(e) => setWithHour(e.target.value)}></input>
+          <br/>
+          <input placeholder = "longDescription" onChange={(e) => setLongDescription(e.target.value)}></input>
+          <br/>
+          <button onClick={handleSubmit}>Adicionar</button>
+          <br/>
+        </form>
       </div>  
-
       <br/>
-
    
     </div>
 

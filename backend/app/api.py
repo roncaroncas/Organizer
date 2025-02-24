@@ -212,7 +212,7 @@ async def my_tasks(request: Request):
 
     userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
     
-    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime " 
+    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime, t.place, t.withHour, t.longDescription " 
         f"FROM tasks t "
         f"LEFT JOIN usersTasks ut ON t.id = ut.taskId "
         f"LEFT JOIN users u ON u.id = ut.userId "
@@ -243,17 +243,17 @@ async def create_task(body: dict, request: Request) -> (bool):
 
     #CRIANDO EVENTO
     sql = (f"INSERT INTO tasks "
-        f"(taskName, startTime, endTime) "
-        f"VALUES (?, ?, ?)")
+        f"(taskName, startTime, endTime, place, withHour) "
+        f"VALUES (?, ?, ?, ?, ?)")
 
-    val = [body["taskName"], body["startTime"], body["endTime"]]
+    val = [body["taskName"], body["startTime"], body["endTime"], body["place"] , body["withHour"]]
     db.cursor.execute(sql, val)
     db.connection.commit()
 
     #CONECTANDO EVENTO AO USUARIO QUE O CRIOU
     sql = (f"SELECT id " 
         f"FROM tasks "
-        f"WHERE taskName = ? AND startTime = ? and endTime = ? "
+        f"WHERE taskName = ? AND startTime = ? and endTime = ? and place = ? and withHour = ?"
         f"ORDER BY id DESC "
         f"LIMIT 1")
 
@@ -275,22 +275,22 @@ async def create_task(body: dict, request: Request) -> (bool):
 @app.get("/task/{taskId}", tags=["tasks"])
 async def get_Task_by_id(taskId: int, request: Request):
 
-    logger.debug(taskId)
+    # logger.debug(taskId)
 
-    sql = (f"SELECT tasks.taskName, tasks.startTime, tasks.endTime " 
+    sql = (f"SELECT taskName, startTime, endTime, place, withHour" 
         f"FROM tasks "
-        f"WHERE tasks.id = ?")
+        f"WHERE id = ?")
 
     taskData = db.cursor.execute(sql, [taskId]).fetchall()[0]
 
-    logger.debug(taskData)
+    # logger.debug(taskData)
     
     return taskData
 
 @app.get("/task/{taskId}/users", tags=["tasks"])
 async def get_Task_by_id(taskId: int, request: Request):
 
-    logger.debug(taskId)
+    # logger.debug(taskId)
 
     sql = (f"SELECT u.id, u.name " 
         f"FROM usersTasks ut "
@@ -300,14 +300,14 @@ async def get_Task_by_id(taskId: int, request: Request):
 
     taskData = db.cursor.execute(sql, [taskId]).fetchall()
 
-    logger.debug(taskData)
+    # logger.debug(taskData)
     
     return taskData
 
 @app.post("/task/{taskId}/addUser/{userId}", tags=["tasks"])
 async def add_user_to_task_by_id(taskId: int, userId: int, request: Request):
 
-    logger.debug(userId)
+    # logger.debug(userId)
 
     sql = (f"INSERT INTO usersTasks "
         f"(userId, taskId) "
@@ -330,14 +330,14 @@ async def my_profile(request: Request):
 
     userData = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0]
 
-    logger.debug(userData)
+    # logger.debug(userData)
     
     return userData
 
 @app.get("/profile/{id}", tags=["profile"])
 async def get_profile_by_id(id: int, request: Request):
 
-    logger.debug(id)
+    # logger.debug(id)
 
     sql = (f"SELECT users.id, users.name, users.dateOfBirth " 
         f"FROM users "
@@ -345,7 +345,7 @@ async def get_profile_by_id(id: int, request: Request):
 
     userData = db.cursor.execute(sql, [id]).fetchall()[0]
 
-    logger.debug(userData)
+    # logger.debug(userData)
     
     return userData
 

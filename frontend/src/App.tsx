@@ -2,18 +2,18 @@ import { CookiesProvider, useCookies } from 'react-cookie'
 import { useEffect } from "react"
 import { Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 
-import Home from "./components/Home";
-import Friends from "./components/Friends";
-import Calendar from "./components/Calendar";
-import CalendarDay from "./components/CalendarDay";
-import Task_id from "./components/Task_id";
-import Profile from "./components/Profile";
-import Profile_id from "./components/Profile_id";
+import Home from "./pages/Home/index";
+import Friends from "./pages/Friends/index";
+import Calendar from "./pages/Calendar/index";
+import CalendarDay from "./pages/Calendar/CalendarDay";
+import Task_id from "./pages/Calendar/Task_id";
+import Profile from "./pages/Profile/index";
+import Profile_id from "./pages/Profile/Profile_id";
 
-import Login from "./components/Login";
-import CreateAccount from "./components/CreateAccount";
+import Login from "./pages/Login/index";
+import CreateAccount from "./pages/Login/CreateAccount";
 
-import Error404 from "./components/Error404";
+import Error404 from "./pages/Errors/Error404";
 // import Test from "./components/Test";
 
 //import useToken from "./hooks/useToken"

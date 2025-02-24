@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate, useParams } from 'react-router-dom'
 
-import Header from "./Header";
+import Header from "../../components/Header";
 
 
 function CalendarDay ({removeCookie})  {
