@@ -6,7 +6,7 @@ import Home from "./pages/Home/index";
 import Friends from "./pages/Friends/index";
 import Calendar from "./pages/Calendar/index";
 import CalendarDay from "./pages/Calendar/CalendarDay";
-import Task_id from "./pages/Calendar/Task_id";
+// import Task_id from "./pages/Calendar/Task_id";
 import Profile from "./pages/Profile/index";
 import Profile_id from "./pages/Profile/Profile_id";
 
@@ -53,7 +53,7 @@ function App() {
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
           <Route path="/calendar/:yyyy/:mm/:dd" element = <CalendarDay removeCookie={removeCookie} />/>
-          <Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>
+          {/*<Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>*/}
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
           <Route path="/profile/:id" element = <Profile_id removeCookie={removeCookie} />/>
           {/*<Route path="/test" element = <Test/>/>*/}

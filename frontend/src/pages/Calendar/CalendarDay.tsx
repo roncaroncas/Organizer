@@ -1,115 +1,64 @@
-import React, {useEffect, useState} from "react";
-import {useNavigate, useParams } from 'react-router-dom'
+// import {useState} from "react";
+// import {useNavigate} from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import Header from "../../components/Header";
 
+import AllTasksTable from "./AllTasksTable"
+import AddNewTask from "./AddNewTask"
 
-function CalendarDay ({removeCookie})  {
 
-///////////ADICIONAR TASK NOVA//////////////////////////////
+function CalendarDay ({removeCookie}:{removeCookie:any})  {
 
-  let navigate = useNavigate()
+// ///////////ADICIONAR TASK NOVA//////////////////////////////
+
+//   let navigate = useNavigate()
 
   const { yyyy } = useParams<string>()
   const { mm } = useParams<string>()
   const { dd } = useParams<string>()
   
-  let pageDate = new Date (yyyy, mm, dd)
-  let pageDateStr = pageDate.toString()
+//   let pageDate = new Date (yyyy, mm, dd)
+//   // let pageDateStr = pageDate.toString()
 
-  const [taskName, setTaskName] = useState('')
-  const [startTime, setStartTime] = useState<number>(yyyy)
-  const [endTime, setEndTime] = useState<number>('')
+//   const [taskName, setTaskName] = useState<string>('')
+//   const [startTime, setStartTime] = useState<string>(yyyy)
+//   const [endTime, setEndTime] = useState<string>('')
 
-  async function createTask(){
+//   async function createTask(){
 
-    let message = {'taskName': taskName, 'startTime': startTime, 'endTime': endTime}
-    console.log(message)
-    const results = await fetch('http://localhost:8000/createTask', {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(message)
-    })
-      .then(data => data.json())
-    // .then(data => data.blabla)
+//     let message = {'taskName': taskName, 'startTime': startTime, 'endTime': endTime}
+//     console.log(message)
+//     const results = await fetch('http://localhost:8000/createTask', {
+//     method: "POST",
+//     credentials: "include",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(message)
+//     })
+//       .then(data => data.json())
+//     // .then(data => data.blabla)
 
-    return results
+//     return results
 
-  }
+//   }
 
-  async function handleSubmit(event) {
+  // async function handleSubmit(event) {
 
-    event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
-    const response = await createTask ()
-    console.log(response)
+  //   event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
+  //   const response = await createTask ()
+  //   console.log(response)
 
-    if (response) {
-      console.log("Evento adicionado! :D")
-    } else {
-      console.log("Evento nao adicionado :(")
-    }
+  //   if (response) {
+  //     console.log("Evento adicionado! :D")
+  //   } else {
+  //     console.log("Evento nao adicionado :(")
+  //   }
 
-    //jeito porco de atualizar a lista de tasks
-    navigate(0)
+  //   //jeito porco de atualizar a lista de tasks
+  //   navigate(0)
 
-  }
+  // }
 
-
-  /////////////TABELA DE TASKS ///////////////////////////
-
-  const [taskList, setTaskList] = useState([])
-
-  useEffect(() => {
-    fetch('http://localhost:8000/myTasks', {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setTaskList(data['tasks'])
-        })}, [])
-
-  
-  let structuredTasks = taskList.map( function (task){
-    return (
-      <tr key={task[0]+Math.random()}>
-        <td>{task[0]}</td>
-        <td><a href={"/task/"+task[0]}>{task[1]}</a></td>
-        <td>{task[2]}</td>
-        <td>{task[3]}</td>
-      </tr>
-    )
-  })
-
-
-  /////////////Calendar GRID ///////////////////////////
-
-  //// MONTH SELECTOR ////
-
-  const [calendarDate, setCalendarDate] = useState<number>(new Date())
-
-  let day1 = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), 0)
-  day1 = day1 - 86400*1000*day1.getDay()
-
-  const monthNumberToLabelMap = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ]
-
-
-  function dateStr(date){
-    return(
-      date.getDate().toString().padStart(2, "0") + "/" +
-      (date.getMonth()+1).toString().padStart(2, "0")  + "/" +
-      date.getFullYear().toString()
-    )
-  }
-
-  function handleClickDay(i: string){
-    console.log("me clicou u.U: " + i)
-  }
 
   
   return (
@@ -118,84 +67,20 @@ function CalendarDay ({removeCookie})  {
       <Header removeCookie={removeCookie}/>
       <br/>
 
-
       {/*COLUNA2      */}
-      <h1> Calendar </h1>
-      <h2> {calendarDate.getFullYear()} </h2>
-      <h2> {monthNumberToLabelMap[calendarDate.getMonth()]} </h2>
+{/*      <h1> Calendar </h1>
+      <h2> {CalendarDate.getFullYear()} </h2>
+      <h2> {monthNumberToLabelMap[calendarDate.getMonth()]} </h2>*/}
       <h3> {dd}/{mm}/{yyyy}</h3>
 
       <br/>
       
       {/*COLUNA3      */}
-      <table key="tableFriends">
-        <thead>
-          <tr>
-            <th>Task_Id</th>
-            <th>Task_Name</th>
-            <th>Task_StartTime</th>
-            <th>Task_EndTime</th>
-          </tr>
-        </thead>
-        <tbody>
-          {structuredTasks}
-        </tbody>
-      </table>
-
+      <AllTasksTable/>
       <br/>
 
-
-      <div className = "centralized-button">
-
-  {/*      <DialogRoot>
-
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              Crie um Evento!
-            </Button>
-          </DialogTrigger>
-
-          <DialogContent
-            position="fixed"
-            top="50%"
-            left="50%"
-            transform="translate(-50%, -50%)"
-            bg="black"
-            color="white"
-            p={6}
-            rounded="md"
-            shadow="xl"
-            maxW="md"
-            w="90%"
-            zIndex={1000}
-            >
-
-            <DialogHeader>
-              <DialogTitle>Crie um Evento</DialogTitle>
-            </DialogHeader>
-            <DialogBody>
-              <Stack gap="4">
-              <label> Nome do Evento </label>
-              <Input placeholder="Nome do Evento" onChange={(e) => setTaskName(e.target.value)}/>
-              <label> Início do Evento </label>
-              <Input type="date" placeholder="Início do Evento" value={yyyy+"/"+mm+"/"+dd} onChange={(e) => console.log(e.target.value)}/>
-              <label> Fim do Evento </label>
-              <Input placeholder="Fim do Evento" onChange={(e) => setEndTime(e.target.value)}/>
-              </Stack>
-            </DialogBody>
-
-            <DialogFooter>
-              <DialogActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogActionTrigger>
-              <Button onClick={handleSubmit}>Adicionar</Button>
-            </DialogFooter>
-
-          </DialogContent>
-
-        </DialogRoot>*/}
-
-      </div>  
+      <AddNewTask/>
+      
 
       <br/>
 

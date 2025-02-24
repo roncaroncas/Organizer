@@ -2,7 +2,7 @@ import {useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
 
-async function loginUser(credentials) {
+async function loginUser(credentials:any) {
 
   console.log(credentials)
   
@@ -18,7 +18,7 @@ async function loginUser(credentials) {
 }
 
 // function Login({setToken}) {
-function Login({ setCookie } ) {
+function Login({ setCookie }:{setCookie:any} ) {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')

@@ -1,12 +1,10 @@
 import {useEffect, useState} from "react";
-import {useNavigate} from 'react-router-dom'
-
-import Header from "../../components/Header";
+// import {useNavigate} from 'react-router-dom'
 
 
 function AllTasksTable ()  {
 
-  let navigate = useNavigate()
+  // let navigate = useNavigate()
 
 
   /////////////TABELA DE TASKS ///////////////////////////

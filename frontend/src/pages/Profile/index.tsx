@@ -3,11 +3,7 @@ import {useEffect, useState} from "react";
 
 import Header from "../../components/Header";
 
-interface RemoveCookie {
-  (name: string): void;
-}
-
-function Profile ({removeCookie }: { removeCookie: RemoveCookie })  {
+function Profile ({removeCookie }: { removeCookie: any })  {
 
   const [myselfData, setMyselfData] = useState([])
 

@@ -1,13 +1,13 @@
-import React, {useState} from "react";
+import {useState} from "react";
 import {useNavigate} from 'react-router-dom'
 
 
-async function createUser(credentials) {
+async function createUser(credentials: any) {
 
   console.log(JSON.stringify(credentials))
   console.log(credentials)
 
-  const results = await fetch('http://localhost:8000/createAccount', {
+  await fetch('http://localhost:8000/createAccount', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials)
@@ -23,7 +23,7 @@ function Login() {
   const [password, setPassword] = useState('')
   let navigate = useNavigate()
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: any) {
     event.preventDefault()
 
     const credentials = {

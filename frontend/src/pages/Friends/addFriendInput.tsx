@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom'
 
 
@@ -42,12 +42,11 @@ function AddFriendInput(){
 
   }
 
-
-
   return(
-    <form>
-        <label>First name:</label>
+    <form >
+        <label>Adicionar Amigo</label>
         <input type="text" onChange={(e) => setFriendId(e.target.value)}/>
+        <button onClick={handleSubmit}>Adicionar</button>
     </form> 
   )
 }

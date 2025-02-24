@@ -3,11 +3,7 @@ import { useParams } from 'react-router-dom'
 
 import Header from "../../components/Header";
 
-interface RemoveCookie {
-  (name: string): void;
-}
-
-function Profile_id ({removeCookie }: { removeCookie: RemoveCookie })  {
+function Profile_id ({removeCookie }: { removeCookie: any })  {
 
   const [profileData, setProfileData] = useState([])
 
