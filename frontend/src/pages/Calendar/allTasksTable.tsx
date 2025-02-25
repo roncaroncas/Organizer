@@ -34,6 +34,7 @@ function AllTasksTable ()  {
           <th>Task_Place</th>
           <th>Task_WithHour</th>
           <th>Task_LongDescription</th>
+          <th>Task_UserStatus</th>
         </tr>
       </thead>
       <tbody>
@@ -48,6 +49,7 @@ function AllTasksTable ()  {
             <td>{task[4]}</td>
             <td>{task[5]}</td>
             <td>{task[6]}</td>
+            <td>{task[7]}</td>
           </tr>
         )
         })}

@@ -212,10 +212,11 @@ async def my_tasks(request: Request):
 
     userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
     
-    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime, t.place, t.withHour, t.longDescription " 
+    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime, t.place, t.withHour, t.longDescription, ts.value " 
         f"FROM tasks t "
         f"LEFT JOIN usersTasks ut ON t.id = ut.taskId "
         f"LEFT JOIN users u ON u.id = ut.userId "
+        f"LEFT JOIN taskStatus ts ON ts.id = ut.statusId "
         # )
         f"WHERE u.id = ?")
 
@@ -348,4 +349,64 @@ async def get_profile_by_id(id: int, request: Request):
     # logger.debug(userData)
     
     return userData
+
+@app.get("/myNotifications", tags=["notification"])
+async def get_notifications(request: Request):
+
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+
+    # Invited Tasks:
+
+    sql = (f"SELECT ut.id, t.taskName "
+        f"FROM tasks t "
+        f"INNER JOIN usersTasks ut ON t.id = ut.taskId "
+        f"WHERE ut.userId = ? and ut.statusId = ?"
+        )
+
+    values = [userId, 0]   #ut.taskStatus = 0 -> "Invited"
+
+    results = db.cursor.execute(sql, values).fetchall()
+
+    return results
+
+@app.put("/updateNotificationStatus", tags=["notification"])
+async def update_notification_status(body: dict, request: Request):
+
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+
+    # Invited Tasks:
+    sql = (f"UPDATE usersTasks "
+        f"SET statusId = ? "
+        # f"FROM usersTasks  "
+        # f"INNER JOIN users u on ut.userId = u.id " 
+        f"WHERE usersTasks.id = ?"
+        # f"WHERE ut.id = ? and u.id = ?"
+        )
+
+    logger.debug(sql)
+
+    # values = [body['idUserTask'], userId]   #ut.taskStatus = 0 -> "Invited"
+    values = [body['newStatus'], body['idUserTask']]  #ut.taskStatus = 0 -> "Invited"
+
+    logger.debug(values)
+
+
+    db.cursor.execute(sql, values)
+    db.connection.commit()
+
+    return True
 

@@ -2,10 +2,13 @@ import {useEffect, useState} from "react";
 // import {useNavigate} from 'react-router-dom'
 
 import Header from "../../components/Header";
+import Notifications from "../../components/Notifications";
 
 function Profile ({removeCookie }: { removeCookie: any })  {
 
   const [myselfData, setMyselfData] = useState([])
+
+  const [notificationList, setNotification] = useState([])
 
   useEffect(() => {
     fetch('http://localhost:8000/profile', {
@@ -21,11 +24,16 @@ function Profile ({removeCookie }: { removeCookie: any })  {
 
 
 
+
+
   return (
 
     <div>
 
       <Header removeCookie={removeCookie}/>
+      <br/>
+
+      <Notifications/>
       <br/>
 
       <table key="tableFriends">
