@@ -1,6 +1,11 @@
-from fastapi import FastAPI, Response, Request
+from fastapi import FastAPI, Response, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .database import db
+
+import sqlite3
+
+from pydantic import BaseModel
+from typing import Optional, List
 
 import secrets
 
@@ -25,69 +30,33 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-#-------BANCO DE DADOS MIGUÉ
-todos = [
-    {
-        "id": "1",
-        "item": "Read a book."
-    },
-    {
-        "id": "2",
-        "item": "Cycle around town."
-    }
-]
-#----------------------
 
-# @app.get("/", tags=["root"])
-# async def read_root() -> dict:
-#     return {"message": "Welcome to your todo list."}
+##########################################
 
-# @app.get("/todo", tags=["todos"])
-# async def get_todos() -> dict:
-#     return { "data": todos }
+#OBJETOS
+class User(BaseModel):  #FROM users
+    id: Optional[int] = None
+    name: Optional[str] = None
+    password: str
+    dateOfBith: Optional[int] = None
+    username: str = None
+    email: Optional[str] = None
 
-# @app.post("/todo", tags=["todos"])
-# async def add_todo(todo: dict) -> dict:
-#     todos.append(todo)
-#     return {
-#         "data": { "Todo added." }
-#     }
+class Token(BaseModel):
+    token: str
 
-# @app.put("/todo/{id}", tags=["todos"])
-# async def update_todo(id: int, body: dict) -> dict:
-#     for todo in todos:
-#         if int(todo["id"]) == id:
-#             todo["item"] = body["item"]
-#             return {
-#                 "data": f"Todo with id {id} has been updated."
-#             }
+class Friend(BaseModel): #Friendship
+    friendId: int
+    friendName: Optional[str] = None
 
-#     return {
-#         "data": f"Todo with id {id} not found."
-#     }
-
-# @app.delete("/todo/{id}", tags=["todos"])
-# async def delete_todo(id: int) -> dict:
-#     for todo in todos:
-#         if int(todo["id"]) == id:
-#             todos.remove(todo)
-#             return {
-#                 "data": f"Todo with id {id} has been removed."
-#             }
-
-#     return {
-#         "data": f"Todo with id {id} not found."
-#     }
+######################   LOGIN   ##############################
 
 @app.post("/login", tags=["login"])
-async def generate_token(body: dict, response: Response) -> dict:
-
-    #TODO: (formato: {"username": str, "password":str}:
+async def generate_token(user: User, response: Response) -> Token:
 
     # 2) Se existe, criar um SESSION_ID no DB e retorna-lo como token <----- falta essa parte!!
 
-
-    query = db.cursor.execute("SELECT id FROM users where (name == ?) AND (password == ?)", [body['username'], body['password']]).fetchall()
+    query = db.cursor.execute("SELECT id FROM users where (username == ?) AND (password == ?)", [user.username, user.password]).fetchall()
 
     if len(query) == 1:
 
@@ -112,31 +81,24 @@ async def generate_token(body: dict, response: Response) -> dict:
         return {"token": token}
 
     else:
-        return {}
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
 
 @app.post("/createAccount", tags=["login"])
-async def create_account(body: dict) -> (bool):
+async def create_account(user: User):
 
-    #TODO: ao receber um body (formato: {"username": str, "password":str}:
+    try:
+        db.cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", [user.username, user.password])
+        db.connection.commit()
+    except sqlite3.IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Contraint Error")
 
-    # 1) verificar se o usuário existe
-
-    nextId = db.cursor.execute(f"SELECT max(id) FROM users").fetchall()[0][0]+1
-
-    logger.debug(nextId)
-    logger.debug(body['username'])
-    logger.debug(body['password'])
-
-    logger.debug((nextId, body['username'], body['password']))
+    return
 
 
-    db.cursor.execute("INSERT INTO users (id, name, password) VALUES (?, ?, ?)", (nextId, body['username'], body['password']))
-    db.connection.commit()
-
-    return True
+#####################  FRIENDS     ###############################
 
 @app.get("/myFriends", tags=["friends"])
-async def my_friends(request: Request):
+async def my_friends(request: Request) -> List[Friend]:
 
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
@@ -144,46 +106,42 @@ async def my_friends(request: Request):
         f"ON tokenAuth.userId = users.id "
         f"WHERE token = ?")
 
-    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
     
-    sql = (f"SELECT f.userid2, u2.name, u1.name " 
-        f"FROM friendship f "
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    
+    userId = row[0]
+
+    sql = (f"SELECT f.userid2, u2.username " 
+        f"FROM all_friendships f "
         f"LEFT JOIN users u1 ON u1.id = f.userid1 "
         f"LEFT JOIN users u2 ON u2.id = f.userid2 "
         f"WHERE u1.id = ?")
 
-    logger.debug(sql)
+    rows = db.cursor.execute(sql, [userId]).fetchall()
 
-    friends = db.cursor.execute(sql, [userId]).fetchall()
+    # logger.debug(rows)
 
-    sql = (f"SELECT f.userid1, u1.name, u2.name " 
-        f"FROM friendship f "
-        f"LEFT JOIN users u1 ON u1.id = f.userid1 "
-        f"LEFT JOIN users u2 ON u2.id = f.userid2 "
-        f"WHERE u2.id = ?")
+    friends = []
+    for r in rows:
+        friends.append(Friend(friendId=r[0], friendName=r[1]))
 
-    friends += db.cursor.execute(sql, [userId]).fetchall()
+    # logger.debug(friends)
 
-    logger.debug(friends)
-
-    #teste para ver se está recebendo o cookie certo! (FUNCIONOU!)
-    #token = request.cookies.get("token")
     
-    return {"friends": friends}
+    return (friends)
 
 @app.post("/addFriend", tags=["friends"])
-async def add_friend(body: dict, request: Request) -> (bool):
+async def add_friend(friend: Friend, request: Request) -> (bool):
 
     #Check if friendId exists:
 
-    friendId = body["friendId"]
-
     sql = (f"SELECT 1 from users WHERE id = ?")
-    existFriend = bool(db.cursor.execute(sql, [friendId]).fetchall())
-    logger.debug(existFriend)
+    row = db.cursor.execute(sql, [friend.friendId]).fetchone()
 
-    if not existFriend:
-        return False
+    if row == None:
+        raise HTTPException(status_code=404, detail="Friend not found")
 
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
@@ -196,8 +154,14 @@ async def add_friend(body: dict, request: Request) -> (bool):
         f"(userId1, userId2) "
         f"VALUES (?, ?)")
 
-    db.cursor.execute(sql, [userId, friendId])
-    db.connection.commit()
+    try:
+        if userId < friend.friendId:
+            db.cursor.execute(sql, [userId, friend.friendId])
+        elif userId > friend.friendId:
+            db.cursor.execute(sql, [friend.friendId, userId])
+        db.connection.commit()
+    except sqlite3.IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Contraint Error")    
 
     return True
 
@@ -220,13 +184,13 @@ async def my_tasks(request: Request):
         # )
         f"WHERE u.id = ?")
 
-    logger.debug(sql)
-    logger.debug(userId)
+    # logger.debug(sql)
+    # logger.debug(userId)
 
     tasks = db.cursor.execute(sql, [userId]).fetchall()
     # tasks = db.cursor.execute(sql).fetchall()
 
-    logger.debug(tasks)
+    # logger.debug(tasks)
     
     return {"tasks": tasks}
     
@@ -409,4 +373,62 @@ async def update_notification_status(body: dict, request: Request):
     db.connection.commit()
 
     return True
+
+
+#####################
+
+    # #-------BANCO DE DADOS MIGUÉ
+# todos = [
+#     {
+#         "id": "1",
+#         "item": "Read a book."
+#     },
+#     {
+#         "id": "2",
+#         "item": "Cycle around town."
+#     }
+# ]
+
+#----------------------
+
+# @app.get("/", tags=["root"])
+# async def read_root() -> dict:
+#     return {"message": "Welcome to your todo list."}
+
+# @app.get("/todo", tags=["todos"])
+# async def get_todos() -> dict:
+#     return { "data": todos }
+
+# @app.post("/todo", tags=["todos"])
+# async def add_todo(todo: dict) -> dict:
+#     todos.append(todo)
+#     return {
+#         "data": { "Todo added." }
+#     }
+
+# @app.put("/todo/{id}", tags=["todos"])
+# async def update_todo(id: int, body: dict) -> dict:
+#     for todo in todos:
+#         if int(todo["id"]) == id:
+#             todo["item"] = body["item"]
+#             return {
+#                 "data": f"Todo with id {id} has been updated."
+#             }
+
+#     return {
+#         "data": f"Todo with id {id} not found."
+#     }
+
+# @app.delete("/todo/{id}", tags=["todos"])
+# async def delete_todo(id: int) -> dict:
+#     for todo in todos:
+#         if int(todo["id"]) == id:
+#             todos.remove(todo)
+#             return {
+#                 "data": f"Todo with id {id} has been removed."
+#             }
+
+#     return {
+#         "data": f"Todo with id {id} not found."
+#     }
 

@@ -18,7 +18,7 @@ function AddFriendInput(){
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({friendId})
+      body: JSON.stringify({"friendId": friendId})
       })
     .then(data => data.json())
     // .then(data => data.blabla)

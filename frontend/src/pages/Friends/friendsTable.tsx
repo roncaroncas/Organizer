@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 
+interface Friend {
+  friendId: string;
+  friendName: string;
+}
 
 /////////////TABELA DE AMIGOS ///////////////////////////////
 
@@ -16,14 +20,15 @@ function FriendsTable(){
       })
         .then((res) => res.json())
         .then((data) => {
-          setFriendList(data['friends'])
-        })}, [])
+          setFriendList(data)
+        })
+      }, [])
 
-  let structuredFriends = friendList.map( function (friend){
+  let structuredFriends = friendList.map( function (friend: Friend){
     return (
-      <tr key={friend[0]+Math.random()}>
-        <td>{friend[0]}</td>
-        <td><a href={"/profile/"+friend[0]}>{friend[1]}</a></td>
+      <tr key={friend['friendId']+Math.random()}>
+        <td>{friend['friendId']}</td>
+        <td><a href={"/profile/"+friend.friendId}>{friend.friendName}</a></td>
       </tr>
     )
   })
