@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Response, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 from .database import db
 
 import sqlite3
@@ -48,6 +49,18 @@ class Token(BaseModel):
 class Friend(BaseModel): #Friendship
     friendId: int
     friendName: Optional[str] = None
+
+class Task(BaseModel):
+    id: Optional[int] = None
+    taskName: str
+    startDayTime: str   #salvo em timestamp!
+    endDayTime: str   #salvo em timestamp!
+    place: str
+    withHour: bool
+    longDescription: str
+    status: Optional[str]
+
+
 
 ######################   LOGIN   ##############################
 
@@ -166,7 +179,7 @@ async def add_friend(friend: Friend, request: Request) -> (bool):
     return True
 
 @app.get("/myTasks", tags=["tasks"])
-async def my_tasks(request: Request):
+async def my_tasks(request: Request) -> List[Task]:
 
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
@@ -187,15 +200,23 @@ async def my_tasks(request: Request):
     # logger.debug(sql)
     # logger.debug(userId)
 
-    tasks = db.cursor.execute(sql, [userId]).fetchall()
+    rows = db.cursor.execute(sql, [userId]).fetchall()
     # tasks = db.cursor.execute(sql).fetchall()
 
     # logger.debug(tasks)
-    
-    return {"tasks": tasks}
+
+    tasks = []
+    for r in rows:
+        tasks.append(Task(
+            id= r[0], taskName= r[1], startDayTime= r[2],
+            endDayTime= r[3], place= r[4], withHour= r[5],
+            longDescription= r[6], status=r[7]))
+
+
+    return (tasks)
     
 @app.post("/createTask", tags=["tasks"])
-async def create_task(body: dict, request: Request) -> (bool):
+async def create_task(task: Task, request: Request) -> (bool):
 
     #USER ID
     sql = (f"SELECT users.id " 
@@ -206,12 +227,18 @@ async def create_task(body: dict, request: Request) -> (bool):
 
     userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
 
+    logger.debug(userId)
+
+
     #CRIANDO EVENTO
     sql = (f"INSERT INTO tasks "
         f"(taskName, startTime, endTime, place, withHour) "
         f"VALUES (?, ?, ?, ?, ?)")
 
-    val = [body["taskName"], body["startTime"], body["endTime"], body["place"] , body["withHour"]]
+    val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.withHour]
+
+    logger.debug(val)
+
     db.cursor.execute(sql, val)
     db.connection.commit()
 

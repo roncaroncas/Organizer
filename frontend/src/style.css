@@ -112,41 +112,80 @@ h1:hover {
   background-color: orange;
 }
 
-/*  ----CALENDARIO MES------  */
+/*  -------------------- */
+
+/*  ----CALENDARIO -----  */
 
 .calendarGrid {
   display: grid;
-  grid-template-columns: 1fr repeat(7, 3fr);
-  border-style: solid;
-  border-radius: 5px;
-  grid-gap: 2px;
-  padding: 20px;
-  min-width: 50%;
-  max-width: 80%;
+  grid-template-columns: 50px repeat(7, auto);
+  grid-gap: 5px;
+  width: 80%;
+/*  min-width: 50%;
+  max-width: 90%;*/
   margin: auto;
+  background-color: #FFF8E7; /* Light Orange */
+  border: 2px solid #4A4A4A;
+  border-radius: 5px;
 }
 
 .calendarGrid .dayInMonthCal{
-  background-color: orange;
-  border-style: solid;
-  border-radius: 5px;
-  min-height: 100px;
+  overflow: hidden;
+  background-color: #FFA500; /* Orange */
+  color: #FFF8E7; /* Light Orange text */
+
 }
 
 .calendarGrid .dayOutMonthCal{
-  background-color: #aaaaaa;
-  border-style: solid;
-  border-radius: 5px;
-  min-height: 100px;
+  overflow: hidden;
+  background-color: #FFDAB9; /* PeachPuff */
+  color: #4A4A4A; /* Dark Gray text */
 }
 
-.calendarGrid .header{
-  display: block;
-  background-color: #dddddd;
-  border-style: solid;
-  border-radius: 5px;
+.calendarGrid .calHeader{
+  overflow: hidden;
+  background-color: #FF6347; /* Tomato */
+  align-items: center;
+  justify-content: center;
+  color: #FFF8E7; /* Light Orange text */
 
 }
+
+.calendarGrid .weekNumber{
+  display: flex;
+  overflow: hidden;
+  width: auto;
+  /*background-color: #FF6347;*/ /* Tomato */
+  text-align: center;
+  justify-content: flex-end;
+}
+
+.calendarGrid .showCol{
+
+  width: 150px;
+  transition: all 0.5s ease /* Smooth transition */
+}
+
+.calendarGrid .hideCol{
+  width: 25px;
+  transition: all 0.5s ease; /* Smooth transition */
+}
+
+.calendarGrid .focusRow{
+  height: 41rem;
+  transition: all 0.5s ease; /* Smooth transition */
+}
+
+.calendarGrid .showRow{
+  height: 8rem;
+  transition: all 0.5s ease; /* Smooth transition */
+}
+
+.calendarGrid .hideRow{
+  height: 2rem;
+  transition: all 0.5s ease; /* Smooth transition */
+}
+
 
 /*  ----------------------  */
 
@@ -187,8 +226,11 @@ button:focus-visible {
   background-color: #fcfcfc;
 }
 
-.centralized-button  {
-  text-align:center
+.button-container {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically */
+/*  height: 100vh; /* Optional: Set height to center vertically within the viewport */*/
 }
 
 /* CSS ANTIGO QUE A FIFIAN FEZ s2 */
@@ -223,11 +265,6 @@ p {
     margin-right: auto;
     top: 50%;
 }
-
-/* 
-div {
-  width: 100%;
-} */
 
 
 input[type=text], select {
@@ -270,6 +307,26 @@ input[type=date], select {
   box-sizing: border-box;
 }
 
+input[type=time], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=datetime-local], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
 input[type=submit] {
   width: 100%;
   background-color: #4CAF50;
@@ -283,4 +340,93 @@ input[type=submit] {
 
 input[type=submit]:hover {
   background-color: #45a049;
+}
+
+
+/* ------- MODAL -----------*/
+
+/* The Modal (background) */
+.modal-hidden {
+  display: none; /* Hidden by default */
+}
+
+.modal-shown {
+  display: flex; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: 20px auto auto auto; 
+  padding: 20px;
+  border: 1px solid #888;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* MODAL COM DUAS COLUNAS */
+
+.form-columns {
+  display: flex;
+  justify-content: space-between;
+}
+
+.column {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.column:last-child {
+  margin-right: 0;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.invited-person {
+  display: flex;
+  align-items: center;
+}
+
+.invited-person input {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically */
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }

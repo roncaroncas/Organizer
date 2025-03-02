@@ -19,7 +19,7 @@ function AllTasksTable ()  {
       })
         .then((res) => res.json())
         .then((data) => {
-          setTaskList(data['tasks'])
+          setTaskList(data)
         })}, [])
 
   
@@ -39,17 +39,16 @@ function AllTasksTable ()  {
       </thead>
       <tbody>
       {taskList.map( function (task){
-        // console.log(task)
         return (
-          <tr key={task[0]+Math.random()}>
-            <td>{task[0]}</td>
-            <td><a href={"/task/"+task[0]}>{task[1]}</a></td>
-            <td>{task[2]}</td>
-            <td>{task[3]}</td>
-            <td>{task[4]}</td>
-            <td>{task[5]}</td>
-            <td>{task[6]}</td>
-            <td>{task[7]}</td>
+          <tr key={task.id}>
+            <td>{task.id}</td>
+            <td>{task.taskName}</td>
+            <td>{task.startTime}</td>
+            <td>{task.endTime}</td>
+            <td>{task.place}</td>
+            <td>{task.withHour}</td>
+            <td>{task.longDescription}</td>
+            <td>{task.status}</td>
           </tr>
         )
         })}
