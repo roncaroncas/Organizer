@@ -9,7 +9,7 @@ interface Task {
   endTime: string;
   place: string;
   withHour: boolean;
-  longDescription: string;
+  taskDescription: string;
 }
 
 function AddNewTask() {
@@ -18,14 +18,16 @@ function AddNewTask() {
 
   let navigate = useNavigate()
 
-  // PARAMETROS DO FORMS
+// PARAMETROS DO FORMS
   const [task, setTask] = useState<Task>({
     taskName: '',
-    startDayTime: new Date(),
-    endDayTime: new Date(),
-    place: '',
+    startDay: new Date(),
+    startTime: "",
+    endDay: new Date(),
+    endTime: "",
+    place: "",
     withHour: true,
-    longDescription: ''
+    taskDescription: ""
   });
 
   // CONTROLE DE MODAL
@@ -40,56 +42,86 @@ function AddNewTask() {
   }
 
 
-  async function createTask() {
+async function createTask(){
 
-    await fetch('http://localhost:8000/createTask', {
+    let fullStartDate = new Date(
+      task.startDay.getFullYear(),
+      task.startDay.getMonth(),
+      task.startDay.getDay(),
+      parseInt(task.startTime.slice(0,2)),
+      parseInt(task.startTime.slice(3,5))
+    )
+
+    setTask(prevTask => {
+      let newTask = { ...prevTask }
+      newTask.startDay = fullStartDate
+      return newTask
+    })
+
+    let fullEndDate = new Date(
+      task.endDay.getFullYear(),
+      task.endDay.getMonth(),
+      task.endDay.getDay(),
+      parseInt(task.endTime.slice(0,2)),
+      parseInt(task.endTime.slice(3,5))
+    )
+
+    setTask(prevTask => {
+      let newTask = { ...prevTask }
+      newTask.endDay = fullEndDate
+      return newTask
+    })
+
+    const formattedTask = {
+      ...task,
+      startDayTime: task.startDay.toISOString(),
+      endDayTime: task.endDay.toISOString()
+    };
+
+    delete formattedTask.startDay
+    delete formattedTask.startTime
+    delete formattedTask.endDay
+    delete formattedTask.endTime
+
+    console.log(formattedTask)
+    console.log("é o de cima")
+
+
+
+   const data = await fetch('http://localhost:8000/createTask', {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...task,
-        startDay: task.startDay.toISOString(),
-        endDay: task.endDay.toISOString()
-      })
+      body: JSON.stringify(formattedTask)
     }).then(data => data.json())
 
-    return null
-  }
+    return data; 
 
-  // EVENT HANDLERS
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    console.log(name, value, type, checked);
 
     setTask(prevTask => {
+      let newTask = { ...prevTask };
 
-      if (type === "checkbox") {
-        return {
-          ...prevTask,
-          [name]: checked
-        };
-      } else if (type === "date") {
-        return {
-          ...prevTask,
-          [name]: value ? new Date(value) : null
-        };
-      } else if (type === "time") {
-        return {
-          ...prevTask,
-          [name]: value
-        };
-      } else if (type === "datetime-local") {
-        return {
-          ...prevTask,
-          [name]: value ? new Date(value) : null
-        };
+      if (name === "startDay") {
+        newTask.startDay = new Date(value);
+      } else if (name === "startTime") {
+        newTask.startTime = value;
+      } else if (name === "endDay") {
+        newTask.endDay = new Date(value);
+      } else if (name === "endTime") {
+        newTask.endTime = value;
+      } else if (type === "checkbox") {
+        newTask[name] = checked;
       } else {
-        return {
-          ...prevTask,
-          [name]: value
-        };
+        newTask[name] = value;
       }
+
+      return newTask;
+    
+
     });
   };
 
@@ -105,7 +137,7 @@ function AddNewTask() {
       console.log("Evento nao adicionado :(")
     }
 
-    navigate(0) //jeito porco de atualizar a lista de tasks
+   // navigate(0) //jeito porco de atualizar a lista de tasks
 
   }
 

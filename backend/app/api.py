@@ -57,7 +57,7 @@ class Task(BaseModel):
     endDayTime: str   #salvo em timestamp!
     place: str
     withHour: bool
-    longDescription: str
+    taskDescription: str
     status: Optional[str]
 
 
@@ -189,7 +189,7 @@ async def my_tasks(request: Request) -> List[Task]:
 
     userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
     
-    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime, t.place, t.withHour, t.longDescription, ts.value " 
+    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime, t.place, t.withHour, t.taskDescription, ts.value " 
         f"FROM tasks t "
         f"LEFT JOIN usersTasks ut ON t.id = ut.taskId "
         f"LEFT JOIN users u ON u.id = ut.userId "
@@ -210,7 +210,7 @@ async def my_tasks(request: Request) -> List[Task]:
         tasks.append(Task(
             id= r[0], taskName= r[1], startDayTime= r[2],
             endDayTime= r[3], place= r[4], withHour= r[5],
-            longDescription= r[6], status=r[7]))
+            taskDescription= r[6], status=r[7]))
 
 
     return (tasks)
@@ -232,10 +232,10 @@ async def create_task(task: Task, request: Request) -> (bool):
 
     #CRIANDO EVENTO
     sql = (f"INSERT INTO tasks "
-        f"(taskName, startTime, endTime, place, withHour) "
-        f"VALUES (?, ?, ?, ?, ?)")
+        f"(taskName, startTime, endTime, place, withHour, taskDescription) "
+        f"VALUES (?, ?, ?, ?, ?, ?)")
 
-    val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.withHour]
+    val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.withHour, task.taskDescription]
 
     logger.debug(val)
 
