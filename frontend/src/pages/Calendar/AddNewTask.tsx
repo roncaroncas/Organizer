@@ -1,5 +1,16 @@
-import {useState} from "react";
+import { useState, useEffect} from "react"
 import {useNavigate} from 'react-router-dom'
+
+interface Task {
+  taskName: string;
+  startDay: Date;
+  startTime: string;
+  endDay: Date;
+  endTime: string;
+  place: string;
+  withHour: boolean;
+  longDescription: string;
+}
 
 function AddNewTask ()  {
 
@@ -7,79 +18,159 @@ function AddNewTask ()  {
 
   let navigate = useNavigate()
 
-  // TA TUDO DEFINIDO COMO STRING!, TEM QUE ACERTAR!
+  // PARAMETROS DO FORMS
+  const [task, setTask] = useState<Task>({
+    taskName: '',
+    startDayTime: new Date(),
+    endDayTime: new Date(),
+    place: '',
+    withHour: true,
+    longDescription: ''
+  });
 
-  const [taskName, setTaskName] = useState('')
-  const [startTime, setStartTime] = useState<string>('')
-  const [endTime, setEndTime] = useState<string>('')
-  const [place, setPlace] = useState<string>('')
-  const [withHour, setWithHour] = useState<string>("")
-  const [longDescription, setLongDescription] = useState<string>('')
+  // CONTROLE DE MODAL
+  const [showModal, setShowModal] = useState<boolean>(false)
+
+  window.addEventListener('click', (event) => handleClickOutModal(event))
+
+  function handleClickOutModal(event) {
+    if (event.target == document.getElementById('modalDiv')) {
+        setShowModal(false)
+    }
+  }
+
 
   async function createTask(){
 
-    let message = {
-      'taskName': taskName,
-      'startTime': startTime,
-      'endTime': endTime,
-      'place': place,
-      'withHour': withHour,
-      'longDescription' : longDescription,
-    }
-    console.log(message)
-    const results = await fetch('http://localhost:8000/createTask', {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(message)
+    await fetch('http://localhost:8000/createTask', {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+      ...task,
+      startDay: task.startDay.toISOString(),
+      endDay: task.endDay.toISOString()
     })
-      .then(data => data.json())
-    // .then(data => data.blabla)
+    }).then(data => data.json())
 
-    return results
-
+    return null
   }
 
-  async function handleSubmit(event: any) {
+  // EVENT HANDLERS
 
-    event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    console.log(name, value, type, checked);
+
+    setTask(prevTask => {
+
+     if (type === "checkbox") {
+        return {
+          ...prevTask,
+          [name]: checked
+        };
+      } else if (type === "date") {
+        return {
+          ...prevTask,
+          [name]: value ? new Date(value) : null
+        };
+      } else if (type === "time") {
+        return {
+          ...prevTask,
+          [name]: value
+        };
+      } else if (type === "datetime-local") {
+        return {
+          ...prevTask,
+          [name]: value ? new Date(value) : null
+        };
+      } else {
+        return {
+          ...prevTask,
+          [name]: value
+        };
+      }
+    });
+  };
+
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+
+    event.preventDefault()
     const response = await createTask ()
     console.log(response)
-
     if (response) {
       console.log("Evento adicionado! :D")
     } else {
       console.log("Evento nao adicionado :(")
     }
 
-    //jeito porco de atualizar a lista de tasks
-    navigate(0)
+    navigate(0) //jeito porco de atualizar a lista de tasks
 
   }
 
+
   return (
+
     <div>
 
-      <div className = "centralized-button">
-        <form>
-          <input placeholder="taskName" onChange={(e) => setTaskName(e.target.value)}></input>
-          <br/>
-          <input placeholder = "startTime" onChange={(e) => setStartTime(e.target.value)}></input>
-          <br/>
-          <input placeholder = "endTime" onChange={(e) => setEndTime(e.target.value)}></input>
-          <br/>
-          <input placeholder = "place" onChange={(e) => setPlace(e.target.value)}></input>
-          <br/>
-          <input placeholder = "withHour" onChange={(e) => setWithHour(e.target.value)}></input>
-          <br/>
-          <input placeholder = "longDescription" onChange={(e) => setLongDescription(e.target.value)}></input>
-          <br/>
-          <button onClick={handleSubmit}>Adicionar</button>
-          <br/>
-        </form>
-      </div>  
-      <br/>
+      {/*Botão para abrir o Modal*/}
+      <div className="button-container">
+        <button onClick={() => setShowModal(!showModal)}>Crie um Novo Evento</button>
+      </div>
+
+      {/*Modal div*/}
+      <div id="modalDiv"
+        className={[
+          showModal ? "modal-shown" : "modal-hidden",
+        ].join(' ')}
+      >
+
+        {/*Modal Container*/}
+           
+        <form className="modal-content" onSubmit={handleSubmit}>
+          <div className="form-columns">
+            <div className="column">
+              <p> Crie um novo Evento! </p>
+
+              <input name="taskName" placeholder="taskName" onChange={handleInputChange} type="text"/><br/>
+              
+              <label> Start Time </label>
+              <input name="startDay" placeholder="startDay" onChange={handleInputChange} type= "date" />
+              <input name="startTime" placeholder="startTime" onChange={handleInputChange} type= "time" />
+              <br/>
+              
+              <label> End Time </label>
+              <input name="endDay" placeholder="endDay" onChange={handleInputChange} type= "date" />
+              <input name="endTime" placeholder="endTime" onChange={handleInputChange} type= "time" />
+              <br/>
+
+              <input name="place" placeholder="place" onChange={handleInputChange} type="text"/><br/>
+              
+              <label>
+                <input
+                  name="withHour"
+                  type="checkbox"
+                  checked={task.withHour}
+                  onChange={handleInputChange}
+                />
+                With Hour
+              </label><br/>
+
+            </div>
+            <div className="column">
+
+            </div>
+          </div>
+          <div className="form-footer">
+            <button type="button" onClick={() => setShowModal(!showModal)}>Close</button>
+            <button type="submit">Adicionar</button>
+          </div>
+        </form>   
+
+        <br/>
    
+      </div>  
     </div>
 
   );
