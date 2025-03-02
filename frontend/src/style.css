@@ -63,13 +63,17 @@ body, ul, li, p {
   padding: 20px;
 }
 
+.logo {
+  width: 50px;
+}
+
 .header h1 {
   display: block;
 }
 
-h1:hover {
+/* h1:hover {
   background-color: orange;
-}
+} */
 
 .header a {
   text-decoration: none;
@@ -90,9 +94,9 @@ h1:hover {
   padding: 10px;
 }
 
-.menu li a:hover {
+/* .menu li a:hover {
   background-color: orange;
-}
+} */
 
 .logout{
   display: flex;
@@ -161,10 +165,11 @@ button {
   background-color: #898989;
   cursor: pointer;
   transition: border-color 0.25s;
-  margin: 10px auto 10px auto
+  margin-top: 10px;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: #ff7a3d;
+  color: #000;
 }
 button:focus,
 button:focus-visible {
@@ -173,12 +178,9 @@ button:focus-visible {
 
 
 .loginform{
-
-
   border-radius: 5px;
   border-color: #888888;
   padding: 25px;
-
   width: 30%;
   margin: 20px auto auto auto;
 }
@@ -238,6 +240,7 @@ input[type=text], select {
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+  color: #000;
 } 
 
 input[type=password], select {
@@ -248,6 +251,7 @@ input[type=password], select {
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+  color: #000;
 }
 
 input[type=number], select {
