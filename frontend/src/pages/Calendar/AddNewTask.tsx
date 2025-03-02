@@ -1,5 +1,5 @@
-import { useState, useEffect} from "react"
-import {useNavigate} from 'react-router-dom'
+import { useState, useEffect } from "react"
+import { useNavigate } from 'react-router-dom'
 
 interface Task {
   taskName: string;
@@ -12,9 +12,9 @@ interface Task {
   longDescription: string;
 }
 
-function AddNewTask ()  {
+function AddNewTask() {
 
-///////////ADICIONAR TASK NOVA////////////////
+  ///////////ADICIONAR TASK NOVA////////////////
 
   let navigate = useNavigate()
 
@@ -35,22 +35,22 @@ function AddNewTask ()  {
 
   function handleClickOutModal(event) {
     if (event.target == document.getElementById('modalDiv')) {
-        setShowModal(false)
+      setShowModal(false)
     }
   }
 
 
-  async function createTask(){
+  async function createTask() {
 
     await fetch('http://localhost:8000/createTask', {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-      ...task,
-      startDay: task.startDay.toISOString(),
-      endDay: task.endDay.toISOString()
-    })
+        ...task,
+        startDay: task.startDay.toISOString(),
+        endDay: task.endDay.toISOString()
+      })
     }).then(data => data.json())
 
     return null
@@ -64,7 +64,7 @@ function AddNewTask ()  {
 
     setTask(prevTask => {
 
-     if (type === "checkbox") {
+      if (type === "checkbox") {
         return {
           ...prevTask,
           [name]: checked
@@ -97,7 +97,7 @@ function AddNewTask ()  {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 
     event.preventDefault()
-    const response = await createTask ()
+    const response = await createTask()
     console.log(response)
     if (response) {
       console.log("Evento adicionado! :D")
@@ -116,7 +116,7 @@ function AddNewTask ()  {
 
       {/*Botão para abrir o Modal*/}
       <div className="button-container">
-        <button onClick={() => setShowModal(!showModal)}>Crie um Novo Evento</button>
+        <button onClick={() => setShowModal(!showModal)}>Criar Novo Evento</button>
       </div>
 
       {/*Modal div*/}
@@ -127,50 +127,50 @@ function AddNewTask ()  {
       >
 
         {/*Modal Container*/}
-           
+
         <form className="modal-content" onSubmit={handleSubmit}>
-          <div className="form-columns">
-            <div className="column">
-              <p> Crie um novo Evento! </p>
+          <p className="modal-title">Novo evento</p>
 
-              <input name="taskName" placeholder="taskName" onChange={handleInputChange} type="text"/><br/>
-              
-              <label> Start Time </label>
-              <input name="startDay" placeholder="startDay" onChange={handleInputChange} type= "date" />
-              <input name="startTime" placeholder="startTime" onChange={handleInputChange} type= "time" />
-              <br/>
-              
-              <label> End Time </label>
-              <input name="endDay" placeholder="endDay" onChange={handleInputChange} type= "date" />
-              <input name="endTime" placeholder="endTime" onChange={handleInputChange} type= "time" />
-              <br/>
+          <input name="taskName" placeholder="Título do Evento" onChange={handleInputChange} type="text" /><br />
 
-              <input name="place" placeholder="place" onChange={handleInputChange} type="text"/><br/>
-              
-              <label>
-                <input
-                  name="withHour"
-                  type="checkbox"
-                  checked={task.withHour}
-                  onChange={handleInputChange}
-                />
-                With Hour
-              </label><br/>
+          <div className="event-details">
+            <section className="event-duration">
+              <div>
+                <label> Hora Início </label>
+                <input name="startDay" placeholder="startDay" onChange={handleInputChange} type="date" />
+                <input name="startTime" placeholder="startTime" onChange={handleInputChange} type="time" />
+              </div>
+              <div>
+                <label> Hora Fim </label>
+                <input name="endDay" placeholder="endDay" onChange={handleInputChange} type="date" />
+                <input name="endTime" placeholder="endTime" onChange={handleInputChange} type="time" />
+              </div>
+            </section>
+            <label>
+              <input
+                name="withHour"
+                type="checkbox"
+                onChange={handleInputChange}
+              />
+              Dia Inteiro
+            </label><br />
 
-            </div>
-            <div className="column">
 
-            </div>
+            <input name="place" placeholder="Local" onChange={handleInputChange} type="text" /><br />
+            <input name="taskDescription" placeholder="Descrição" onChange={handleInputChange} type="text" /><br />
+
+
+
           </div>
           <div className="form-footer">
-            <button type="button" onClick={() => setShowModal(!showModal)}>Close</button>
+            <button type="button" onClick={() => setShowModal(!showModal)}>Fechar</button>
             <button type="submit">Adicionar</button>
           </div>
-        </form>   
+        </form>
 
-        <br/>
-   
-      </div>  
+        <br />
+
+      </div>
     </div>
 
   );
