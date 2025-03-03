@@ -12,6 +12,13 @@ interface Task {
   taskDescription: string;
 }
 
+const formatDateTime = (date) => {
+  let year = date.getFullYear();
+  let month = ("0" + (date.getMonth() + 1)).slice(-2);
+  let day = ("0" + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
+};
+
 function AddNewTask() {
 
   ///////////ADICIONAR TASK NOVA////////////////
@@ -22,9 +29,9 @@ function AddNewTask() {
   const [task, setTask] = useState<Task>({
     taskName: '',
     startDay: new Date(),
-    startTime: "",
-    endDay: new Date(),
-    endTime: "",
+    startTime: new Date(Date.now()).toISOString().slice(11, 16),
+    endDay: new Date(Date.now() + 3600000),
+    endTime: new Date(Date.now() + 3600000).toISOString().slice(11, 16),
     place: "",
     fullDay: false,
     taskDescription: ""
@@ -169,15 +176,22 @@ async function createTask(){
             <section className="event-duration">
               <div>
                 <label> Hora Início </label>
-                <input name="startDay" placeholder="startDay" onChange={handleInputChange} type="date" />
-                {task.fullDay? <input name="startTime" placeholder="startTime" onChange={handleInputChange} type="time" /> : ""}
+                <input
+                  name="startDay" placeholder="startDay" onChange={handleInputChange} type="date"
+                  value={formatDateTime(task.startDay)}/>
+                  {task.fullDay? "":<input name="startTime" placeholder="startTime" onChange={handleInputChange} type="time"
+                  value={task.startDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} />}
               </div>
+             
               <div>
                 <label> Hora Fim </label>
-                <input name="endDay" placeholder="endDay" onChange={handleInputChange} type="date" />
-                {task.fullDay? <input name="endTime" placeholder="endTime" onChange={handleInputChange} type="time" /> : ""}
+                <input name="endDay" placeholder="endDay" onChange={handleInputChange} type="date"
+                  value={formatDateTime(task.endDay)}/>
+                {task.fullDay? "":<input name="endTime" placeholder="endTime" onChange={handleInputChange} type="time" 
+                value={task.endDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} />}
               </div>
             </section>
+            
             <label>
               <input
                 name="fullDay"
@@ -185,11 +199,10 @@ async function createTask(){
                 onChange={handleInputChange}
               />
               Dia Inteiro
-            </label><br />
-
+            </label><br/>
 
             <input name="place" placeholder="Local" onChange={handleInputChange} type="text" /><br />
-            <input name="taskDescription" placeholder="Descrição" onChange={handleInputChange} type="text" /><br />
+            <input name="taskDescription" placeholder="Descrição" onChange={handleInputChange} type="text"/><br />
 
 
 

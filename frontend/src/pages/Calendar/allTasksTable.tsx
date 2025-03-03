@@ -32,7 +32,7 @@ function AllTasksTable ()  {
           <th>Task_StartTime</th>
           <th>Task_EndTime</th>
           <th>Task_Place</th>
-          <th>Task_WithHour</th>
+          <th>Task_FullDay</th>
           <th>Task_LongDescription</th>
           <th>Task_UserStatus</th>
         </tr>
@@ -43,11 +43,11 @@ function AllTasksTable ()  {
           <tr key={task.id}>
             <td>{task.id}</td>
             <td>{task.taskName}</td>
-            <td>{task.startTime}</td>
-            <td>{task.endTime}</td>
+            <td>{task.startDayTime}</td>
+            <td>{task.endDayTime}</td>
             <td>{task.place}</td>
-            <td>{task.withHour}</td>
-            <td>{task.longDescription}</td>
+            <td>{task.fullDay?"Sim":"Não"}</td>
+            <td>{task.taskDescription}</td>
             <td>{task.status}</td>
           </tr>
         )

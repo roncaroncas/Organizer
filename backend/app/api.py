@@ -57,7 +57,7 @@ class Task(BaseModel):
     taskName: str
     startDayTime: str   #salvo em timestamp!
     endDayTime: str   #salvo em timestamp!
-    place: str
+    place: Optional[str]
     fullDay: bool
     taskDescription: str
     status: Optional[str] = None
