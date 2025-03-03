@@ -14,8 +14,8 @@ function Header ({removeCookie}:{removeCookie:any})  {
     
   }
 
-
-  const menuPages = [["Home", "/home"], ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"]]
+  // ["Home", "/home"],
+  const menuPages = [ ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"]]
 
   let structuredMenu = menuPages.map( function (item) {
 
@@ -36,8 +36,8 @@ function Header ({removeCookie}:{removeCookie:any})  {
         {structuredMenu}
       </ul>
       </nav>
-      <nav>
 
+      <nav>
       <ul className="logout">
         <li onClick={handleLogout}><a href="/">Logout</a></li>
       </ul>
