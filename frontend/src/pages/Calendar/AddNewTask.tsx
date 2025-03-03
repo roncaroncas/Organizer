@@ -8,7 +8,7 @@ interface Task {
   endDay: Date;
   endTime: string;
   place: string;
-  withHour: boolean;
+  fullDay: boolean;
   taskDescription: string;
 }
 
@@ -26,7 +26,7 @@ function AddNewTask() {
     endDay: new Date(),
     endTime: "",
     place: "",
-    withHour: true,
+    fullDay: false,
     taskDescription: ""
   });
 
@@ -170,17 +170,17 @@ async function createTask(){
               <div>
                 <label> Hora Início </label>
                 <input name="startDay" placeholder="startDay" onChange={handleInputChange} type="date" />
-                <input name="startTime" placeholder="startTime" onChange={handleInputChange} type="time" />
+                {task.fullDay? <input name="startTime" placeholder="startTime" onChange={handleInputChange} type="time" /> : ""}
               </div>
               <div>
                 <label> Hora Fim </label>
                 <input name="endDay" placeholder="endDay" onChange={handleInputChange} type="date" />
-                <input name="endTime" placeholder="endTime" onChange={handleInputChange} type="time" />
+                {task.fullDay? <input name="endTime" placeholder="endTime" onChange={handleInputChange} type="time" /> : ""}
               </div>
             </section>
             <label>
               <input
-                name="withHour"
+                name="fullDay"
                 type="checkbox"
                 onChange={handleInputChange}
               />

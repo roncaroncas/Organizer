@@ -49,6 +49,7 @@ class Token(BaseModel):
 class Friend(BaseModel): #Friendship
     friendId: int
     friendName: Optional[str] = None
+    status: Optional[str]
 
 class Task(BaseModel):
     id: Optional[int] = None
@@ -56,9 +57,9 @@ class Task(BaseModel):
     startDayTime: str   #salvo em timestamp!
     endDayTime: str   #salvo em timestamp!
     place: str
-    withHour: bool
+    fullDay: bool
     taskDescription: str
-    status: Optional[str]
+    status: Optional[str] = None
 
 
 
@@ -126,10 +127,11 @@ async def my_friends(request: Request) -> List[Friend]:
     
     userId = row[0]
 
-    sql = (f"SELECT f.userid2, u2.username " 
+    sql = (f"SELECT f.userid2, u2.username, fs.value " 
         f"FROM all_friendships f "
         f"LEFT JOIN users u1 ON u1.id = f.userid1 "
         f"LEFT JOIN users u2 ON u2.id = f.userid2 "
+        f"LEFT JOIN friendshipStatus fs ON f.status = fs.id "
         f"WHERE u1.id = ?")
 
     rows = db.cursor.execute(sql, [userId]).fetchall()
@@ -138,7 +140,7 @@ async def my_friends(request: Request) -> List[Friend]:
 
     friends = []
     for r in rows:
-        friends.append(Friend(friendId=r[0], friendName=r[1]))
+        friends.append(Friend(friendId=r[0], friendName=r[1], status=r[2]))
 
     # logger.debug(friends)
 
@@ -149,7 +151,6 @@ async def my_friends(request: Request) -> List[Friend]:
 async def add_friend(friend: Friend, request: Request) -> (bool):
 
     #Check if friendId exists:
-
     sql = (f"SELECT 1 from users WHERE id = ?")
     row = db.cursor.execute(sql, [friend.friendId]).fetchone()
 
@@ -178,6 +179,56 @@ async def add_friend(friend: Friend, request: Request) -> (bool):
 
     return True
 
+
+@app.delete("/deleteFriend", tags=["todos"])
+async def delete_friend(body: dict, request: Request) -> (bool):
+
+
+
+    logger.debug("VOU DESAMIGAR :(")
+    logger.debug(body["friendId"])
+
+
+    sql = (f"SELECT 1 from users WHERE id = ?")
+    row = db.cursor.execute(sql, [body["friendId"]]).fetchone()
+
+    if row == None:
+        raise HTTPException(status_code=404, detail="Friend not found")
+
+    logger.debug("TO AVISANDO! VOU DESAMIGAR :(")
+
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+
+    sql = (f"DELETE FROM friendship "
+        f"WHERE (userId1 = ? AND userId2 = ?) "
+        f"OR (userId2 = ? AND userId1 = ?) ")
+
+    val = [userId, body["friendId"], userId, body["friendId"]]
+
+    logger.debug(sql)
+    logger.debug(val)
+
+
+    try:
+        db.cursor.execute(sql, val)
+        db.connection.commit()
+
+        logger.debug("desamiguei pra sempre")
+    except sqlite3.IntegrityError as e:
+        logger.debug("desamiguei errado hehehe")
+        raise HTTPException(status_code=400, detail="Contraint Error")    
+
+    return True
+
+
+
+##------------------------------------------------------------------------------
+
 @app.get("/myTasks", tags=["tasks"])
 async def my_tasks(request: Request) -> List[Task]:
 
@@ -189,7 +240,7 @@ async def my_tasks(request: Request) -> List[Task]:
 
     userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
     
-    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime, t.place, t.withHour, t.taskDescription, ts.value " 
+    sql = (f"SELECT t.id, t.taskName, t.startTime, t.endTime, t.place, t.fullDay, t.taskDescription, ts.value " 
         f"FROM tasks t "
         f"LEFT JOIN usersTasks ut ON t.id = ut.taskId "
         f"LEFT JOIN users u ON u.id = ut.userId "
@@ -209,7 +260,7 @@ async def my_tasks(request: Request) -> List[Task]:
     for r in rows:
         tasks.append(Task(
             id= r[0], taskName= r[1], startDayTime= r[2],
-            endDayTime= r[3], place= r[4], withHour= r[5],
+            endDayTime= r[3], place= r[4], fullDay= r[5],
             taskDescription= r[6], status=r[7]))
 
 
@@ -217,6 +268,8 @@ async def my_tasks(request: Request) -> List[Task]:
     
 @app.post("/createTask", tags=["tasks"])
 async def create_task(task: Task, request: Request) -> (bool):
+
+    logger.debug('Comecei a taskear')
 
     #USER ID
     sql = (f"SELECT users.id " 
@@ -232,10 +285,10 @@ async def create_task(task: Task, request: Request) -> (bool):
 
     #CRIANDO EVENTO
     sql = (f"INSERT INTO tasks "
-        f"(taskName, startTime, endTime, place, withHour, taskDescription) "
+        f"(taskName, startTime, endTime, place, fullDay, taskDescription) "
         f"VALUES (?, ?, ?, ?, ?, ?)")
 
-    val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.withHour, task.taskDescription]
+    val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.fullDay, task.taskDescription]
 
     logger.debug(val)
 
@@ -245,7 +298,7 @@ async def create_task(task: Task, request: Request) -> (bool):
     #CONECTANDO EVENTO AO USUARIO QUE O CRIOU
     sql = (f"SELECT id " 
         f"FROM tasks "
-        f"WHERE taskName = ? AND startTime = ? and endTime = ? and place = ? and withHour = ?"
+        f"WHERE taskName = ? AND startTime = ? and endTime = ? and place = ? and fullDay = ? and taskDescription = ?"
         f"ORDER BY id DESC "
         f"LIMIT 1")
 
@@ -269,7 +322,7 @@ async def get_Task_by_id(taskId: int, request: Request):
 
     # logger.debug(taskId)
 
-    sql = (f"SELECT taskName, startTime, endTime, place, withHour" 
+    sql = (f"SELECT taskName, startTime, endTime, place, fullDay" 
         f"FROM tasks "
         f"WHERE id = ?")
 

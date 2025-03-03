@@ -160,10 +160,10 @@ function CalendarGrid(){
 
     //FILTRANDO AS TAREFAS QUE POSSUEM o STARTDATE IGUAL AO DIA d
     const dayTasks = tasks.filter(task => {
-      const taskDate = new Date(task.startTime)
-      if (taskDate.toDateString() === d.toDateString()){
-        console.log (d, taskDate.toDateString(), d.toDateString())
-      }
+      const taskDate = new Date(task.startDayTime)
+      // if (taskDate.toDateString() === d.toDateString()){
+      //   console.log (d, taskDate.toDateString(), d.toDateString())
+      // }
       return taskDate.toDateString() === d.toDateString()
     })
     
@@ -186,7 +186,7 @@ function CalendarGrid(){
             dayTasks.length == 0 ? "Dia Livre!" :
             dayTasks.map(task => (
             <div key={task.id}>
-              {convertToLocalTime(task.startTime)}<br/>
+              {convertToLocalTime(task.startDayTime)}<br/>
               ({task.id}): {task.taskName} <br/>
               <br/>
             </div>)))}
