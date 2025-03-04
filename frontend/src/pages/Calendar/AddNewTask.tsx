@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from 'react-router-dom'
+import { format, addHours } from 'date-fns';
+
+import useModal from "../../hooks/useModal";
+import useFetch from "../../hooks/useFetch"
 
 interface Task {
   taskName: string;
@@ -12,99 +16,73 @@ interface Task {
   taskDescription: string;
 }
 
-const formatDateTime = (date) => {
-  let year = date.getFullYear();
-  let month = ("0" + (date.getMonth() + 1)).slice(-2);
-  let day = ("0" + date.getDate()).slice(-2);
-  return `${year}-${month}-${day}`;
-};
+interface AddNewTaskProps {
+  initialTask?: Partial<Task>;
+}
 
-function AddNewTask() {
+function AddNewTask({ initialTask = {} }: AddNewTaskProps) {
 
   ///////////ADICIONAR TASK NOVA////////////////
-
   let navigate = useNavigate()
 
-// PARAMETROS DO FORMS
+  // PARAMETROS DO FORMS
   const [task, setTask] = useState<Task>({
     taskName: '',
     startDay: new Date(),
-    startTime: new Date(Date.now()).toISOString().slice(11, 16),
-    endDay: new Date(Date.now() + 3600000),
-    endTime: new Date(Date.now() + 3600000).toISOString().slice(11, 16),
+    startTime: format(new Date(), 'HH:mm'),
+    endDay: addHours(new Date(), 1),
+    endTime: format(addHours(new Date(), 1), 'HH:mm'),
     place: "",
     fullDay: false,
-    taskDescription: ""
+    taskDescription: "",
+    ...initialTask
   });
 
-  // CONTROLE DE MODAL
-  const [showModal, setShowModal] = useState<boolean>(false)
+  // ----------------   CONTROLE DE MODAL ------------------
 
-  window.addEventListener('click', (event) => handleClickOutModal(event))
+  const { isOpen, openModal, closeModal, toggleModal } = useModal()
 
-  function handleClickOutModal(event) {
-    if (event.target == document.getElementById('modalDiv')) {
-      setShowModal(false)
-    }
-  }
-
-
-async function createTask(){
-
-    let fullStartDate = new Date(
-      task.startDay.getFullYear(),
-      task.startDay.getMonth(),
-      task.startDay.getDay(),
-      parseInt(task.startTime.slice(0,2)),
-      parseInt(task.startTime.slice(3,5))
-    )
-
-    setTask(prevTask => {
-      let newTask = { ...prevTask }
-      newTask.startDay = fullStartDate
-      return newTask
-    })
-
-    let fullEndDate = new Date(
-      task.endDay.getFullYear(),
-      task.endDay.getMonth(),
-      task.endDay.getDay(),
-      parseInt(task.endTime.slice(0,2)),
-      parseInt(task.endTime.slice(3,5))
-    )
-
-    setTask(prevTask => {
-      let newTask = { ...prevTask }
-      newTask.endDay = fullEndDate
-      return newTask
-    })
-
-    const formattedTask = {
-      ...task,
-      startDayTime: task.startDay.toISOString(),
-      endDayTime: task.endDay.toISOString()
+  useEffect(() => {
+    const handleClickOutModal = (event) => {
+      if (event.target === document.getElementById('modalDiv')) {
+        closeModal();
+      }
     };
 
-    delete formattedTask.startDay
-    delete formattedTask.startTime
-    delete formattedTask.endDay
-    delete formattedTask.endTime
+    window.addEventListener('click', handleClickOutModal);
 
-    console.log(formattedTask)
-    console.log("é o de cima")
+    return () => window.removeEventListener('click', handleClickOutModal);
+  }, [closeModal]);
 
+  // ------------------- CONTROLE DO FETCH ----------------
 
 
-   const data = await fetch('http://localhost:8000/createTask', {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formattedTask)
-    }).then(data => data.json())
+  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/createTask', {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...task,
+        startDayTime: new Date(
+        task.startDay.getFullYear(),
+        task.startDay.getMonth(),
+        task.startDay.getDay(),
+        parseInt(task.startTime.slice(0,2)),
+        parseInt(task.startTime.slice(3,5))
+      ).toISOString(),
 
-    return data; 
+      endDayTime: new Date(
+        task.endDay.getFullYear(),
+        task.endDay.getMonth(),
+        task.endDay.getDay(),
+        parseInt(task.endTime.slice(0,2)),
+        parseInt(task.endTime.slice(3,5))
+      ).toISOString()
+    })
+  }) 
 
-  }
+
+  // ----------------------------------------
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -126,23 +104,15 @@ async function createTask(){
         newTask[name] = value;
       }
 
-      return newTask;
-    
+      return newTask;    
 
     });
   };
 
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-
     event.preventDefault()
-    const response = await createTask()
-    console.log(response)
-    if (response) {
-      console.log("Evento adicionado! :D")
-    } else {
-      console.log("Evento nao adicionado :(")
-    }
+    await fetchData()
 
    // navigate(0) //jeito porco de atualizar a lista de tasks
 
@@ -155,13 +125,13 @@ async function createTask(){
 
       {/*Botão para abrir o Modal*/}
       <div className="button-container">
-        <button onClick={() => setShowModal(!showModal)}>Criar Novo Evento</button>
+        <button onClick={openModal}>Criar Novo Evento</button>
       </div>
 
       {/*Modal div*/}
       <div id="modalDiv"
         className={[
-          showModal ? "modal-shown" : "modal-hidden",
+          isOpen ? "modal-shown" : "modal-hidden",
         ].join(' ')}
       >
 
@@ -178,7 +148,7 @@ async function createTask(){
                 <label> Hora Início </label>
                 <input
                   name="startDay" placeholder="startDay" onChange={handleInputChange} type="date"
-                  value={formatDateTime(task.startDay)}/>
+                  value={format(task.startDay, 'yyyy-MM-dd')}/>
                   {task.fullDay? "":<input name="startTime" placeholder="startTime" onChange={handleInputChange} type="time"
                   value={task.startDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} />}
               </div>
@@ -186,7 +156,7 @@ async function createTask(){
               <div>
                 <label> Hora Fim </label>
                 <input name="endDay" placeholder="endDay" onChange={handleInputChange} type="date"
-                  value={formatDateTime(task.endDay)}/>
+                  value={format(task.endDay, 'yyyy-MM-dd')}/>
                 {task.fullDay? "":<input name="endTime" placeholder="endTime" onChange={handleInputChange} type="time" 
                 value={task.endDay.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} />}
               </div>
@@ -204,11 +174,9 @@ async function createTask(){
             <input name="place" placeholder="Local" onChange={handleInputChange} type="text" /><br />
             <input name="taskDescription" placeholder="Descrição" onChange={handleInputChange} type="text"/><br />
 
-
-
           </div>
           <div className="form-footer">
-            <button type="button" onClick={() => setShowModal(!showModal)}>Fechar</button>
+            <button type="button" onClick={closeModal}>Fechar</button>
             <button type="submit">Adicionar</button>
           </div>
         </form>

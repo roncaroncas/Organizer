@@ -1,8 +1,17 @@
 import {useState, useEffect} from "react";
 import {useNavigate} from 'react-router-dom'
 
-Date.prototype.getWeek = function (dowOffset) {
+import { format } from 'date-fns';
+import classNames from 'classnames';
+
+import useFetch from "../../hooks/useFetch"
+
+
+// ---------------- UTILS -----------------------
+
+// Extend Date prototype to get week number
 /*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.meanfreepath.com */
+Date.prototype.getWeek = function (dowOffset) {
 
     dowOffset = typeof(dowOffset) == 'number' ? dowOffset : 0; //default dowOffset to zero
     var newYear = new Date(this.getFullYear(),0,1);
@@ -29,14 +38,6 @@ Date.prototype.getWeek = function (dowOffset) {
     return weeknum;
 };
 
-function dateStr(date){
-  return(
-    date.getDate().toString().padStart(2, "0") + "/" +
-    (date.getMonth()+1).toString().padStart(2, "0")  + "/" +
-    date.getFullYear().toString()
-  )
-}
-
 function convertToLocalTime(dateStr) {
   const date = new Date(dateStr);
   const hours = date.getHours();
@@ -48,6 +49,10 @@ function convertToLocalTime(dateStr) {
     minute: '2-digit',
   });
 }
+
+
+// ------------------------------
+
 function CalendarGrid(){
 
   let navigate = useNavigate()
@@ -58,25 +63,49 @@ function CalendarGrid(){
   const [selectedDay, setSelectedDay]     = useState<number>(new Date(Date.now()))
   const [selectedWeek, setSelectedWeek]   = useState<number>(null)
 
-  const [hiddenWeeks, setHiddenWeeks] = useState({})
   const [tasks, setTasks] = useState([])
 
-  // const [calendarGrid, setCalendarGrid] = useState("")
+  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/myTasks', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
 
   useEffect(() => {
-    fetch('http://localhost:8000/myTasks', {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setTasks(data);
-      });
+    fetchData();
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      setTasks(data);
+    }
+  }, [data]);
 
-  /////////////Calendar GRID ///////////////////////////
+
+  // ------------------ EVENT HANDLERS ---------------------------
+
+
+  const handleClickWeek = (wkNumber: number) => {
+    setCalMode("Week")
+    toggleWeekExpansion(wkNumber)
+  }
+
+  const toggleWeekExpansion = (weekNumber: number) => {
+    setSelectedWeek((prevWeek) => (prevWeek === weekNumber ? null : weekNumber));
+  }
+
+  const handleClickDay = (i: Date) => {
+    console.log("Clicado em: " + i.toString())
+  }
+
+  const toggleColumn = (weekDay: number) => {
+    const updatedDayHideShow = [...dayHideShow]
+    updatedDayHideShow[weekDay] = !updatedDayHideShow[weekDay]
+    setDayHideShow(updatedDayHideShow)
+  }
+
+  // --------------------  MOVENDO DIAS/MÊS/ANO --------------------
+
 
   const monthNumberToLabelMap = [
     'January', 'February', 'March',
@@ -85,171 +114,142 @@ function CalendarGrid(){
     'October', 'November', 'December',
   ]
 
-  function handleClickWeek(wkNumber: number){
-    setCalMode("Week")
-    toggleRow(wkNumber)
-    // console.log("estou na semana "+wkNumber.toString())
+  function changeDay(delta: int){
+    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth(), prevDate.getDate()+delta))
+    setSelectedWeek(null)
   }
 
-  const toggleWeekExpansion = (weekNumber) => {
-    setSelectedWeek((prevWeek) => (prevWeek === weekNumber ? null : weekNumber));
-  };
-
-  function handleClickDay(i: Date){
-    console.log("me clicou u.U: " + i.toString())
-    console.log(i)
-    // navigate("/calendar/" + i.getFullYear() +"/" + (i.getMonth()+1).toString().padStart(2, "0") + "/" + i.getDate().toString().padStart(2, "0"))
+  function changeMonth(delta: int){
+    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth()+delta, prevDate.getDate()))
+    setSelectedWeek(null)
   }
 
-  function toggleColumn(weekDay: number){
-    const updatedDayHideShow = [...dayHideShow];
-    updatedDayHideShow[weekDay] = !updatedDayHideShow[weekDay];
-    setDayHideShow(updatedDayHideShow);
-    // console.log("To toglando coluna")
+  function changeYear(delta: int){
+    setSelectedDay((prevDate) => new Date(prevDate.getFullYear()+delta, prevDate.getMonth(), prevDate.getDate()))
+    setSelectedWeek(null)
   }
 
+  // -----------------------------------------------------
 
-  // MOVENDO DIAS/MÊS/ANO
+  const generateDayTasks = (date, tasks) =>
+    tasks.filter(
+      (task) => new Date(task.startDayTime).toDateString() === date.toDateString()
+    )
 
-  function lastDay(){
-    console.log("antes dia!")
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth(), prevDate.getDate()-1))
-  }
+  const createDayCell = (date, dayTasks, weekNumber) => (
 
-  function nextDay(){
-    console.log("proximo dia!")
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth(), prevDate.getDate()+1))
-  }
-
-
-  function lastMonth(){
-    console.log("antes mes!")
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth()-1, prevDate.getDate()))
-  }
-
-  function nextMonth(){
-    console.log("proximo mes!")
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth()+1, prevDate.getDate()))
-  }
-
-  function lastYear(){
-    console.log("antes ano!")
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear()-1, prevDate.getMonth(), prevDate.getDate()))
-  }
-
-  function nextYear(){
-    console.log("proximo ano!")
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear()+1, prevDate.getMonth(), prevDate.getDate()))
-  }
-
-
-  // ----------------------------
-
-  const dayDifference = selectedDay.getDate() - selectedDay.getDay();
-
-  let day1 = new Date(
-    selectedDay.getFullYear(),
-    selectedDay.getMonth(),
-    dayDifference <= 1 ? dayDifference : dayDifference - 7)
-
-
-  // ---------- GRID ------------
-
-  useEffect(() => {
-    // updateCalendarGrid(selectedDay);
-    console.log("trifou o use uefeito")
-  }, [selectedDay]);
-
-  let calendarGrid = []
-
-  // HEAD
-
-  calendarGrid.push(<div key="week" className="weekNumber"> <p> Week </p> </div>);
-
-  const weekNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-  weekNames.forEach((name, i) => {
-    calendarGrid.push(
-      <div key={name}
-        onClick={() => toggleColumn(i)}
-        className={[
-          "calHeader",
-          dayHideShow[i] ? "showCol" : "hideCol",
+    <div id={date.toISOString()} key={format(date, "dd/MM/yyyy")}
+      className={
+        [
+          date.getMonth() === selectedDay.getMonth() ? "dayInMonthCal" : "dayOutMonthCal",
+          dayHideShow[date.getDay()] ? "showCol" : "hideCol",
+          selectedWeek == null ? "showRow" : (selectedWeek === date.getWeek() ? "focusRow" : "hideRow"),
         ].join(' ')}
+    >
+
+      <div id="dateTitle" onClick={() => handleClickDay(date)}>
+        {dayHideShow[date.getDay()] ? format(date, "dd/MM/yyyy") : format(date, "dd")}
+      </div>
+        
+      <div id="dateContent">
+        {(selectedWeek != date.getWeek() ? "("+dayTasks.length+")" :
+          dayTasks.length == 0 ? "Dia Livre!" :
+          dayTasks.map(task => (
+          <div key={task.id}>
+            {convertToLocalTime(task.startDayTime)}<br/>
+            ({task.id}): {task.taskName} <br/>
+            <br/>
+          </div>)))}
+      </div>
+
+      <div id="dateButton" onClick={() => console.log("Voce quer adicionar tarefa do dia: " + format(date, "dd/MM/yyyy"))}>
+        <a> (+) </a>
+      </div>
+    </div>
+
+  )
+
+
+  // ------------------- CALENDAR ----------------------
+
+  // -------------- CALENDAR HEAD ------------------
+
+   const calendarHead = [
+    // GRID HEADER
+    <div key="week" className="weekNumber">
+      <p> Week </p>
+    </div>,
+
+    ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name, i) => (
+      <div
+        key={name}
+        onClick={() => toggleColumn(i)}
+        className={classNames("calHeader", dayHideShow[i] ? "showCol" : "hideCol")}
       >
         <div>{name}</div>
       </div>
+    ))
+  ];
+
+
+  // -----------CALENDAR BODY-----------------
+
+  const calendarBody = (() =>{
+
+    let bodyGrid = []
+
+    // Primeiro dia que aparece no calendário do mês
+    const day1 = new Date(
+      selectedDay.getFullYear(),
+      selectedDay.getMonth(),
+      1 - new Date(selectedDay.getFullYear(), selectedDay.getMonth(), 1).getDay()
     );
-  });
 
-  // BODY
-  for (let i=0; i<42; i++){
+    let i = 0
+    let date = new Date(day1)
 
-    const d = new Date(
-      day1.getFullYear(),
-      day1.getMonth(),
-      day1.getDate()+i)
+    while (
+      date.getDay()!=0 || 
+      date.getMonth() == selectedDay.getMonth() ||
+      (date.getMonth() + 1) % 12 == selectedDay.getMonth()
+      ){
 
+      //FILTRANDO AS TAREFAS QUE POSSUEM o STARTDATE IGUAL AO DIA date
+      const dayTasks = generateDayTasks(date, tasks)
+      const weekNumber = date.getWeek()
 
-    //Week number (Coluna a Esquerda)
-    if (d.getDay() == 0){
-      calendarGrid.push(
-        <div
-          key={"Week_"+d.getWeek()}
-          className={
-          [
-            "weekNumber",
-            // hiddenWeeks[d.getWeek()] ? "hideRow" : "showRow",
-            selectedWeek == null ? "showRow" : (selectedWeek === d.getWeek() ? "focusRow" : "hideRow"),
-          ].join(' ')}
-          onClick={() => toggleWeekExpansion(d.getWeek())}
-        >
-          {d.getWeek()}
-        </div>
-      )
+      
+      //Week number (Coluna a Esquerda)
+      if (date.getDay() == 0){
+        bodyGrid.push(
+          <div
+            key={"Week_"+weekNumber}
+            className={
+            [
+              "weekNumber",
+              selectedWeek == null ? "showRow" : (selectedWeek === weekNumber ? "focusRow" : "hideRow"),
+            ].join(' ')}
+            onClick={() => handleClickWeek(weekNumber)}
+          >
+            {weekNumber}
+          </div>
+        )
+      }
+
+      //Dias    
+      bodyGrid.push(createDayCell(date, dayTasks, weekNumber))
+
+      // Iterando 
+      i++
+      date = new Date(
+        day1.getFullYear(),
+        day1.getMonth(),
+        day1.getDate()+i)
     }
 
-    //Dias
+    return (bodyGrid)
 
-    //FILTRANDO AS TAREFAS QUE POSSUEM o STARTDATE IGUAL AO DIA d
-    const dayTasks = tasks.filter(task => {
-      const taskDate = new Date(task.startDayTime)
-      // if (taskDate.toDateString() === d.toDateString()){
-      //   console.log (d, taskDate.toDateString(), d.toDateString())
-      // }
-      return taskDate.toDateString() === d.toDateString()
-    })
-    
-    calendarGrid.push(
-      <div id={d.toISOString()} key={dateStr(d)}
-        className={
-          [
-            d.getMonth() === selectedDay.getMonth() ? "dayInMonthCal" : "dayOutMonthCal",
-            dayHideShow[d.getDay()] ? "showCol" : "hideCol",
-            selectedWeek == null ? "showRow" : (selectedWeek === d.getWeek() ? "focusRow" : "hideRow"),
-          ].join(' ')}
-      >
-
-        <div id="dateTitle" onClick={() => handleClickDay(d)}>
-          {dayHideShow[d.getDay()] ? dateStr(d) : dateStr(d).substring(0,2)}
-        </div>
-          
-        <div id="dateContent">
-          {(selectedWeek != d.getWeek() ? "("+dayTasks.length+")" :
-            dayTasks.length == 0 ? "Dia Livre!" :
-            dayTasks.map(task => (
-            <div key={task.id}>
-              {convertToLocalTime(task.startDayTime)}<br/>
-              ({task.id}): {task.taskName} <br/>
-              <br/>
-            </div>)))}
-        </div>
-
-        <div id="dateButton" onClick={() => console.log("Voce quer adicionar tarefa do dia: " + dateStr(d))}>
-          <a> (+) </a>
-        </div>
-      </div>
-    );
-  }
+  })()
 
   return (
     <div>
@@ -257,19 +257,20 @@ function CalendarGrid(){
       {/*<h1> Calendar </h1>*/}
         
       <h1>
-        <a onClick= {lastDay}> (-) </a>
+        <a onClick= {() => changeDay(-1)}> (-) </a>
         <a> {selectedDay.getDate()} </a>
-        <a onClick= {nextDay}> (+) </a>
-        <a onClick= {lastMonth}> (-) </a>
+        <a onClick= {() => changeDay(+1)}> (+) </a>
+        <a onClick= {() => changeMonth(-1)}> (-) </a>
         <a> {monthNumberToLabelMap[selectedDay.getMonth()]} </a>
-        <a onClick= {nextMonth}> (+) </a>
-        <a onClick= {lastYear}> (-) </a>
+        <a onClick= {() => changeMonth(+1)}> (+) </a>
+        <a onClick= {() => changeYear(-1)}> (-) </a>
         <a> {selectedDay.getFullYear()} </a>
-        <a onClick= {nextYear}> (+) </a>
+        <a onClick= {() => changeYear(+1)}> (+) </a>
       </h1>
     
       <div className = "calendarGrid">
-        {calendarGrid}
+        {calendarHead}
+        {calendarBody}
       </div>
     
       <h4> Debug: 
