@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import classNames from 'classnames';
 
 import useFetch from "../../hooks/useFetch"
+import useModal from "../../hooks/useModal"
 
 
 // ---------------- UTILS -----------------------
@@ -65,11 +66,14 @@ function CalendarGrid(){
 
   const [tasks, setTasks] = useState([])
 
+  // ------------------- CONTROLE DO FETCH ----------------
+
   const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/myTasks', {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
+
 
   useEffect(() => {
     fetchData();
@@ -80,6 +84,23 @@ function CalendarGrid(){
       setTasks(data);
     }
   }, [data]);
+
+  // ----------------   CONTROLE DE MODAL ------------------
+
+  const { isOpen, openModal, closeModal, toggleModal } = useModal()
+  const [activeTask, setActiveTask] = useState(null)
+
+  useEffect(() => {
+    const handleClickOutModal = (event) => {
+      if (event.target === document.getElementById('modalDiv')) {
+        closeModal();
+      }
+    };
+
+    window.addEventListener('click', handleClickOutModal);
+
+    return () => window.removeEventListener('click', handleClickOutModal);
+  }, [closeModal]);
 
 
   // ------------------ EVENT HANDLERS ---------------------------
@@ -103,6 +124,13 @@ function CalendarGrid(){
     updatedDayHideShow[weekDay] = !updatedDayHideShow[weekDay]
     setDayHideShow(updatedDayHideShow)
   }
+
+  const handleTaskClick = (task) => {
+    setActiveTask(task); // Set the clicked task as active
+    openModal();
+    console.log("clicou a task: "+task.id)
+  }
+  
 
   // --------------------  MOVENDO DIAS/MÊS/ANO --------------------
 
@@ -136,6 +164,25 @@ function CalendarGrid(){
       (task) => new Date(task.startDayTime).toDateString() === date.toDateString()
     )
 
+  function createTask(task) {
+
+    return( 
+      <div key={task.id} className="calendarTask">
+        {convertToLocalTime(task.startDayTime)}<br/>
+        ({task.id}): {task.name} <br/>
+        <span
+          style={{ color: "blue", cursor: "pointer" }}
+          onClick={() => handleTaskClick(task)}
+        >
+          {task.id}
+        </span>
+        <br/>
+      </div>
+    )
+  }             
+
+
+
   const createDayCell = (date, dayTasks, weekNumber) => (
 
     <div id={date.toISOString()} key={format(date, "dd/MM/yyyy")}
@@ -154,13 +201,11 @@ function CalendarGrid(){
       <div id="dateContent">
         {(selectedWeek != date.getWeek() ? "("+dayTasks.length+")" :
           dayTasks.length == 0 ? "Dia Livre!" :
-          dayTasks.map(task => (
-          <div key={task.id}>
-            {convertToLocalTime(task.startDayTime)}<br/>
-            ({task.id}): {task.taskName} <br/>
-            <br/>
-          </div>)))}
+          dayTasks.map(task => {
+          return(createTask(task))}))}
+
       </div>
+
 
       <div id="dateButton" onClick={() => console.log("Voce quer adicionar tarefa do dia: " + format(date, "dd/MM/yyyy"))}>
         <a> (+) </a>
@@ -271,7 +316,28 @@ function CalendarGrid(){
       <div className = "calendarGrid">
         {calendarHead}
         {calendarBody}
+
       </div>
+
+      <div 
+      className={["calendarModal",
+          isOpen ? "modal-shown" : "modal-hidden",
+        ].join(' ')}>
+
+        {isOpen && activeTask && (
+        <div className="modal-content">
+          <h2>Task Details</h2>
+          <p>ID: {activeTask.id}</p>
+          <p>Name: {activeTask.name}</p>
+          <p>Start Time: {convertToLocalTime(activeTask.startDayTime)}</p>
+          <button onClick={closeModal}>Close</button>
+        </div>
+      )}
+      </div>
+
+
+
+      
     
       <h4> Debug: 
         <a>
