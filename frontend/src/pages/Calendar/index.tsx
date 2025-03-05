@@ -5,7 +5,7 @@ import Header from "../../components/Header";
 
 import AllTasksTable from "./AllTasksTable"
 import CalendarGrid from "./CalendarGrid"
-import AddNewTask from "./AddNewTask"
+// import AddNewTask from "./AddNewTask"
 
 function Calendar ({ removeCookie }:{removeCookie:any})  {
 
@@ -17,13 +17,14 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
 
       <CalendarGrid/>
       <br/>
+
+      {/*<AddNewTask/>
+      <br/>*/}
       
       {/*COLUNA3      */}
       <AllTasksTable/>
       <br/>
 
-      <AddNewTask/>
-      <br/>
    
     </div>
 

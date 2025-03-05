@@ -7,6 +7,10 @@ import classNames from 'classnames';
 import useFetch from "../../hooks/useFetch"
 import useModal from "../../hooks/useModal"
 
+import TaskInCalendar from "./TaskInCalendar"
+
+import TaskModal from "./TaskModal"
+
 
 // ---------------- UTILS -----------------------
 
@@ -39,18 +43,6 @@ Date.prototype.getWeek = function (dowOffset) {
     return weeknum;
 };
 
-function convertToLocalTime(dateStr) {
-  const date = new Date(dateStr);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const localTime = new Date();
-  localTime.setHours(hours, minutes, 0, 0);
-  return localTime.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 
 // ------------------------------
 
@@ -58,13 +50,14 @@ function CalendarGrid(){
 
   let navigate = useNavigate()
 
-  const [calMode, setCalMode] = useState("Month") //Day, Week, Month
+  // const [calMode, setCalMode] = useState("Month") //Day, Week, Month
   const [dayHideShow, setDayHideShow] = useState([true, true, true, true, true, true, true]) //Day, Week, Month
 
   const [selectedDay, setSelectedDay]     = useState<number>(new Date(Date.now()))
   const [selectedWeek, setSelectedWeek]   = useState<number>(null)
 
   const [tasks, setTasks] = useState([])
+
 
   // ------------------- CONTROLE DO FETCH ----------------
 
@@ -88,7 +81,7 @@ function CalendarGrid(){
   // ----------------   CONTROLE DE MODAL ------------------
 
   const { isOpen, openModal, closeModal, toggleModal } = useModal()
-  const [activeTask, setActiveTask] = useState(null)
+  const [selectedTask, setSelectedTask] = useState<task>(null)
 
   useEffect(() => {
     const handleClickOutModal = (event) => {
@@ -102,35 +95,30 @@ function CalendarGrid(){
     return () => window.removeEventListener('click', handleClickOutModal);
   }, [closeModal]);
 
+  const [newTask, setNewTask] = useState<boolean>(false)
+
 
   // ------------------ EVENT HANDLERS ---------------------------
 
 
-  const handleClickWeek = (wkNumber: number) => {
-    setCalMode("Week")
-    toggleWeekExpansion(wkNumber)
+  const handleClickWeekRow = (weekNumber: number) => {
+    setSelectedWeek((prevWeek) => (prevWeek === weekNumber ? null : weekNumber))
   }
 
-  const toggleWeekExpansion = (weekNumber: number) => {
-    setSelectedWeek((prevWeek) => (prevWeek === weekNumber ? null : weekNumber));
-  }
+  const handleClickWeekColumn = (weekDay: number) =>
+    setDayHideShow(prev => prev.map((day, index) => index === weekDay ? !day : day))
 
   const handleClickDay = (i: Date) => {
-    console.log("Clicado em: " + i.toString())
-  }
+    console.log("Clicado em: " + i.toString())}
 
-  const toggleColumn = (weekDay: number) => {
-    const updatedDayHideShow = [...dayHideShow]
-    updatedDayHideShow[weekDay] = !updatedDayHideShow[weekDay]
-    setDayHideShow(updatedDayHideShow)
-  }
-
-  const handleTaskClick = (task) => {
-    setActiveTask(task); // Set the clicked task as active
+  const onTaskClick = (task) => {
+    setSelectedTask(task); // Set the clicked task as active
+    console.log(task)
     openModal();
+    // FAZER FUNÇÃO PARA ATUALIZAR VALUES DO FORMS
     console.log("clicou a task: "+task.id)
   }
-  
+
 
   // --------------------  MOVENDO DIAS/MÊS/ANO --------------------
 
@@ -164,55 +152,53 @@ function CalendarGrid(){
       (task) => new Date(task.startDayTime).toDateString() === date.toDateString()
     )
 
-  function createTask(task) {
+  const DayCell = (date, dayTasks, selectedDay, selectedWeek, dayHideShow, handleClickDay, onTaskClick) => {
 
-    return( 
-      <div key={task.id} className="calendarTask">
-        {convertToLocalTime(task.startDayTime)}<br/>
-        ({task.id}): {task.name} <br/>
-        <span
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={() => handleTaskClick(task)}
-        >
-          {task.id}
-        </span>
-        <br/>
-      </div>
-    )
-  }             
+    const weekNumber = date.getWeek()  
 
+    return(
 
+      <div key={format(date, "dd/MM/yyyy")}
+        className={classNames(
+          [
+            date.getMonth() === selectedDay.getMonth() ? "dayInMonthCal" : "dayOutMonthCal",
+            dayHideShow[date.getDay()] ? "showCol" : "hideCol",
+            selectedWeek == null ? "showRow" : (selectedWeek === date.getWeek() ? "focusRow" : "hideRow"),
+          ])}
+      >
 
-  const createDayCell = (date, dayTasks, weekNumber) => (
+        <div id="dateTitle" onClick={() => handleClickDay(date)}>
+          <strong>{dayHideShow[date.getDay()] ? format(date, "dd/MM/yyyy") : format(date, "dd")}</strong>
+        </div>
+          
+        <div id="dateContent">
+          {(selectedWeek != date.getWeek() ? "("+dayTasks.length+")" :
+            dayTasks.length == 0 ? "Dia Livre!" :
+            dayTasks.map(task => {
+              return(
+                <div key={task.id}>
+                  <TaskInCalendar
+                    task={task}
+                    onTaskClick = {onTaskClick}
+                  />                  
+                </div>
+              )
+            }
+          ))}
+        </div>
 
-    <div id={date.toISOString()} key={format(date, "dd/MM/yyyy")}
-      className={
-        [
-          date.getMonth() === selectedDay.getMonth() ? "dayInMonthCal" : "dayOutMonthCal",
-          dayHideShow[date.getDay()] ? "showCol" : "hideCol",
-          selectedWeek == null ? "showRow" : (selectedWeek === date.getWeek() ? "focusRow" : "hideRow"),
-        ].join(' ')}
-    >
-
-      <div id="dateTitle" onClick={() => handleClickDay(date)}>
-        {dayHideShow[date.getDay()] ? format(date, "dd/MM/yyyy") : format(date, "dd")}
-      </div>
         
-      <div id="dateContent">
-        {(selectedWeek != date.getWeek() ? "("+dayTasks.length+")" :
-          dayTasks.length == 0 ? "Dia Livre!" :
-          dayTasks.map(task => {
-          return(createTask(task))}))}
 
+
+        <div id="dateButton" onClick={() => console.log("Voce quer adicionar tarefa do dia: " + format(date, "dd/MM/yyyy"))}>
+          <a> (+) </a>
+        </div>
       </div>
 
 
-      <div id="dateButton" onClick={() => console.log("Voce quer adicionar tarefa do dia: " + format(date, "dd/MM/yyyy"))}>
-        <a> (+) </a>
-      </div>
-    </div>
 
-  )
+    )
+  }
 
 
   // ------------------- CALENDAR ----------------------
@@ -228,7 +214,7 @@ function CalendarGrid(){
     ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name, i) => (
       <div
         key={name}
-        onClick={() => toggleColumn(i)}
+        onClick={() => handleClickWeekColumn(i)}
         className={classNames("calHeader", dayHideShow[i] ? "showCol" : "hideCol")}
       >
         <div>{name}</div>
@@ -262,19 +248,17 @@ function CalendarGrid(){
       //FILTRANDO AS TAREFAS QUE POSSUEM o STARTDATE IGUAL AO DIA date
       const dayTasks = generateDayTasks(date, tasks)
       const weekNumber = date.getWeek()
-
       
       //Week number (Coluna a Esquerda)
       if (date.getDay() == 0){
         bodyGrid.push(
           <div
             key={"Week_"+weekNumber}
-            className={
-            [
+            className={classNames([
               "weekNumber",
               selectedWeek == null ? "showRow" : (selectedWeek === weekNumber ? "focusRow" : "hideRow"),
-            ].join(' ')}
-            onClick={() => handleClickWeek(weekNumber)}
+            ])}
+            onClick={() => handleClickWeekRow(weekNumber)}
           >
             {weekNumber}
           </div>
@@ -282,7 +266,7 @@ function CalendarGrid(){
       }
 
       //Dias    
-      bodyGrid.push(createDayCell(date, dayTasks, weekNumber))
+      bodyGrid.push(DayCell(date, dayTasks, selectedDay, selectedWeek, dayHideShow, handleClickDay, onTaskClick))
 
       // Iterando 
       i++
@@ -311,33 +295,50 @@ function CalendarGrid(){
         <a onClick= {() => changeYear(-1)}> (-) </a>
         <a> {selectedDay.getFullYear()} </a>
         <a onClick= {() => changeYear(+1)}> (+) </a>
+        <button onClick={() => {
+          setNewTask(true)
+          openModal(true)
+        }}>
+        
+          Novo Evento
+        </button>
       </h1>
     
       <div className = "calendarGrid">
         {calendarHead}
         {calendarBody}
-
       </div>
 
       <div 
-      className={["calendarModal",
+      className={classNames(["calendarModal",
           isOpen ? "modal-shown" : "modal-hidden",
-        ].join(' ')}>
+        ])}>
 
-        {isOpen && activeTask && (
-        <div className="modal-content">
-          <h2>Task Details</h2>
-          <p>ID: {activeTask.id}</p>
-          <p>Name: {activeTask.name}</p>
-          <p>Start Time: {convertToLocalTime(activeTask.startDayTime)}</p>
-          <button onClick={closeModal}>Close</button>
-        </div>
-      )}
+        {selectedTask && (
+          <div className="modal-content">
+            <TaskModal
+              id = {selectedTask.id}
+              closeModal={() => {
+                setSelectedTask(null);   // Clear the selected event
+                closeModal();             // Close the modal
+              }}
+              initialTask = {selectedTask}
+            />
+          </div>
+        )}
+        {newTask && (
+          <div className="modal-content">
+            <TaskModal
+              closeModal={() => {
+                setNewTask(false);        // Clear the selected event
+                closeModal();             // Close the modal
+              }}
+            />
+          </div>
+        )}
+
       </div>
-
-
-
-      
+    
     
       <h4> Debug: 
         <a>

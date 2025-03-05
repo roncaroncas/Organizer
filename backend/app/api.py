@@ -352,6 +352,59 @@ async def create_task(task: Task, request: Request) -> (bool):
 
     return True
 
+@app.put("/updateTask", tags=["tasks"])
+async def update_task(task: Task, request: Request) -> (bool):
+
+    logger.debug("Finge que atualizei a task kkkk")
+
+    # logger.debug('Comecei a taskear')
+
+    # #USER ID
+    # sql = (f"SELECT users.id " 
+    #     f"FROM tokenAuth "
+    #     f"INNER JOIN users "
+    #     f"ON tokenAuth.userId = users.id "
+    #     f"WHERE token = ?")
+
+    # userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+
+    # logger.debug(userId)
+
+
+    # #CRIANDO EVENTO
+    # sql = (f"INSERT INTO tasks "
+    #     f"(taskName, startTime, endTime, place, fullDay, taskDescription) "
+    #     f"VALUES (?, ?, ?, ?, ?, ?)")
+
+    # val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.fullDay, task.taskDescription]
+
+    # logger.debug(val)
+
+    # db.cursor.execute(sql, val)
+    # db.connection.commit()
+
+    # #CONECTANDO EVENTO AO USUARIO QUE O CRIOU
+    # sql = (f"SELECT id " 
+    #     f"FROM tasks "
+    #     f"WHERE taskName = ? AND startTime = ? and endTime = ? and place = ? and fullDay = ? and taskDescription = ?"
+    #     f"ORDER BY id DESC "
+    #     f"LIMIT 1")
+
+    # #TO PERGUNTANDO O ID DE UM JEITO NAO OTIMIZADO CTZ
+    # taskId = db.cursor.execute(sql, val).fetchall()[0][0]
+
+    # logger.debug(taskId)
+
+    # sql = (f"INSERT INTO usersTasks  "
+    #     f"(userId, taskId, statusId) "
+    #     f"VALUES (?, ?, ?)")
+
+    # val = [userId, taskId, 0]
+    # db.cursor.execute(sql, val)
+    # db.connection.commit()
+
+    return True
+
 @app.get("/task/{taskId}", tags=["tasks"])
 async def get_Task_by_id(taskId: int, request: Request):
 
