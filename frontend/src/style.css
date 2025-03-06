@@ -116,9 +116,28 @@ body, ul, li, p {
   background-color: orange;
 }
 
-/*  -------------------- */
+/*  -------CALENDAR PAGE------------- */
 
-/*  ----CALENDARIO -----  */
+.calendarPage{
+  display: flex;
+}
+
+.calendarPage .column1{
+  flex: 1;
+  padding: 20px;
+  border: 1px solid #ccc;
+  min-width: 25%;
+}
+
+.calendarPage .column2{
+  flex: 3;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+
+
+/*  ----CALENDARIO GRID-----  */
 
 .calendarGrid {
   display: grid;
@@ -176,22 +195,26 @@ body, ul, li, p {
 }
 
 .calendarGrid .focusRow{
-  height: 41rem;
+  height: 100%;
   transition: all 0.5s ease; /* Smooth transition */
 }
 
 .calendarGrid .showRow{
-  height: 8rem;
+  height: 10rem;
   transition: all 0.5s ease; /* Smooth transition */
 }
 
 .calendarGrid .hideRow{
-  height: 1rem;
+  height: 0rem;
   transition: all 0.5s ease; /* Smooth transition */
 }
 
 .calendarTask{
   border: 2px solid;   /*Só para eu identificar os treco*/
+  width: auto; /* Adjust as needed */
+  overflow: hidden; /* Hides overflow */
+  text-overflow: ellipsis; /* Adds "..." for overflow text */
+  white-space: nowrap; /* Prevents line breaks */
 } 
 
 /*  ----------------------  */
@@ -255,8 +278,7 @@ td {
 }
 
 h1,
-h2,
-p {
+h2{
     text-align: center;
 }
 

@@ -10,12 +10,11 @@ function Header ({removeCookie}:{removeCookie:any})  {
   function handleLogout () {
     console.log("Ai! fui clicado u.u")
     navigate(0)
-    removeCookie("token", {path: '/'})
-    
+    removeCookie("token", {path: '/'}) 
   }
 
   // ["Home", "/home"],
-  const menuPages = [ ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"]]
+  const menuPages = [ ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"], ["TaskGroups", "/taskGroups"]]
 
   let structuredMenu = menuPages.map( function (item) {
 
@@ -25,7 +24,6 @@ function Header ({removeCookie}:{removeCookie:any})  {
       return (<li key={item[0]}><a href={item[1]}>{item[0]}</a></li>)
     }
   })
-
 
   return (
     <div className="header">

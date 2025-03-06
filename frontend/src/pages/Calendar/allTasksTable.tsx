@@ -4,6 +4,8 @@ import {useEffect, useState} from "react";
 
 function AllTasksTable ()  {
 
+  // SERVE PARA DEBUGGAR
+
   // let navigate = useNavigate()
 
 

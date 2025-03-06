@@ -172,19 +172,32 @@ function CalendarGrid(){
         </div>
           
         <div id="dateContent">
-          {(selectedWeek != date.getWeek() ? "("+dayTasks.length+")" :
-            dayTasks.length == 0 ? "Dia Livre!" :
-            dayTasks.map(task => {
-              return(
+          {selectedWeek !== date.getWeek() ? (
+            dayTasks.length === 0 ? (
+              "Dia Livre!"
+            ) : (
+              <>
+                {dayTasks.slice(0, 3).map(task => (
+                  <div key={task.id}>
+                    <TaskInCalendar task={task} onTaskClick={onTaskClick} />
+                  </div>
+                ))}
+                {dayTasks.length > 3 && (
+                  <div>+{dayTasks.length - 3} more</div>
+                )}
+              </>
+            )
+          ) : (
+            dayTasks.length === 0 ? (
+              "Dia Livre!"
+            ) : (
+              dayTasks.map(task => (
                 <div key={task.id}>
-                  <TaskInCalendar
-                    task={task}
-                    onTaskClick = {onTaskClick}
-                  />                  
+                  <TaskInCalendar task={task} onTaskClick={onTaskClick} />
                 </div>
-              )
-            }
-          ))}
+              ))
+            )
+          )}
         </div>
 
         
@@ -283,7 +296,7 @@ function CalendarGrid(){
   return (
     <div>
 
-      {/*<h1> Calendar </h1>*/}
+      {/* HEADER */}
         
       <h1>
         <a onClick= {() => changeDay(-1)}> (-) </a>
@@ -304,11 +317,14 @@ function CalendarGrid(){
         </button>
       </h1>
     
+      {/* GRID */}
       <div className = "calendarGrid">
         {calendarHead}
         {calendarBody}
       </div>
 
+
+      {/*MODAL*/}
       <div 
       className={classNames(["calendarModal",
           isOpen ? "modal-shown" : "modal-hidden",

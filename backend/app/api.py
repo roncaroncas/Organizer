@@ -62,6 +62,12 @@ class Task(BaseModel):
     taskDescription: str
     status: Optional[str] = None
 
+class GroupTask(BaseModel):
+    id: Optional[int]
+    name: str
+    parentId: Optional[int]
+
+
 
 
 ######################   LOGIN   ##############################
@@ -224,7 +230,7 @@ async def delete_friend(body: dict, request: Request) -> (bool):
     return True
 
 @app.put("/acceptFriend", tags=["friends"])
-async def delete_friend(body: dict, request: Request) -> (bool):
+async def accept_friend(body: dict, request: Request) -> (bool):
 
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
@@ -307,38 +313,34 @@ async def create_task(task: Task, request: Request) -> (bool):
     logger.debug('Comecei a taskear')
 
     #USER ID
+
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
         f"INNER JOIN users "
         f"ON tokenAuth.userId = users.id "
         f"WHERE token = ?")
 
-    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    else:
+        userId = row[0]
 
     logger.debug(userId)
-
 
     #CRIANDO EVENTO
     sql = (f"INSERT INTO tasks "
         f"(taskName, startTime, endTime, place, fullDay, taskDescription) "
-        f"VALUES (?, ?, ?, ?, ?, ?)")
+        f"VALUES (?, ?, ?, ?, ?, ?) "
+        f"RETURNING id")
 
     val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.fullDay, task.taskDescription]
 
     logger.debug(val)
 
-    db.cursor.execute(sql, val)
+    taskId = db.cursor.execute(sql, val).fetchone()[0]
     db.connection.commit()
-
-    #CONECTANDO EVENTO AO USUARIO QUE O CRIOU
-    sql = (f"SELECT id " 
-        f"FROM tasks "
-        f"WHERE taskName = ? AND startTime = ? and endTime = ? and place = ? and fullDay = ? and taskDescription = ?"
-        f"ORDER BY id DESC "
-        f"LIMIT 1")
-
-    #TO PERGUNTANDO O ID DE UM JEITO NAO OTIMIZADO CTZ
-    taskId = db.cursor.execute(sql, val).fetchall()[0][0]
 
     logger.debug(taskId)
 
@@ -347,61 +349,41 @@ async def create_task(task: Task, request: Request) -> (bool):
         f"VALUES (?, ?, ?)")
 
     val = [userId, taskId, 0]
-    db.cursor.execute(sql, val)
-    db.connection.commit()
+    try:
+        db.cursor.execute(sql, val)
+        db.connection.commit()
+    except Exception as e:
+        logger.error(f"Error creating task: {e}")
+        raise HTTPException(status_code=500, detail="Error creating task")
 
     return True
 
 @app.put("/updateTask", tags=["tasks"])
 async def update_task(task: Task, request: Request) -> (bool):
 
-    logger.debug("Finge que atualizei a task kkkk")
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
 
-    # logger.debug('Comecei a taskear')
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
 
-    # #USER ID
-    # sql = (f"SELECT users.id " 
-    #     f"FROM tokenAuth "
-    #     f"INNER JOIN users "
-    #     f"ON tokenAuth.userId = users.id "
-    #     f"WHERE token = ?")
+    #ATUALIZANDO EVENTO EVENTO
+    sql = (f"UPDATE tasks "
+        f"SET taskName = ?, startTime = ?, endTime = ?, place = ?, fullDay = ?, taskDescription = ? "
+        f"WHERE id = ?")
 
-    # userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+    val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.fullDay, task.taskDescription, task.id]
 
-    # logger.debug(userId)
+    logger.debug(val)
 
-
-    # #CRIANDO EVENTO
-    # sql = (f"INSERT INTO tasks "
-    #     f"(taskName, startTime, endTime, place, fullDay, taskDescription) "
-    #     f"VALUES (?, ?, ?, ?, ?, ?)")
-
-    # val = [task.taskName, task.startDayTime, task.endDayTime, task.place , task.fullDay, task.taskDescription]
-
-    # logger.debug(val)
-
-    # db.cursor.execute(sql, val)
-    # db.connection.commit()
-
-    # #CONECTANDO EVENTO AO USUARIO QUE O CRIOU
-    # sql = (f"SELECT id " 
-    #     f"FROM tasks "
-    #     f"WHERE taskName = ? AND startTime = ? and endTime = ? and place = ? and fullDay = ? and taskDescription = ?"
-    #     f"ORDER BY id DESC "
-    #     f"LIMIT 1")
-
-    # #TO PERGUNTANDO O ID DE UM JEITO NAO OTIMIZADO CTZ
-    # taskId = db.cursor.execute(sql, val).fetchall()[0][0]
-
-    # logger.debug(taskId)
-
-    # sql = (f"INSERT INTO usersTasks  "
-    #     f"(userId, taskId, statusId) "
-    #     f"VALUES (?, ?, ?)")
-
-    # val = [userId, taskId, 0]
-    # db.cursor.execute(sql, val)
-    # db.connection.commit()
+    db.cursor.execute(sql, val)
+    db.connection.commit()
 
     return True
 
@@ -450,6 +432,150 @@ async def add_user_to_task_by_id(taskId: int, userId: int, request: Request):
     db.cursor.execute(sql, val)
     db.connection.commit()
     
+    return True
+
+@app.get("/myTaskGroups" , tags=["tasksGroups"])
+async def my_tasks_groups(request: Request):
+
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    else:
+        userId = row[0]
+
+    sql = (f"SELECT tg.id, tg.name, tg.parentId "
+        f"FROM taskGroups tg "
+        f"INNER JOIN userGroupTask ugt "
+        f"ON tg.id = ugt.taskGroupId "
+        f"INNER JOIN users u "
+        f"ON u.id = ugt.userId "
+        f"WHERE u.id = ?")
+
+    val = [userId]
+
+    rows = db.cursor.execute(sql, val).fetchall()
+
+    # logger.debug(rows)
+
+    groupTasks = []
+
+    for r in rows:
+        logger.debug(r)
+        groupTasks.append(GroupTask(id=r[0], name=r[1], parentId=r[2]))
+
+    logger.debug(groupTasks)
+
+    return (groupTasks)
+
+@app.post("/addTaskGroup" , tags=["tasksGroups"])
+async def add_task_group(request: Request, groupTask: GroupTask) -> (GroupTask):
+
+    logger.debug(groupTask)
+
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    else:
+        userId = row[0]
+
+    sql = (f"INSERT INTO taskGroups "
+        f"(name, parentId) "
+        f"VALUES (?, ?) " 
+        f"RETURNING id")
+
+    val = [groupTask.name, groupTask.parentId]
+
+    logger.debug(sql) 
+
+
+    taskGroupId = db.cursor.execute(sql, val).fetchone()[0]
+    db.connection.commit()
+
+    groupTask.id = taskGroupId
+
+
+    sql = (f"INSERT INTO userGroupTask "
+        f"(userId, taskGroupId) "
+        f"VALUES (?, ?) ")
+
+    val = [userId, taskGroupId]
+
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+
+
+    return groupTask
+
+@app.put("/updateTaskGroup" , tags=["tasksGroups"])
+async def update_task_group(request: Request, groupTask: GroupTask) -> (GroupTask):
+
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    # Invited Tasks:
+    sql = (f"UPDATE taskGroups "
+        f"SET name = ?, parentId = ?  "
+        f"WHERE id = ?"
+        )
+
+    val = [groupTask.name, groupTask.parentId, groupTask.id]
+
+
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+
+    return groupTask
+
+@app.delete("/deleteTaskGroup" , tags=["tasksGroups"])
+async def update_task_group(body: dict, request: Request) -> (bool):
+
+    #USER ID
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    sql = (f"DELETE FROM taskGroups "
+        f"WHERE id = ? "
+        )
+
+    val = [body["id"]]
+
+
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+
     return True
 
 @app.get("/profile", tags=["profile"])
@@ -504,7 +630,7 @@ async def get_notifications(request: Request):
 
     values = [userId, 0]   #ut.taskStatus = 0 -> "Invited"
 
-    results = db.cursor.execute(sql, values).fetchall()
+    results = db.cursor.execute(sql, val).fetchall()
 
     return results
 
@@ -531,72 +657,13 @@ async def update_notification_status(body: dict, request: Request):
 
     logger.debug(sql)
 
-    # values = [body['idUserTask'], userId]   #ut.taskStatus = 0 -> "Invited"
-    values = [body['newStatus'], body['idUserTask']]  #ut.taskStatus = 0 -> "Invited"
+    # val = [body['idUserTask'], userId]   #ut.taskStatus = 0 -> "Invited"
+    val = [body['newStatus'], body['idUserTask']]  #ut.taskStatus = 0 -> "Invited"
 
-    logger.debug(values)
+    logger.debug(val)
 
 
-    db.cursor.execute(sql, values)
+    db.cursor.execute(sql, val)
     db.connection.commit()
 
     return True
-
-
-#####################
-
-    # #-------BANCO DE DADOS MIGUÉ
-# todos = [
-#     {
-#         "id": "1",
-#         "item": "Read a book."
-#     },
-#     {
-#         "id": "2",
-#         "item": "Cycle around town."
-#     }
-# ]
-
-#----------------------
-
-# @app.get("/", tags=["root"])
-# async def read_root() -> dict:
-#     return {"message": "Welcome to your todo list."}
-
-# @app.get("/todo", tags=["todos"])
-# async def get_todos() -> dict:
-#     return { "data": todos }
-
-# @app.post("/todo", tags=["todos"])
-# async def add_todo(todo: dict) -> dict:
-#     todos.append(todo)
-#     return {
-#         "data": { "Todo added." }
-#     }
-
-# @app.put("/todo/{id}", tags=["todos"])
-# async def update_todo(id: int, body: dict) -> dict:
-#     for todo in todos:
-#         if int(todo["id"]) == id:
-#             todo["item"] = body["item"]
-#             return {
-#                 "data": f"Todo with id {id} has been updated."
-#             }
-
-#     return {
-#         "data": f"Todo with id {id} not found."
-#     }
-
-# @app.delete("/todo/{id}", tags=["todos"])
-# async def delete_todo(id: int) -> dict:
-#     for todo in todos:
-#         if int(todo["id"]) == id:
-#             todos.remove(todo)
-#             return {
-#                 "data": f"Todo with id {id} has been removed."
-#             }
-
-#     return {
-#         "data": f"Todo with id {id} not found."
-#     }
-

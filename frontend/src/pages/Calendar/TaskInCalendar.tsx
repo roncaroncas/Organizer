@@ -4,21 +4,20 @@ import { format } from 'date-fns';
 import TaskModal from "./TaskModal"
 
 
-
 function TaskInCalendar({task, onTaskClick}) { 
+
+  // FORMATO DE LISTA (INDEPENDENTE DA HORA)
 
   return( 
     <div key={task.id} className="calendarTask">
-      {format(task.startDayTime, "HH:mm")}<br/>
-      ({task.id}): {task.taskName} <br/>
+      {format(task.startDayTime, "HH:mm")}
       <span
         style={{ color: "blue", cursor: "pointer" }}
         onClick={() => onTaskClick(task)}
-      >
-        {task.id}
+      >        
+        ({task.id}): {task.taskName}
       </span>
 
-      <br/>
     </div>
   )
 

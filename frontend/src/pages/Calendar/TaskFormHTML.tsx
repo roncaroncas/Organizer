@@ -46,7 +46,8 @@ function TaskFormHTML({task, setTask, handleInputChange, handleSubmit, closeModa
       </div>
       <div className="form-footer">
         <button type="button" onClick={closeModal}>Fechar</button>
-        <button type="submit">Adicionar</button>
+        <button type="submit">Salvar</button>
+
       </div>
     </form>
   )

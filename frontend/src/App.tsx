@@ -10,6 +10,8 @@ import CalendarDay from "./pages/Calendar/CalendarDay";
 import Profile from "./pages/Profile/index";
 import Profile_id from "./pages/Profile/Profile_id";
 
+import CalendarGroupsManager from "./pages/TaskGroups/CalendarGroupsManager"
+
 import Login from "./pages/Login/index";
 import CreateAccount from "./pages/Login/CreateAccount";
 
@@ -36,9 +38,9 @@ function App() {
       console.log(cookie.token)
 
       if ((locationPath == "/login") || (locationPath == "/createAccount")){
-        navigate ('/home')
+        navigate ('/calendar')
       } else if (locationPath == "/"){
-        navigate ('/home')
+        navigate ('/calendar')
       }   
     }
   }, []);
@@ -49,9 +51,9 @@ function App() {
         <Routes>
           <Route path="/login" element=<Login setCookie={setCookie} />/>
           <Route path="/createAccount" element=<CreateAccount/>/>
-          <Route path="/home" element = <Home removeCookie={removeCookie} />/>
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
+          <Route path="/taskGroups" element = <CalendarGroupsManager/>/>
           {/*<Route path="/calendar/:yyyy/:mm/:dd" element = <CalendarDay removeCookie={removeCookie} />/>*/}
           {/*<Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>*/}
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
