@@ -1,54 +1,54 @@
 import { useState } from "react";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
-
-/////////////TABELA DE AMIGOS ///////////////////////////////
-
-
-function AddFriendInput(){
-
-  const [friendId, setFriendId] = useState<string>("")
-  let navigate = useNavigate()
+function AddFriendInput() {
+  const [friendId, setFriendId] = useState<string>("");
+  let navigate = useNavigate();
 
   async function addFriend(friendId: string) {
+    console.log(friendId);
 
-    console.log(friendId)
-    
     const results = await fetch('http://localhost:8000/addFriend', {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({"friendId": parseInt(friendId)})
-      })
-    .then(data => data.json())
-    // .then(data => data.blabla)
+      body: JSON.stringify({ "friendId": parseInt(friendId) })
+    })
+      .then(data => data.json());
 
-    return results
+    return results;
   }
 
   async function handleSubmit(event: any) {
-
-    event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
-    const response = await addFriend (friendId)
-    console.log(response)
+    event.preventDefault();
+    const response = await addFriend(friendId);
+    console.log(response);
 
     if (response) {
-      console.log("Amigo adicionado! :D")
+      console.log("Amigo adicionado! :D");
     } else {
-      console.log("Amigo nao existe :(")
+      console.log("Amigo não existe :(");
     }
 
-    navigate(0)
-
+    navigate(0);
   }
 
-  return(
-    <form >
-        <label>Adicionar Amigo</label>
-        <input type="text" onChange={(e) => setFriendId(e.target.value)}/>
-        <button onClick={handleSubmit}>Adicionar</button>
-    </form> 
-  )
+  return (
+    <div className="container">
+      <form onSubmit={handleSubmit} className="form-container">
+        <label htmlFor="friendId">Adicionar Amigo</label>
+        <input
+          type="text"
+          id="friendId"
+          value={friendId}
+          onChange={(e) => setFriendId(e.target.value)}
+          className="input"
+          placeholder="ID do amigo"
+        />
+        <button type="submit" className="btn">Adicionar</button>
+      </form>
+    </div>
+  );
 }
 
 export default AddFriendInput;

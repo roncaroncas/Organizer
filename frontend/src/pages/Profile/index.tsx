@@ -33,25 +33,33 @@ function Profile ({removeCookie }: { removeCookie: any })  {
       <Header removeCookie={removeCookie}/>
       <br/>
 
-      <Notifications/>
-      <br/>
+      <div className="container">
 
-      <table key="tableFriends">
-        <thead>
-          <tr>
-            <th>My_Id</th>
-            <th>My_Name</th>
-            <th>Birthday</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr key={myselfData[0]}>
-            <td>{myselfData[0]}</td>
-            <td>{myselfData[1]}</td>
-            <td>{myselfData[2]}</td>
-          </tr>
-        </tbody>
-      </table>
+        <Notifications/>
+        
+
+      </div>
+      <br/>
+      <div className="container">
+
+        <table key="tableFriends">
+          <thead>
+            <tr>
+              <th>My_Id</th>
+              <th>My_Name</th>
+              <th>Birthday</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr key={myselfData[0]}>
+              <td>{myselfData[0]}</td>
+              <td>{myselfData[1]}</td>
+              <td>{myselfData[2]}</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
 
     </div>
         

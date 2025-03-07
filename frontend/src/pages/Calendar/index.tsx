@@ -19,7 +19,7 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
 
       <div className="calendarPage">
 
-        <div className ="column1">
+        <div className ="column1 container">
 
           <div>
             <h3> Blups </h3>
@@ -38,7 +38,7 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
           
         </div>
 
-        <div className ="column2">
+        <div className ="column2 container">
           <CalendarGrid/>
         </div>
 
@@ -48,8 +48,8 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
         {/*COLUNA3      */}
 
       </div>
-
-      <div>
+      <br/>
+      <div className="container">
         <AllTasksTable/>
       </div>
 

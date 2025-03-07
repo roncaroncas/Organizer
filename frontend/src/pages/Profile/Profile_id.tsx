@@ -1,59 +1,55 @@
 import { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom';
 
 import Header from "../../components/Header";
 
-function Profile_id ({removeCookie }: { removeCookie: any })  {
+function Profile_id ({removeCookie }: { removeCookie: any }) {
 
   const [profileData, setProfileData] = useState([])
 
   const { id } = useParams()
 
-  console.log("hello!")
-  console.log(id)
-
   useEffect(() => {
-    fetch('http://localhost:8000/profile/'+ id!.toString(), {
+    fetch('http://localhost:8000/profile/' + id!.toString(), {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setProfileData(data)
       })
-        .then((res) => res.json())
-        .then((data) => {
-          setProfileData(data)
-          console.log(data)
-        })}, [])
-
+  }, [id])
 
   return (
-
     <div>
+      <Header removeCookie={removeCookie} />
+      <br />
 
-      <Header removeCookie={removeCookie}/>
-      <br/>
+      <div className="container">
 
-      <table key="tableFriends">
-      
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Birthday</th>
-          </tr>
-        </thead>
+        <table key="tableProfile" className="profile-table">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Birthday</th>
+            </tr>
+          </thead>
 
-        <tbody>
-          <tr key={profileData[0]}>
-            <td>{profileData[0]}</td>
-            <td>{profileData[1]}</td>
-            <td>{profileData[2]}</td>
-          </tr>
-        </tbody>
-
-      </table>
-
+          <tbody>
+            {profileData.length > 0 && (
+              <tr key={profileData[0]}>
+                <td>{profileData[0]}</td>
+                <td>{profileData[1]}</td>
+                <td>{profileData[2]}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
-        
   )
 }
+
 export default Profile_id;

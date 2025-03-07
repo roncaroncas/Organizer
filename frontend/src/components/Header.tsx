@@ -1,49 +1,65 @@
-// import React from "react";
-import {useNavigate, useLocation} from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
-function Header ({removeCookie}:{removeCookie:any})  {
+function Header({ removeCookie }) {
+  let navigate = useNavigate();
+  let locationPath = useLocation().pathname;
+  const [openDropdown, setOpenDropdown] = useState(null);
 
-  let navigate = useNavigate()
-  let locationPath = useLocation()["pathname"]
-
-
-  function handleLogout () {
-    console.log("Ai! fui clicado u.u")
-    navigate(0)
-    removeCookie("token", {path: '/'}) 
+  function handleLogout() {
+    console.log('Ai! fui clicado u.u');
+    navigate(0);
+    removeCookie('token', { path: '/' });
   }
 
-  // ["Home", "/home"],
-  const menuPages = [ ["Friends", "/friends"], ["Calendar", "/calendar"], ["Profile", "/profile"], ["TaskGroups", "/taskGroups"]]
-
-  let structuredMenu = menuPages.map( function (item) {
-
-    if (locationPath == item[1]) {
-      return (<li className="active" key={item[0]}><a href={item[1]}>{item[0]}</a></li>)
-    } else {
-      return (<li key={item[0]}><a href={item[1]}>{item[0]}</a></li>)
-    }
-  })
+  function toggleDropdown(menu) {
+    setOpenDropdown(openDropdown === menu ? null : menu);
+  }
 
   return (
     <div className="header">
-
-      <h1> <a href="/">Organizer</a> </h1>
-      <nav>
-      <ul className="menu">
-        {structuredMenu}
-      </ul>
-      </nav>
-
-      <nav>
-      <ul className="logout">
-        <li onClick={handleLogout}><a href="/">Logout</a></li>
-      </ul>
-      </nav>
-        
+      <h1>
+        <a href="/" style={{ color: 'white', textDecoration: 'none' }}>
+          Organizer
+        </a>
+      </h1>
+      <div className="menuContainer">
+        <nav>
+          <ul className="menu">
+            <li className="menuItem" onClick={() => toggleDropdown('tasks')}>
+              Tasks
+              <ul className={`dropdown ${openDropdown === 'tasks' ? 'dropdownOpen' : ''}`}>
+                <li><a href="/calendar" className="dropdownItem">Calendar</a></li>
+                <li><a href="/taskGroups" className="dropdownItem">TaskGroups</a></li>
+              </ul>
+            </li>
+            <li className="menuItem" onClick={() => toggleDropdown('friends')}>
+              Friends
+              <ul className={`dropdown ${openDropdown === 'friends' ? 'dropdownOpen' : ''}`}>
+                <li><a href="/friends" className="dropdownItem">Friends</a></li>
+                <li><a href="/friendGroups" className="dropdownItem">FriendGroups</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div className="rightSection">
+        <a
+          href="/profile"
+          className="link"
+        >
+          Profile
+        </a>
+        <a
+          href="/"
+          onClick={handleLogout}
+          className="link"
+        >
+          Logout
+        </a>
+      </div>
     </div>
-        
   );
-};
+}
 
 export default Header;
