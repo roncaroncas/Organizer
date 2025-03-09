@@ -121,11 +121,16 @@ function CalendarGroupsManager() {
     <div>
       <Header/>
 
-      <div style={{ padding: "16px", maxWidth: "600px", margin: "auto" }}>
+      <div className="pagebody">
+
+        {/* -- Title -- */}
         <h2 style={{ fontSize: "20px", fontWeight: "bold" }}>Manage Calendar Groups</h2>
+
+
+        {/* -- Content --*/}
         <div>
           {groups.map(group => (
-            <div key={group.id} style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "8px", marginBottom: "8px" }}>
+            <div key={group.id} className="card-container">
               {editingGroup === group.id ? (
                 <div>
                   <input style={{ width: "100%", padding: "8px", marginBottom: "8px", border: "1px solid #ccc" }} value={editValues.name} onChange={e => setEditValues({ ...editValues, name: e.target.value })} />
@@ -158,7 +163,7 @@ function CalendarGroupsManager() {
           ))}
         </div>
         
-        <div style={{ marginTop: "16px", borderTop: "1px solid #ccc", paddingTop: "16px" }}>
+        <div className="card-container">
           <h3 style={{ fontWeight: "bold" }}>Add New Group</h3>
           <input style={{ width: "100%", padding: "8px", marginBottom: "8px", border: "1px solid #ccc" }} placeholder="Group Name" value={newGroup.name} onChange={e => setNewGroup({ ...newGroup, name: e.target.value })} />
           <select

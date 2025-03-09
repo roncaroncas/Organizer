@@ -17,7 +17,7 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
       <Header removeCookie={removeCookie}/>
       <br/>
 
-      <div className="calendarPage">
+      <div className="pagebody calendarPage">
 
         <div className ="column1 container">
 

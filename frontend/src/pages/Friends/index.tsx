@@ -13,14 +13,16 @@ function Friends ( {removeCookie}: {removeCookie:any} )  {
   return (
     <div>
       <Header removeCookie={removeCookie}/>
-      <br/>
 
-      <FriendsTable/>
-      <br/>
+      <div className="pagebody">
 
-      <AddFriendInput/>
-      <br/>
+        <FriendsTable/>
+        <br/>
 
+        <AddFriendInput/>
+        <br/>
+        
+      </div>
     </div>  
   )
 }

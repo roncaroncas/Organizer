@@ -26,27 +26,30 @@ function Profile_id ({removeCookie }: { removeCookie: any }) {
       <Header removeCookie={removeCookie} />
       <br />
 
-      <div className="container">
+      <div className="pagebody">
 
-        <table key="tableProfile" className="profile-table">
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Name</th>
-              <th>Birthday</th>
-            </tr>
-          </thead>
+        <div className="container">
 
-          <tbody>
-            {profileData.length > 0 && (
-              <tr key={profileData[0]}>
-                <td>{profileData[0]}</td>
-                <td>{profileData[1]}</td>
-                <td>{profileData[2]}</td>
+          <table key="tableProfile" className="profile-table">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Birthday</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {profileData.length > 0 && (
+                <tr key={profileData[0]}>
+                  <td>{profileData[0]}</td>
+                  <td>{profileData[1]}</td>
+                  <td>{profileData[2]}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

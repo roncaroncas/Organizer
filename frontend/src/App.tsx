@@ -4,6 +4,7 @@ import { Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 
 import Home from "./pages/Home/index";
 import Friends from "./pages/Friends/index";
+import FriendsGroups from "./pages/FriendsGroup/index";
 import Calendar from "./pages/Calendar/index";
 import CalendarDay from "./pages/Calendar/CalendarDay";
 // import Task_id from "./pages/Calendar/Task_id";
@@ -52,6 +53,7 @@ function App() {
           <Route path="/login" element=<Login setCookie={setCookie} />/>
           <Route path="/createAccount" element=<CreateAccount/>/>
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
+          <Route path="/friendGroups" element = <FriendsGroups removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
           <Route path="/taskGroups" element = <CalendarGroupsManager/>/>
           {/*<Route path="/calendar/:yyyy/:mm/:dd" element = <CalendarDay removeCookie={removeCookie} />/>*/}

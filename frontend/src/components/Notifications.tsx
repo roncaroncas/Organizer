@@ -47,8 +47,8 @@ function Notifications ()  {
       <tr key={notification[0]}>
         <td>{notification[0]}</td>
         <td><a>{notification[1]}</a></td>
-        <td><a onClick={() => {console.log(k); handleChangeStatus(k, 20)}}>Accept</a></td>
-        <td><a onClick={() => {console.log(k); handleChangeStatus(k, 30)}}>Decline</a></td>
+        <td><button className = "btn accept" onClick={() => {console.log(k); handleChangeStatus(k, 20)}}>Accept</button></td>
+        <td><button className = "btn reject" onClick={() => {console.log(k); handleChangeStatus(k, 30)}}>Decline</button></td>
       </tr>
     )
   })

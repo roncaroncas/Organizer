@@ -1,8 +1,8 @@
 import {useState, useEffect} from "react";
 import {useNavigate} from 'react-router-dom'
 
-import { format } from 'date-fns';
-import classNames from 'classnames';
+import { format } from 'date-fns'
+import classNames from 'classnames'
 
 import useFetch from "../../hooks/useFetch"
 import useModal from "../../hooks/useModal"

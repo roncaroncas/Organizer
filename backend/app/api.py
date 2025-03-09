@@ -611,6 +611,8 @@ async def get_profile_by_id(id: int, request: Request):
 @app.get("/myNotifications", tags=["notification"])
 async def get_notifications(request: Request):
 
+    logger.debug("comecei!")
+
     #USER ID
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
@@ -628,7 +630,7 @@ async def get_notifications(request: Request):
         f"WHERE ut.userId = ? and ut.statusId = ?"
         )
 
-    values = [userId, 0]   #ut.taskStatus = 0 -> "Invited"
+    val = [userId, 0]   #ut.taskStatus = 0 -> "Invited"
 
     results = db.cursor.execute(sql, val).fetchall()
 
