@@ -3,11 +3,11 @@ import { useEffect } from "react"
 import { Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 
 import Home from "./pages/Home/index";
+import Feed from "./pages/Feed/index";
 import Friends from "./pages/Friends/index";
 import FriendsGroups from "./pages/FriendsGroup/index";
 import Calendar from "./pages/Calendar/index";
 import CalendarDay from "./pages/Calendar/CalendarDay";
-// import Task_id from "./pages/Calendar/Task_id";
 import Profile from "./pages/Profile/index";
 import Profile_id from "./pages/Profile/Profile_id";
 
@@ -52,6 +52,7 @@ function App() {
         <Routes>
           <Route path="/login" element=<Login setCookie={setCookie} />/>
           <Route path="/createAccount" element=<CreateAccount/>/>
+          <Route path="/feed" element = <Feed removeCookie={removeCookie} />/>
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
           <Route path="/friendGroups" element = <FriendsGroups removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>

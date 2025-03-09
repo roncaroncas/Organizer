@@ -30,6 +30,12 @@ function Header({ removeCookie }) {
       <div className="menuContainer">
         <nav>
           <ul className="menu">
+            <li className="menuItem" onClick={() => toggleDropdown('feed')}>
+              Feed
+              <ul className = {classNames(["dropdown", openDropdown === 'feed' ? 'dropdownOpen' : ''])}>
+                <li><a href="/feed" className="dropdownItem">Feed</a></li>
+              </ul>
+            </li>
             <li className="menuItem" onClick={() => toggleDropdown('tasks')}>
               Tasks
               <ul className = {classNames(["dropdown", openDropdown === 'tasks' ? 'dropdownOpen' : ''])}>
