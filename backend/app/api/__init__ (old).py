@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, Response, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -30,7 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
 
 ##########################################
 
