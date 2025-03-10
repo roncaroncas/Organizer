@@ -3,8 +3,9 @@ from app.database.connection import db
 from app.config import logger
 from typing import List
 
-from app.models import User, Token
+import secrets
 
+from app.models import User, Token
 
 router = APIRouter()
 

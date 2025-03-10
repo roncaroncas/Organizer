@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
 
-#OBJETOS
 class User(BaseModel):  #FROM users
     id: Optional[int] = None
     name: Optional[str] = None

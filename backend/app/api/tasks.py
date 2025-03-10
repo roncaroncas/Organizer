@@ -7,7 +7,6 @@ from app.models import Task
 
 router = APIRouter()
 
-
 @router.get("/myTasks", tags=["tasks"])
 async def my_tasks(request: Request) -> List[Task]:
 
