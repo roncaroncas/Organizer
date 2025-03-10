@@ -26,3 +26,5 @@ dist-ssr
 # Temp python
 *.pyc
 *__pycache__*
+
+*old*
