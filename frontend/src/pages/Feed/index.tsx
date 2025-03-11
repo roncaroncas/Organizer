@@ -3,92 +3,104 @@ import {useEffect, useState} from "react";
 import { format } from 'date-fns';
 
 import Header from "../../components/Header";
+import useFetch from "../../hooks/useFetch";
+
+
+interface Post {
+  id?: number
+  authorName?: string
+  authorId: number
+  groupPostId?: number
+  text: string
+  timestamp?: string
+}
 
 function Feed ({ removeCookie }:{removeCookie:any})  {
 
 
-  let [feed, setFeed] = useState([
-    {
-      id: 1,
-      author: { id: 101, name: "Alice" },
-      timestamp: "2025-03-09T12:00:00Z",
-      text: "Hello world! This is my first post."
-    },
-    {
-      id: 2,
-      author: { id: 102, name: "Bob" },
-      timestamp: "2025-03-09T13:15:00Z",
-      text: "Just had a great workout! Feeling strong."
-    },
-    {
-      id: 3,
-      author: { id: 103, name: "Charlie" },
-      timestamp: "2025-03-09T14:30:00Z",
-      text: "Anyone up for a coding challenge?"
-    },
-    {
-      id: 4,
-      author: { id: 104, name: "David" },
-      timestamp: "2025-03-09T15:00:00Z",
-      text: "Enjoying a sunny day at the park!"
-    },
-    {
-      id: 5,
-      author: { id: 105, name: "Eve" },
-      timestamp: "2025-03-09T16:20:00Z",
-      text: "Just finished reading an amazing book!"
-    },
-    {
-      id: 6,
-      author: { id: 106, name: "Frank" },
-      timestamp: "2025-03-09T17:45:00Z",
-      text: "Cooking up something delicious tonight."
-    },
-    {
-      id: 7,
-      author: { id: 107, name: "Grace" },
-      timestamp: "2025-03-09T18:30:00Z",
-      text: "Excited for the weekend plans!"
-    },
-    {
-      id: 8,
-      author: { id: 108, name: "Hank" },
-      timestamp: "2025-03-09T19:10:00Z",
-      text: "Just hit a new personal best in my run!"
-    },
-    {
-      id: 9,
-      author: { id: 109, name: "Ivy" },
-      timestamp: "2025-03-09T20:00:00Z",
-      text: "Working on a new art piece, can't wait to share!"
-    },
-    {
-      id: 10,
-      author: { id: 110, name: "Jack" },
-      timestamp: "2025-03-09T21:25:00Z",
-      text: "Just watched an incredible movie!"
-    },
-    {
-      id: 11,
-      author: { id: 111, name: "Kim" },
-      timestamp: "2025-03-09T22:15:00Z",
-      text: "Late-night coding session in progress!"
-    },
-    {
-      id: 12,
-      author: { id: 112, name: "Leo" },
-      timestamp: "2025-03-09T23:40:00Z",
-      text: "Reflecting on a productive day."
+  let [newPost, setNewPost] = useState<Post>({
+    text: ""
+  });
+
+
+  // ----- FETCHS ----- //
+
+  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/posts/getAll', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  const { data:data_post, error:error_post, isLoading:isLoading_post, fetchData:fetchData_post } = useFetch('http://localhost:8000/posts/addNew', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newPost)
+  });
+
+  let [feed, setFeed] = useState([])
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (data) {
+      setFeed(data);
     }
-  ]);
+  }, [data]);
+
+
+  // --- LOG ---!
+  useEffect(() => {
+    if (feed) {
+      console.log(feed);
+    }
+  }, [feed]);
+
+
+// --------------EVENT HANDLERS----------------------
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    // const [tempFormValues, setTempFormValues] = useState({
+    //   startDay: format(task.startDayTime, "yyyy-MM-dd"), // Pre-fill with initial value
+    //   endDay: format(task.endDayTime, "yyyy-MM-dd")
+    // })
+
+    const { name, value, type, checked } = e.target;
+
+    // console.log(name, value, type, checked)
+
+    setNewPost(prevPost => {
+      let newPost = { ...prevPost };
+
+    if (type === "checkbox") {
+        newPost[name] = checked;
+      } else {
+        newPost[name] = value;
+      }
+      return newPost;    
+
+    });
+  };
+
+  // ----------------------------------------------------
+
+
+  let handleSubmit = async () => {
+    await fetchData_post() //MANDA O NOVO POST PRO DB
+    await fetchData() // LE OS POSTS DE NOVO DO DB!
+    console.log(newPost)
+  }
 
 
   let structuredFeed = feed.map((post) => {
 
     return (
       <div key={post.id} className="card-container">
-        <strong> {post.author.name} </strong>
-        <p> {format(post.timestamp, "hh/MM/yy - hh:mm")}</p>
+        <a href={"/profile/"+post.authorId}> <strong> {post.authorName} </strong> </a>
+        <p> {format(post.timestamp, "dd/MM/yy - HH:mm")}</p>
         <p> {post.text} </p>
       </div>
       )
@@ -106,9 +118,9 @@ function Feed ({ removeCookie }:{removeCookie:any})  {
         {/* --- Novo Post --- */}
         <div className="card-container">
           <h3> O que você está pensando? </h3>
-          <input type="text"/>
+          <input type="text" name="text" onChange={handleInputChange}/> {/*name='text' é o novo da variável do newPost!!*/}
 
-          <button className ="btn accept">
+          <button className ="btn accept" onClick={handleSubmit}>
             Publicar!
           </button>
         </div>

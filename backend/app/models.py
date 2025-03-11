@@ -32,3 +32,11 @@ class GroupTask(BaseModel):
     id: Optional[int]
     name: str
     parentId: Optional[int]
+
+class Post(BaseModel):
+    id: Optional[int] = None
+    authorName: Optional[str] = None
+    authorId: Optional[int] = None
+    groupPostId: Optional[int] = None
+    text: str
+    timestamp: Optional[str] = None
