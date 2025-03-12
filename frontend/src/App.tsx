@@ -6,6 +6,7 @@ import Home from "./pages/Home/index";
 import Feed from "./pages/Feed/index";
 import Friends from "./pages/Friends/index";
 import FriendsGroups from "./pages/FriendsGroup/index";
+import GroupPage from "./pages/FriendsGroup/GroupPage";
 import Calendar from "./pages/Calendar/index";
 import CalendarDay from "./pages/Calendar/CalendarDay";
 import Profile from "./pages/Profile/index";
@@ -55,6 +56,7 @@ function App() {
           <Route path="/feed" element = <Feed removeCookie={removeCookie} />/>
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
           <Route path="/friendGroups" element = <FriendsGroups removeCookie={removeCookie} />/>
+          <Route path="/group/:id" element = <GroupPage removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
           <Route path="/taskGroups" element = <CalendarGroupsManager/>/>
           {/*<Route path="/calendar/:yyyy/:mm/:dd" element = <CalendarDay removeCookie={removeCookie} />/>*/}

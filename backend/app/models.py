@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class User(BaseModel):  #FROM users
     id: Optional[int] = None
@@ -17,6 +17,12 @@ class Friend(BaseModel): #Friendship
     friendName: Optional[str] = None
     status: Optional[str]
     statusNmbr: Optional[int]
+
+class Group(BaseModel): #Groups
+    id: int = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    users: Optional[List[User]] = None
 
 class Task(BaseModel):
     id: Optional[int] = None

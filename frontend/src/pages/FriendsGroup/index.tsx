@@ -1,50 +1,59 @@
 import {useEffect, useState} from "react";
 
-import Header from "../../components/Header";
+import Header from "../../components/Header"
+import useFetch from "../../hooks/useFetch"
+
+interface User {
+  id: number
+  name: string
+};
+
+interface Group {
+  id?: number
+  name?: string
+  description: string
+  users?: User[]
+};
 
 function FriendGroups ({ removeCookie }:{removeCookie:any})  {
 
 
- let [groups, setGroups] = useState([
-    {
-      id: 1,
-      name: "Group A",
-      description: "Description A",
-      users: [
-        { id: 101, name: "Alice" },
-        { id: 102, name: "Bob" },
-        { id: 103, name: "Boba" },
-        { id: 104, name: "Bobe" },
-        { id: 105, name: "Bobi" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Group B",
-      description: "Description B",
-      users: [
-        { id: 201, name: "Charlie" },
-        { id: 202, name: "David" },
-      ],
-    },
-    {
-      id: 3,
-      name: "Group C",
-      description: "Description C",
-      users: [
-        { id: 301, name: "Eve" },
-        { id: 302, name: "Frank" },
-      ],
-    },
-  ])
+ let [groups, setGroups] = useState([])
 
+
+ //---- FETCHES ------ //
+
+  //Fetch groupsData
+  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/group/getAll', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    if (data) {
+      setGroups(data)
+      console.log("chamei o setGroupData!")
+      console.log(data)
+    }
+  }, [data])
+
+  useEffect(() => {
+    console.log(groups)
+  }, [groups])
+
+  // ---------------------------------------- //
 
   let structuredGroups = groups.map((group) => {
 
     return (
       <div key={group.id} className="container">
         <div className ="card-container">
-          <strong> {group.name} </strong>
+          <a href={"/group/"+group.id.toString()}> <strong> {group.name} </strong> </a> 
           <p> {group.description} </p>
 
           {group.users.slice(0, 3).map((user) => {

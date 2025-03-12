@@ -121,8 +121,8 @@ async def delete_post(postId: int, request: Request):
         db.cursor.execute(sql, val)
         db.connection.commit()
     except Exception as e:
-        logger.error(f"Error creating task: {e}")
-        raise HTTPException(status_code=500, detail="Error creating task")
+        logger.error(f"Error deleting task: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting task")
 
     return True
 

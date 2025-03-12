@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..api import friends, auth, tasks, tasksGroups, profile, notification, posts
+from ..api import friends, auth, tasks, tasksGroups, profile, notification, posts, group
 
 router = APIRouter()
 
@@ -11,3 +11,4 @@ router.include_router(profile.router, tags=["profile"]) # prefix="/profile",
 router.include_router(notification.router, tags=["notification"]) # prefix="/notification", 
 
 router.include_router(posts.router, prefix="/posts", tags=["feed"])
+router.include_router(group.router, prefix="/group", tags=["group"])
