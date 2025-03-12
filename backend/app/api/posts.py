@@ -39,15 +39,24 @@ async def get_all_posts(request: Request) -> List[Post]:
     # rows = db.cursor.execute(sql, [userId]).fetchall()
     rows = db.cursor.execute(sql).fetchall()
 
+
+
     posts = []
     for r in rows:
+
+        if(r[1] == userId):
+            postType = "self"
+        else:
+            postType = None
+
         posts.append(Post(
             id= r[0],
             authorId = r[1],
             authorName = r[2],
             groupPostId= r[3],
             text= r[4],
-            timestamp= r[5]
+            timestamp= r[5],
+            type= postType
         ))
 
     return (posts)
@@ -84,3 +93,36 @@ async def add_new_post(post: Post, request: Request):
         raise HTTPException(status_code=500, detail="Error creating task")
 
     return True
+
+@router.delete("/delete/{postId}")
+async def delete_post(postId: int, request: Request):
+
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    else:
+        userId = row[0]
+
+    #CRIANDO POST
+    sql = (f"DELETE FROM posts "
+        f"WHERE id = ? and whoId = ? "
+        )
+
+    val = [postId, userId]
+
+    try:
+        db.cursor.execute(sql, val)
+        db.connection.commit()
+    except Exception as e:
+        logger.error(f"Error creating task: {e}")
+        raise HTTPException(status_code=500, detail="Error creating task")
+
+    return True
+

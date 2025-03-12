@@ -40,3 +40,4 @@ class Post(BaseModel):
     groupPostId: Optional[int] = None
     text: str
     timestamp: Optional[str] = None
+    type: Optional[str] = None
