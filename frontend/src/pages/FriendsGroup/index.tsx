@@ -18,7 +18,12 @@ interface Group {
 function FriendGroups ({ removeCookie }:{removeCookie:any})  {
 
 
- let [groups, setGroups] = useState([])
+ let [groups, setGroups] = useState<Group>([])
+
+ let [newGroup, setNewGroup] = useState<Group>({
+  name: "",
+  description: "",
+ })
 
 
  //---- FETCHES ------ //
@@ -30,21 +35,57 @@ function FriendGroups ({ removeCookie }:{removeCookie:any})  {
     headers: { 'Content-Type': 'application/json' },
   });
 
+  //Fetch addNewGroup
+  const { data: data_post, error: error_post, isLoading: isLoading_post, fetchData: fetchData_post } = useFetch('http://localhost:8000/group/addNew', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newGroup),
+  });
+
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [,data_post])
 
   useEffect(() => {
     if (data) {
       setGroups(data)
-      console.log("chamei o setGroupData!")
-      console.log(data)
     }
   }, [data])
+
+
+
 
   useEffect(() => {
     console.log(groups)
   }, [groups])
+
+
+
+
+  // -------- HANDLERS ------------ // 
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    const { name, value, type, checked } = e.target;
+
+    setNewGroup(prevGroup => {
+      let newGroup = { ...prevGroup };
+
+      if (type === "checkbox") {
+          newGroup[name] = checked;
+        } else {
+          newGroup[name] = value;
+        }
+        return newGroup;    
+
+    });
+  };
+
+  const handleSubmit = () => {
+    event.preventDefault()
+    fetchData_post()
+  }
 
   // ---------------------------------------- //
 
@@ -92,25 +133,27 @@ function FriendGroups ({ removeCookie }:{removeCookie:any})  {
        
        {/* --- Novo Grupo --- */}
         <div className="card-container">
-          <h3> Novo Grupo! </h3>
-          <input type="text" placeholder="Group Name"/>
-          <input type="text" placeholder="Group Description"/>
+          <form onSubmit={handleSubmit}>
+            <h3> Novo Grupo! </h3>
+            <input type="text" name="name" placeholder="Group Name" value={newGroup.name} onChange={handleInputChange}/>
+            <input type="text" name="description" placeholder="Group Description" value={newGroup.description} onChange={handleInputChange}/>
 
-          <button className ="btn accept">
-            Criar
-          </button>
+            <button className ="btn accept">
+              Criar
+            </button>
+          </form>
         </div>
 
 
        {/* --- Procurar Grupo --- */}
-        <div className="card-container">
+{/*        <div className="card-container">
           <h3> Procurar Grupo! </h3>
           <input type="text" placeholder="Group Name"/>
 
           <button className ="btn accept">
             Procurar Grupo!
           </button>
-        </div>
+        </div>*/}
 
       </div>
    

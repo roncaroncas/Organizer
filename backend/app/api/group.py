@@ -100,3 +100,46 @@ async def get_all_groups(request: Request) -> (List[Group]):
 
     return groups
 
+
+@router.post("/addNew")
+async def get_group(group: Group, request: Request) -> (Group):
+
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    else:
+        userId = row[0]
+
+    #CRIANDO NEW GROUP
+    sql = (f"INSERT INTO friendGroup "
+        f"(name, description) "
+        f"VALUES (?, ?) "
+        f"RETURNING id")
+
+    logger.debug(sql)
+
+    val = [group.name, group.description] 
+
+    groupId = db.cursor.execute(sql, val).fetchone()[0]
+    db.connection.commit()
+
+    #CONECTANDO GRUPO AO USUARIO
+    sql = (f"INSERT INTO usersToFriendGroups "
+        f"(userId, friendGroupId) "
+        f"VALUES (?, ?) "
+        )
+
+    val = [userId, groupId]
+
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+
+
+    return group
