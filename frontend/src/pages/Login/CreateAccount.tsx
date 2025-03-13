@@ -38,7 +38,7 @@ function Login() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className = "loginform">
+    <form onSubmit={handleSubmit} className = "loginform container">
 
       <div>
         <p> Crie a sua conta! </p>

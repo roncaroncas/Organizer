@@ -5,8 +5,8 @@ class User(BaseModel):  #FROM users
     id: Optional[int] = None
     name: Optional[str] = None
     password: str
-    dateOfBith: Optional[int] = None
-    username: str = None
+    dateOfBirth: Optional[int] = None
+    username: str
     email: Optional[str] = None
 
 class Token(BaseModel):

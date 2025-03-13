@@ -1,77 +1,118 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useNavigate} from 'react-router-dom'
 
+import useFetch from "../../hooks/useFetch";
 
-async function loginUser(credentials:any) {
-
-  console.log(credentials)
-  
-  const results = await fetch('http://localhost:8000/login', {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials)
-    })
-  .then(data => data.json())
-  .then(data => data.token)
-
-  return results
-}
+interface UserData {
+  username: string
+  password: string
+  id: number
+  name: string
+  dateOfBirth: number
+  email: string
+};
 
 // function Login({setToken}) {
 function Login({ setCookie }:{setCookie:any} ) {
 
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [userData, setUserData] = useState({
+    username: "",
+    password: ""
+  })
 
   let navigate = useNavigate()
-  const routeChange = () =>{ 
-    let path = '/createAccount' 
-    navigate(path);
-    console.log("routeChange!")
+
+  // ----- FETCHES ------ //
+
+
+  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/login', {   // RETORNA O TOKEN!!!!!
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData)
+  });
+
+
+ // --------EFFECTS -------------- //
+
+  useEffect (() => {
+    if (data) {
+      setCookie("token", data.token, {path: "/"})
+      navigate("/calendar")
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (error) {
+      console.error("Login error:", error);
+    }
+  }, [error]);
+
+
+  // ------- EVENT HANDLERS ---------- //
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+    const { name, value, type, checked } = event.target;
+
+    setUserData(prevUserData => {
+      let newUserData = { ...prevUserData };
+
+      if (type === "checkbox") {
+          newUserData[name] = checked;
+        } else {
+          newUserData[name] = value;
+        }
+        return newUserData;    
+
+    })
   }
 
-  async function handleSubmit(event: any) {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
 
-    event.preventDefault() //DEVE TER UM JEITO MELHOR DO QUE ISSO AQUI 
-
-    const credentials = {
-      "username": username,
-      "password": password
+    if (isLoading) {
+      return; // Prevent multiple submissions
     }
 
-    const token = await loginUser(credentials)
-
-    if (token){
-      // console.log("lido do forms o token: " + token)
-      setCookie("token", token, {path: "/"})
-      navigate(0) //força um refresh para trocar de página...
-    }
+    if (!userData.username || !userData.password) {
+      alert("Please fill in both fields.");
+    return;
   }
+
+    fetchData()
+  }
+
+
+  // ---------------------------- //
+
 
   return (
     <div>
 
-      <form onSubmit={handleSubmit} className="loginform">
+    
+
+      <form onSubmit={handleSubmit} className="loginform container">
         <div>
           <p> Faça o seu login! </p>
         </div>
 
         <label><b>Username</b></label>
-        <input className="login-input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <input className="login-input" type="text" name="username" value={userData.username} onChange={handleInputChange} />
 
         <label><b>Password</b></label>
-        <input className="login-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input className="login-input" type="password" name="password" value={userData.password} onChange={handleInputChange} />
 
         <div className="centralized-button">
           <button type="submit">Login</button><br/>
         </div>
 
-        {/*<button>Forget password?</button><br/>*/}
+        {isLoading && <div>Loading...</div>} {/* Show loading */}
+        {error && <div> Acesso Negado!! </div>}
         
       </form>
 
-      <div className = "centralized-button">
-        <button onClick={routeChange}>Criar nova conta!</button>
+      <div className = "loginform container">
+        <a href="/createAccount"><button>Criar nova conta!</button></a>
       </div>
 
     </div>

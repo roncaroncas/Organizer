@@ -6,7 +6,8 @@ function useFetch(url: string, options: RequestInit) {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoading(true)
+    setError(null)
     try {
       const response = await fetch(url, options)
       if (!response.ok) {
