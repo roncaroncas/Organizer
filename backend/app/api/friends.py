@@ -7,7 +7,7 @@ from app.models import Friend
 
 router = APIRouter()
 
-@router.get("/myFriends", tags=["friends"])
+@router.get("/myFriends")
 async def my_friends(request: Request) -> List[Friend]:
 
     sql = (f"SELECT users.id " 
@@ -43,7 +43,7 @@ async def my_friends(request: Request) -> List[Friend]:
     
     return (friends)
 
-@router.post("/addFriend", tags=["friends"])
+@router.post("/addFriend")
 async def add_friend(body: dict, request: Request) -> (bool):
 
     friendId = body['friendId']
@@ -78,7 +78,7 @@ async def add_friend(body: dict, request: Request) -> (bool):
     return True
 
 
-@router.delete("/deleteFriend", tags=["friends"])
+@router.delete("/deleteFriend")
 async def delete_friend(body: dict, request: Request) -> (bool):
 
 
@@ -118,7 +118,7 @@ async def delete_friend(body: dict, request: Request) -> (bool):
 
     return True
 
-@router.put("/acceptFriend", tags=["friends"])
+@router.put("/acceptFriend")
 async def accept_friend(body: dict, request: Request) -> (bool):
 
     sql = (f"SELECT users.id " 

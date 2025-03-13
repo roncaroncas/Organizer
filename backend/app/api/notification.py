@@ -8,7 +8,7 @@ from typing import List
 
 router = APIRouter()
 
-@router.get("/myNotifications", tags=["notification"])
+@router.get("/myNotifications")
 async def get_notifications(request: Request):
 
     logger.debug("comecei!")
@@ -36,7 +36,7 @@ async def get_notifications(request: Request):
 
     return results
 
-@router.put("/updateNotificationStatus", tags=["notification"])
+@router.put("/updateNotificationStatus")
 async def update_notification_status(body: dict, request: Request):
 
     #USER ID

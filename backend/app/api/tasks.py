@@ -7,7 +7,7 @@ from app.models import Task
 
 router = APIRouter()
 
-@router.get("/myTasks", tags=["tasks"])
+@router.get("/myTasks")
 async def my_tasks(request: Request) -> List[Task]:
 
     sql = (f"SELECT users.id " 
@@ -44,7 +44,7 @@ async def my_tasks(request: Request) -> List[Task]:
 
     return (tasks)
     
-@router.post("/createTask", tags=["tasks"])
+@router.post("/createTask")
 async def create_task(task: Task, request: Request) -> (bool):
 
     logger.debug('Comecei a taskear')
@@ -95,7 +95,7 @@ async def create_task(task: Task, request: Request) -> (bool):
 
     return True
 
-@router.put("/updateTask", tags=["tasks"])
+@router.put("/updateTask")
 async def update_task(task: Task, request: Request) -> (bool):
 
     #USER ID
@@ -124,25 +124,20 @@ async def update_task(task: Task, request: Request) -> (bool):
 
     return True
 
-@router.get("/task/{taskId}", tags=["tasks"])
-async def get_Task_by_id(taskId: int, request: Request):
+@router.get("/task/{taskId}")
+async def get_task_by_id(taskId: int, request: Request):
 
-    # logger.debug(taskId)
 
     sql = (f"SELECT taskName, startTime, endTime, place, fullDay" 
         f"FROM tasks "
         f"WHERE id = ?")
 
     taskData = db.cursor.execute(sql, [taskId]).fetchall()[0]
-
-    # logger.debug(taskData)
     
     return taskData
 
-@router.get("/task/{taskId}/users", tags=["tasks"])
-async def get_Task_by_id(taskId: int, request: Request):
-
-    # logger.debug(taskId)
+@router.get("/task/{taskId}/users")
+async def get_task_by_id_user(taskId: int, request: Request):
 
     sql = (f"SELECT u.id, u.name " 
         f"FROM usersTasks ut "
@@ -151,12 +146,10 @@ async def get_Task_by_id(taskId: int, request: Request):
         f"WHERE ut.taskId = ?")
 
     taskData = db.cursor.execute(sql, [taskId]).fetchall()
-
-    # logger.debug(taskData)
     
     return taskData
 
-@router.post("/task/{taskId}/addUser/{userId}", tags=["tasks"])
+@router.post("/task/{taskId}/addUser/{userId}")
 async def add_user_to_task_by_id(taskId: int, userId: int, request: Request):
 
     # logger.debug(userId)

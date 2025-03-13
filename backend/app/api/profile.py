@@ -9,7 +9,7 @@ from app.models import User, Token
 router = APIRouter()
 
 
-@router.get("/profile", tags=["profile"])
+@router.get("/profile")
 async def my_profile(request: Request):
 
     sql = (f"SELECT users.id, users.name, users.dateOfBirth " 
@@ -24,7 +24,7 @@ async def my_profile(request: Request):
     
     return userData
 
-@router.get("/profile/{id}", tags=["profile"])
+@router.get("/profile/{id}")
 async def get_profile_by_id(id: int, request: Request):
 
     # logger.debug(id)

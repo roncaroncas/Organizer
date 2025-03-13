@@ -7,7 +7,7 @@ from app.models import GroupTask
 
 router = APIRouter()
 
-@router.get("/myTaskGroups" , tags=["tasksGroups"])
+@router.get("/myTaskGroups")
 async def my_tasks_groups(request: Request):
 
     #USER ID
@@ -48,7 +48,7 @@ async def my_tasks_groups(request: Request):
 
     return (groupTasks)
 
-@router.post("/addTaskGroup" , tags=["tasksGroups"])
+@router.post("/addTaskGroup")
 async def add_task_group(request: Request, groupTask: GroupTask) -> (GroupTask):
 
     logger.debug(groupTask)
@@ -95,7 +95,7 @@ async def add_task_group(request: Request, groupTask: GroupTask) -> (GroupTask):
 
     return groupTask
 
-@router.put("/updateTaskGroup" , tags=["tasksGroups"])
+@router.put("/updateTaskGroup")
 async def update_task_group(request: Request, groupTask: GroupTask) -> (GroupTask):
 
     #USER ID
@@ -124,7 +124,7 @@ async def update_task_group(request: Request, groupTask: GroupTask) -> (GroupTas
 
     return groupTask
 
-@router.delete("/deleteTaskGroup" , tags=["tasksGroups"])
+@router.delete("/deleteTaskGroup")
 async def update_task_group(body: dict, request: Request) -> (bool):
 
     #USER ID
