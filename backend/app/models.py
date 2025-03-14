@@ -4,9 +4,9 @@ from typing import Optional, List
 class User(BaseModel):  #FROM users
     id: Optional[int] = None
     name: Optional[str] = None
-    password: str
+    password: Optional[str] = None
     dateOfBirth: Optional[int] = None
-    username: str
+    username: Optional[str] = None
     email: Optional[str] = None
 
 class Token(BaseModel):

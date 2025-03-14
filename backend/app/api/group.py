@@ -26,30 +26,31 @@ async def get_group(id: int, request: Request) -> (Group):
 
 
     # Invited Tasks:
-    sql = (f"SELECT fg.id, fg.name, fg.description "
+    sql = (f"SELECT fg.id, fg.name, fg.description, u.id, u.name "
         f"FROM friendGroup fg "
         f"INNER JOIN usersToFriendGroups utfg ON utfg.friendGroupId = fg.id "
         f"INNER JOIN users u ON utfg.userId = u.id "
-        f"WHERE u.id = ? and fg.id = ?"
+        f"WHERE fg.id = ?"
         )
 
-    logger.debug(sql)
+    val = [id] 
 
-    val = [userId, id] 
+    rows = db.cursor.execute(sql, val).fetchall()
 
-    row = db.cursor.execute(sql, val).fetchone()
+    members = []
 
-    logger.debug(row)
+    for r in rows:
+        logger.debug(r)
+        members.append(User(id=r[3], name=r[4]))
 
 
     group = Group(
-        id=row[0],
-        name=row[1],
-        description=row[2],
-        users=[]
+        id=rows[0][0],
+        name=rows[0][1],
+        description=rows[0][2],
+        users=members
     )
 
-    logger.debug(group)
 
     return group
 
@@ -123,8 +124,6 @@ async def get_group(group: Group, request: Request) -> (Group):
         f"VALUES (?, ?) "
         f"RETURNING id")
 
-    logger.debug(sql)
-
     val = [group.name, group.description] 
 
     groupId = db.cursor.execute(sql, val).fetchone()[0]
@@ -143,3 +142,35 @@ async def get_group(group: Group, request: Request) -> (Group):
 
 
     return group
+
+@router.post("/inviteMember/{id}")
+async def get_group(id: int, user: User, request: Request) -> bool:
+
+    sql = (f"SELECT users.id " 
+        f"FROM tokenAuth "
+        f"INNER JOIN users "
+        f"ON tokenAuth.userId = users.id "
+        f"WHERE token = ?")
+
+    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    
+    if row == None:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    else:
+        userId = row[0]
+
+    #CONECTANDO GRUPO AO USUARIO
+    sql = (f"INSERT INTO usersToFriendGroups "
+        f"(userId, friendGroupId) "
+        f"VALUES (?, ?) "
+        )
+
+    val = [user.id, id]
+
+    logger.debug(val)
+
+    db.cursor.execute(sql, val)
+    db.connection.commit()
+
+
+    return True
