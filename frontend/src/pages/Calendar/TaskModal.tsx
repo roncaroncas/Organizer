@@ -46,10 +46,6 @@ function TaskModal({id, closeModal,  initialTask = {} }: TaskModalProps) {
 
   });
 
-  // console.log("Criei o taskModal!")
-
-  // console.log(task)
-
 
 
   // ------------------- CONTROLE DO FETCH ----------------
@@ -86,14 +82,7 @@ function TaskModal({id, closeModal,  initialTask = {} }: TaskModalProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
-    // const [tempFormValues, setTempFormValues] = useState({
-    //   startDay: format(task.startDayTime, "yyyy-MM-dd"), // Pre-fill with initial value
-    //   endDay: format(task.endDayTime, "yyyy-MM-dd")
-    // })
-
     const { name, value, type, checked } = e.target;
-
-    // console.log(name, value, type, checked)
 
     setTask(prevTask => {
       let newTask = { ...prevTask };

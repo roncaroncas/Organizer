@@ -11,9 +11,8 @@ function Header({ removeCookie }) {
   const [openDropdown, setOpenDropdown] = useState(null);
 
   function handleLogout() {
-    console.log('Ai! fui clicado u.u');
-    navigate(0);
     removeCookie('token', { path: '/' });
+    navigate("/login");
   }
 
   function toggleDropdown(menu) {
@@ -47,7 +46,7 @@ function Header({ removeCookie }) {
               Friends
               <ul className= {classNames(["dropdown", openDropdown === 'friends' ? 'dropdownOpen' : ''])}>
                 <li><a href="/friends" className="dropdownItem">Friends</a></li>
-                <li><a href="/friendGroups" className="dropdownItem">FriendGroups</a></li>
+                <li><a href="/groups" className="dropdownItem">Groups</a></li>
               </ul>
             </li>
           </ul>

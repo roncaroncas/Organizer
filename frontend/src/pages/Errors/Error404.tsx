@@ -1,10 +1,10 @@
-// import React from "react";
 
 function Error404 () {
 
-  return (
-    <div>
+    return (
+    <div className = 'container'>
         <h1>Error 404</h1>
+        <a href = "/">Return to Home!</a>
     </div>
   );
 };

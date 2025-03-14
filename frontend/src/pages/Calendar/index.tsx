@@ -17,9 +17,14 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
       <Header removeCookie={removeCookie}/>
       <br/>
 
-      <div className="pagebody calendarPage">
+      <div className="pagebody">
 
-        <div className ="column1 container">
+      
+        <div className ="container">
+          <CalendarGrid/>
+        </div>
+
+        <div className ="container">
 
           <div>
             <h3> Blups </h3>
@@ -37,19 +42,14 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
           <hr/>
           
         </div>
+        <br/>
 
-        <div className ="column2 container">
-          <CalendarGrid/>
-        </div>
-
-        {/*<AddNewTask/>
-        <br/>*/}
-        
-        {/*COLUNA3      */}
 
       </div>
       <br/>
+
       <div className="container">
+        Apenas para debug!
         <AllTasksTable/>
       </div>
 

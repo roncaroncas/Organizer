@@ -5,8 +5,8 @@ import { Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 import Home from "./pages/Home/index";
 import Feed from "./pages/Feed/index";
 import Friends from "./pages/Friends/index";
-import FriendsGroups from "./pages/FriendsGroup/index";
-import GroupPage from "./pages/FriendsGroup/GroupPage";
+import FriendsGroups from "./pages/Groups/index";
+import GroupPage from "./pages/Groups/GroupPage";
 import Calendar from "./pages/Calendar/index";
 import CalendarDay from "./pages/Calendar/CalendarDay";
 import Profile from "./pages/Profile/index";
@@ -18,9 +18,6 @@ import Login from "./pages/Login/index";
 import CreateAccount from "./pages/Login/CreateAccount";
 
 import Error404 from "./pages/Errors/Error404";
-// import Test from "./components/Test";
-
-//import useToken from "./hooks/useToken"
 
 function App() {
 
@@ -55,7 +52,7 @@ function App() {
           <Route path="/createAccount" element=<CreateAccount/>/>
           <Route path="/feed" element = <Feed removeCookie={removeCookie} />/>
           <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
-          <Route path="/friendGroups" element = <FriendsGroups removeCookie={removeCookie} />/>
+          <Route path="/groups" element = <FriendsGroups removeCookie={removeCookie} />/>
           <Route path="/group/:id" element = <GroupPage removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
           <Route path="/taskGroups" element = <CalendarGroupsManager/>/>
