@@ -162,10 +162,22 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
 
 .pagebody {
   padding-top: 80px;  /* Para compensar o fixed menu */ 
-
-
-
 }
+
+.calendarbody{
+  display: flex; /* Makes the container a flex container */
+  width: 100%; /* Ensure the container takes up the full width */
+}
+
+.calendarbody .leftcolumn{
+  flex: 0 0 16.7%;
+}
+
+.calendarbody .maincolumn {
+  flex: 1; /* Main column takes up the remaining space */
+  background-color: #ffffff; /* Optional: For visual distinction */
+}
+
 
 /* ---------- BUTTON STYLES ------------ */
 
@@ -390,34 +402,11 @@ table th {
 }
 
 
-
-/*  -------CALENDAR PAGE------------- */
-
-.calendarPage{
-  display: flex;
-}
-
-/* Column 1 should take up 25% of the space and be limited to 300px max width */
-.column1 {
-  flex: 0 1 25%; /* flex-grow, flex-shrink, flex-basis */
-  max-width: 300px; /* Set max width for column1 */
-  padding: 20px;
-  border: 1px solid #ccc;
-}
-
-.calendarPage .column2{
-  flex: 3;
-  padding: 20px;
-  border: 1px solid #ccc;
-}
-
-
-
 /*  ----CALENDARIO GRID-----  */
 
 .calendarGrid {
   display: grid;
-  grid-template-columns: 50px repeat(7, auto);
+  grid-template-columns: 2fr repeat(7, 5fr);
   grid-gap: 5px;
   margin: auto;
   background-color: #FFF8E7;
@@ -438,21 +427,21 @@ table th {
 }
 
 .calendarGrid .calHeader {
+  text-align: center;
   background-color: #FF6347;
   color: #FFF8E7;
 }
 
 .calendarGrid .weekNumber{
-  display: flex;
   overflow: hidden;
   width: auto;
-  /*background-color: #FF6347;*/ /* Tomato */
+  color: #FFF8E7;
+  background-color: #FF6347;
   text-align: center;
   justify-content: flex-end;
 }
 
 .calendarGrid .showCol{
-
   width: 150px;
   transition: all 0.5s ease /* Smooth transition */
 }
@@ -492,6 +481,15 @@ table th {
 .container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.full-container {
+  margin: auto;
+  width: 95%;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;

@@ -14,7 +14,7 @@ function CalendarGroups () {
 	]) /*Dummy Values*/
 
 	return (
-		<div className="checkbox-group">
+	<div className="checkbox-group">
       <h3>Calendar Groups <a href="/taskGroups">⚙️</a></h3>
       	{taskGroups.map((group) => (
       	<div key={group.id}>

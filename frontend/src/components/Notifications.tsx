@@ -35,14 +35,12 @@ function Notifications ()  {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data)
           setNotificationsList(data)
 
         })}, [])
 
   let structuredNotifications = notificationsList.map( function (notification){
     let k = notification[0]
-    console.log(k)
     return (
       <tr key={notification[0]}>
         <td>{notification[0]}</td>

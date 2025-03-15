@@ -33,14 +33,6 @@ function App() {
       if ((locationPath != "/login") && (locationPath != "/createAccount")){
         navigate('/login')
       }
-    } else {
-      console.log(cookie.token)
-
-      if ((locationPath == "/login") || (locationPath == "/createAccount")){
-        navigate ('/calendar')
-      } else if (locationPath == "/"){
-        navigate ('/calendar')
-      }   
     }
   }, []);
 
@@ -48,6 +40,7 @@ function App() {
   return (
       <CookiesProvider>
         <Routes>
+          <Route path="/" element=<Calendar setCookie={setCookie} />/>
           <Route path="/login" element=<Login setCookie={setCookie} />/>
           <Route path="/createAccount" element=<CreateAccount/>/>
           <Route path="/feed" element = <Feed removeCookie={removeCookie} />/>
@@ -56,8 +49,6 @@ function App() {
           <Route path="/group/:id" element = <GroupPage removeCookie={removeCookie} />/>
           <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
           <Route path="/taskGroups" element = <CalendarGroupsManager/>/>
-          {/*<Route path="/calendar/:yyyy/:mm/:dd" element = <CalendarDay removeCookie={removeCookie} />/>*/}
-          {/*<Route path="/task/:id" element = <Task_id removeCookie={removeCookie} />/>*/}
           <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
           <Route path="/profile/:id" element = <Profile_id removeCookie={removeCookie} />/>
           {/*<Route path="/test" element = <Test/>/>*/}

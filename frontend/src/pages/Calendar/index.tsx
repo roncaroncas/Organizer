@@ -1,6 +1,8 @@
 // import {useEffect, useState} from "react";
 // import {useNavigate} from 'react-router-dom'
 
+import React, { memo } from "react"; 
+
 import Header from "../../components/Header";
 
 import AllTasksTable from "./AllTasksTable"
@@ -17,31 +19,34 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
       <Header removeCookie={removeCookie}/>
       <br/>
 
-      <div className="pagebody">
+      <div className="pagebody calendarbody">
 
-      
-        <div className ="container">
-          <CalendarGrid/>
-        </div>
+        <div className = "leftcolumn">
+          <div className ="full-container">
 
-        <div className ="container">
+            <div>
+              <h3> Blups </h3>
+              <a>HEALTH</a> <br/>
+              <a>GOODS</a> <br/>
+              <a>EDUCATION</a> <br/>
+              <a>WORK</a> <br/>
+              <a>EXERCISES</a> <br/>
+              <a>FOOD!</a> <br/>
+            </div>
+            <hr/>
 
-          <div>
-            <h3> Blups </h3>
-            <a>HEALTH</a> <br/>
-            <a>GOODS</a> <br/>
-            <a>EDUCATION</a> <br/>
-            <a>WORK</a> <br/>
-            <a>EXERCISES</a> <br/>
-            <a>FOOD!</a> <br/>
+            <CalendarGroups/>
+
+            <hr/>
+            
           </div>
-          <hr/>
-
-          <CalendarGroups/>
-
-          <hr/>
-          
         </div>
+        <div className = "maincolumn">
+          <div className ="full-container">
+            <CalendarGrid/>
+          </div>
+        </div>
+        
         <br/>
 
 
@@ -52,11 +57,10 @@ function Calendar ({ removeCookie }:{removeCookie:any})  {
         Apenas para debug!
         <AllTasksTable/>
       </div>
-
    
     </div>
 
   );
 };
 
-export default Calendar;
+export default memo(Calendar);
