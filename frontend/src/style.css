@@ -458,7 +458,7 @@ table th {
 }
 
 .calendarGrid .hideCol{
-  width: 25px;
+  width: 0px;
   transition: all 0.5s ease; /* Smooth transition */
 }
 

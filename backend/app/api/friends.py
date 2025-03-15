@@ -32,13 +32,9 @@ async def my_friends(request: Request) -> List[Friend]:
 
     rows = db.cursor.execute(sql, [userId]).fetchall()
 
-    logger.debug(rows)
-
     friends = []
     for r in rows:
         friends.append(Friend(friendId=r[0], friendName=r[1], statusNmbr=r[2], status=r[3]))
-
-    # logger.debug(friends)
 
     
     return (friends)
@@ -88,8 +84,6 @@ async def delete_friend(body: dict, request: Request) -> (bool):
     if row == None:
         raise HTTPException(status_code=404, detail="Friend not found")
 
-    logger.debug("TO AVISANDO! VOU DESAMIGAR :(")
-
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "
         f"INNER JOIN users "
@@ -103,17 +97,12 @@ async def delete_friend(body: dict, request: Request) -> (bool):
 
     val = [userId, body["friendId"], userId, body["friendId"]]
 
-    logger.debug(sql)
-    logger.debug(val)
-
 
     try:
         db.cursor.execute(sql, val)
         db.connection.commit()
 
-        logger.debug("desamiguei pra sempre")
     except sqlite3.IntegrityError as e:
-        logger.debug("desamiguei errado hehehe")
         raise HTTPException(status_code=400, detail="Contraint Error")    
 
     return True
@@ -140,10 +129,6 @@ async def accept_friend(body: dict, request: Request) -> (bool):
         val = [3, friendId, userId]   #status 3 = accepted
 
     row = db.cursor.execute(sql, val).fetchone()[0]
-
-
-    logger.debug(sql)
-    logger.debug(val)
 
     try:
         db.cursor.execute(sql, val)

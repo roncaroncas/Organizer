@@ -11,8 +11,6 @@ router = APIRouter()
 @router.get("/myNotifications")
 async def get_notifications(request: Request):
 
-    logger.debug("comecei!")
-
     #USER ID
     sql = (f"SELECT users.id " 
         f"FROM tokenAuth "

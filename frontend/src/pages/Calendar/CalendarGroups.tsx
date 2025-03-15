@@ -18,7 +18,7 @@ function CalendarGroups () {
       <h3>Calendar Groups <a href="/taskGroups">⚙️</a></h3>
       	{taskGroups.map((group) => (
       	<div key={group.id}>
-					<label>
+			<label>
 	      		<input type="checkbox" value={group.name}/>
 	      		{group.name}
 	      	</label>

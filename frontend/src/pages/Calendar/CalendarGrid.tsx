@@ -1,7 +1,8 @@
 import {useState, useEffect} from "react";
 import {useNavigate} from 'react-router-dom'
 
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, getISOWeek } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, getISOWeek } from "date-fns";
+import { addDays, addMonths, addYears } from "date-fns";
 import classNames from 'classnames'
 
 import useFetch from "../../hooks/useFetch"
@@ -10,9 +11,6 @@ import useModal from "../../hooks/useModal"
 import TaskInCalendar from "./TaskInCalendar"
 
 import TaskModal from "./TaskModal"
-
-// TODO: SUBSTITUIR OS SELECTEDDAY, SELECTED WEEK... por "MODE"
-
 
 // ---------------- UTILS -----------------------
 
@@ -31,15 +29,11 @@ function CalendarGrid(){
 
   let navigate = useNavigate()
 
-  const [dayHideShow, setDayHideShow] = useState([true, true, true, true, true, true, true]) //Week Day
-
   const [mode, setMode] = useState({
     mode: "Month",
-    param: 0
+    param: null,
+    day: new Date(Date.now())
   })
-
-  const [selectedDay, setSelectedDay]     = useState<number>(new Date(Date.now()))
-  const [selectedWeek, setSelectedWeek]   = useState<number>(null)
 
   const [tasks, setTasks] = useState([])
 
@@ -51,7 +45,6 @@ function CalendarGrid(){
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
-
 
   useEffect(() => {
     fetchData();
@@ -84,35 +77,6 @@ function CalendarGrid(){
   // ------------------ EVENT HANDLERS ---------------------------
 
 
-  const handleClickWeekRow = (weekNumber: number) => {
-    setSelectedWeek((prevWeek) => (prevWeek === weekNumber ? null : weekNumber))
-    if (mode.mode == "Month") {
-      setMode({
-        mode: "Week",
-        param: weekNumber
-      })
-    } else {
-      setMode({
-        mode: "Month",
-        param: 0
-      })
-      
-    }
-  }
-
-  const handleClickWeekColumn = (weekDay: number) =>
-    setDayHideShow(prev => prev.map((day, index) => index === weekDay ? !day : day))
-
-  const handleClickDay = (i: Date) => {
-    console.log("Clicado em: " + i.toString())
-    if (mode.mode != "Day") {
-      setMode({
-        mode: "Day",
-        param: i
-      })
-    }
-  }
-
   const onTaskClick = (task) => {
     setSelectedTask(task); // Set the clicked task as active
     openModal();
@@ -134,18 +98,30 @@ function CalendarGrid(){
   ]
 
   function changeDay(delta: int){
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth(), prevDate.getDate()+delta))
-    setSelectedWeek(null)
+    setMode(prev =>{
+      return({
+        ...prev,
+        day: addDays(prev.day, delta)
+      })
+    })
   }
 
   function changeMonth(delta: int){
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth()+delta, prevDate.getDate()))
-    setSelectedWeek(null)
+    setMode(prev =>{
+      return({
+        ...prev,
+        day: addMonths(prev.day, delta)
+      })
+    })
   }
 
   function changeYear(delta: int){
-    setSelectedDay((prevDate) => new Date(prevDate.getFullYear()+delta, prevDate.getMonth(), prevDate.getDate()))
-    setSelectedWeek(null)
+    setMode(prev =>{
+      return({
+        ...prev,
+        day: addYears(prev.day, delta)
+      })
+    })
   }
 
   // -----------------------------------------------------
@@ -155,21 +131,21 @@ function CalendarGrid(){
       (task) => new Date(task.startDayTime).toDateString() === date.toDateString()
     )
 
-  const DayContent = (date, dayTasks, selectedDay, selectedWeek, dayHideShow, handleClickDay, onTaskClick) => {
+  const DayContent = (date, dayTasks, selectedDay, onTaskClick) => {
 
     return(
 
-      <div key={format(date, "dd/MM/yyyy")}
+      <div key={format(date, "dd-MM-yyyy")}
         className={classNames(
           [
             date.getMonth() === selectedDay.getMonth() ? "dayInMonthCal" : "dayOutMonthCal",
-            dayHideShow[date.getDay()] ? "showCol" : "hideCol",
-            selectedWeek == null ? "showRow" : (selectedWeek === getWeek(date) ? "focusRow" : "hideRow"),
+            "showCol",
+            mode.mode != "Week" ? "showRow" : (mode.param === getWeek(date) ? "focusRow" : "hideRow"),
           ])}
       >
 
-        <div className="dateTitle" onClick={() => handleClickDay(date)}>
-          <strong>{dayHideShow[date.getDay()] ? format(date, "dd/MM/yyyy") : format(date, "dd")}</strong>
+        <div className="dateTitle">
+          <strong>{format(date, "dd/MM/yyyy")}</strong>
            <a onClick={() => {
               setNewTask(true)
               openModal(true)
@@ -179,7 +155,7 @@ function CalendarGrid(){
         </div>
           
         <div className="dateContent">
-          {selectedWeek !== getWeek(date) ? (
+          {(mode.mode == "Week" && mode.param != getWeek(date)) ? (
             dayTasks.length === 0 ? (
               ""
             ) : (
@@ -225,22 +201,20 @@ function CalendarGrid(){
     ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name, i) => (
       <div
         key={name}
-        onClick={() => handleClickWeekColumn(i)}
-        className={classNames("calHeader", dayHideShow[i] ? "showCol" : "hideCol")}
+        className={classNames("calHeader", "showCol")}
       >
         <div>{name}</div>
       </div>
     ))
   ];
 
-
-  // -----------CALENDAR BODY-----------------
+  // --------------- CALENDAR BODY ----------------
 
   // PREPARANDO OS DADOS:
 
   const calendarBody = (() =>{
 
-    const monthStart = startOfMonth(selectedDay);
+    const monthStart = startOfMonth(mode.day);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart);
     const endDate = endOfWeek(monthEnd);
@@ -256,7 +230,7 @@ function CalendarGrid(){
         const dayTasks = generateDayTasks(day, tasks)
         week.push({
           day: day,
-          content: DayContent(day, dayTasks, selectedDay, selectedWeek, dayHideShow, handleClickDay, onTaskClick)});
+          content: DayContent(day, dayTasks, mode.day, onTaskClick)});
         day = addDays(day, 1);
       }
       weeks.push({ weekNumber: getWeek(weekStart), days: week });
@@ -272,9 +246,8 @@ function CalendarGrid(){
           key={`weekNumber-${week.weekNumber}`}
           className={classNames([
             "weekNumber",
-            selectedWeek == null ? "showRow" : (selectedWeek === week.weekNumber ? "focusRow" : "hideRow"),
+            mode.mode != "Week" ? "showRow" : (mode.param === week.weekNumber ? "focusRow" : "hideRow"),
           ])}
-          onClick={() => handleClickWeekRow(week.weekNumber)}
         >
           {week.weekNumber}
         </div>,
@@ -294,14 +267,14 @@ function CalendarGrid(){
       {/* HEADER */}
         
       <h1>
-        <a onClick= {() => changeDay(-1)}> (-) </a>
-        <a> {selectedDay.getDate()} </a>
-        <a onClick= {() => changeDay(+1)}> (+) </a>
+{/*      <a onClick= {() => changeDay(-1)}> (-) </a>
+        <a> {mode.day.getDate()} </a>
+        <a onClick= {() => changeDay(+1)}> (+) </a>*/}
         <a onClick= {() => changeMonth(-1)}> (-) </a>
-        <a> {monthNumberToLabelMap[selectedDay.getMonth()]} </a>
+        <a> {monthNumberToLabelMap[mode.day.getMonth()]} </a>
         <a onClick= {() => changeMonth(+1)}> (+) </a>
         <a onClick= {() => changeYear(-1)}> (-) </a>
-        <a> {selectedDay.getFullYear()} </a>
+        <a> {mode.day.getFullYear()} </a>
         <a onClick= {() => changeYear(+1)}> (+) </a>
       </h1>
     
@@ -345,9 +318,7 @@ function CalendarGrid(){
     
       <h4> Debug: 
         <a>
-          {selectedDay.toString().padStart(2, "0")}
-          /{(selectedDay.getMonth()+1).toString().padStart(2, "0")}
-          /{selectedDay.getFullYear()} (Week: {selectedWeek})
+          {mode.mode} - {mode.param}
         </a>
       </h4>
       
