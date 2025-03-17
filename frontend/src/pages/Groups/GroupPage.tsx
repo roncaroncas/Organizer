@@ -2,21 +2,29 @@ import { useEffect, useState} from "react";
 import { useParams } from 'react-router-dom';
 
 import useFetch from "../../hooks/useFetch";
+import useForm from "../../hooks/useForm";
 
 import Header from "../../components/Header";
 
 interface User {
-  id?: number;
-  name?: string;
+  id: number;
+  name: string;
 }
 
 interface Group {
-  id?: number;
-  name?: string;
+  id: number;
+  name: string;
   description?: string;
-  users?: User[];
+  users: User[];
 }
-function GroupPage_Id ({removeCookie }: { removeCookie: any }) {
+
+interface FormData {
+  id: number;
+  name: string;
+}
+
+
+function GroupPage_Id () {
 
   const [groupData, setGroupData] = useState<Group>({
     id: 0,
@@ -25,28 +33,32 @@ function GroupPage_Id ({removeCookie }: { removeCookie: any }) {
     users: [],
   });
 
-  let [newFriend, setNewFriend] = useState<User>({
-    id: 0,
-    name: ""
-  })
+
+  // ------------- CONTROLE DO FORMS ------------- //
+  const { formValues, handleInputChange, /*getFormattedData */} = useForm<FormData>(
+    {
+      id: 0,
+      name: "",
+    },
+  );
 
   const { id } = useParams()
 
   // ------- FETCHES ---------- //
 
   //Fetch groupData
-  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/group/get/'+id.toString(), {
+  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/group/get/'+id!.toString(), {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
 
   //Fetch addNewGroup
-  const { data: data_post, error: error_post, isLoading: isLoading_post, fetchData: fetchData_post } = useFetch('http://localhost:8000/group/inviteMember/'+id.toString(), {
+  const { data: data_post, /*error: error_post, isLoading: isLoading_post,*/ fetchData: fetchData_post } = useFetch('http://localhost:8000/group/inviteMember/'+id!.toString(), {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newFriend),
+    body: JSON.stringify(formValues),
   });
 
 
@@ -71,24 +83,8 @@ function GroupPage_Id ({removeCookie }: { removeCookie: any }) {
 
   // -------- HANDLERS ------------ // 
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
-    const { name, value, type, checked } = e.target;
-
-    setNewFriend(prevNewFriend => {
-      let newFriend = { ...prevNewFriend };
-
-      if (type === "checkbox") {
-          newFriend[name] = checked;
-        } else {
-          newFriend[name] = value;
-        }
-        return newFriend;    
-
-    });
-  };
-
-  const handleSubmit = () => {
+  async function handleSubmit(event: any) {
     event.preventDefault()
     fetchData_post()
   }
@@ -112,7 +108,7 @@ function GroupPage_Id ({removeCookie }: { removeCookie: any }) {
 
   return (
     <div>
-      <Header removeCookie={removeCookie} />
+      <Header />
       <br />
 
       <div className="pagebody">
@@ -134,7 +130,7 @@ function GroupPage_Id ({removeCookie }: { removeCookie: any }) {
           <div className="card-container">
             <form>
               <h3> Adicionar alguem! </h3>
-              <input type = "text" name = "id" placeholder="id" onChange={handleInputChange}></input>
+              <input type = "text" name = "id" placeholder="id" value= {formValues.id} onChange={handleInputChange}></input>
               <button className="btn accept" onClick = {handleSubmit}>Adicionar!</button>
 
             </form>

@@ -4,27 +4,25 @@ import Header from "../../components/Header";
 import useFetch from "../../hooks/useFetch"
 
 interface GroupTask {
-  id?: number
+  id: number
   name: string;
   parentId: number;
+  [key: string]: any
 }
 
 function CalendarGroupsManager() {
 
   // DISPLAYED GROUPS
   const [groups, setGroups] = useState<GroupTask[]>([])
-
-  // UNIFICAR OS QUATRO ESTADOS ABAIXO
-  // const [currentId, setCurrentId] = useState<number>(-1)
-  // const [newGroup, setNewGroup] = useState<GroupTask>({id: undefined, name: "", parentId: 0});
-  // const [editingGroup, setEditingGroup] = useState<number>(undefined);
-  // const [editValues, setEditValues] = useState<GroupTask>({id: undefined, name: "", parentId: 0});
-
-  const [interactingGroup, setInteractingGroup] = useState<GroupTask | null>(null);
+  const [interactingGroup, setInteractingGroup] = useState<GroupTask>({
+    id: 0,
+    name: "",
+    parentId: 0,
+  });
 
   // ------FETCHES-------------- //
 
-  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/myTaskGroups', {
+  const { data, /*error*,/ /*isLoading,*/ fetchData } = useFetch('http://localhost:8000/myTaskGroups', {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -44,7 +42,7 @@ function CalendarGroupsManager() {
     body: JSON.stringify(interactingGroup),
   })
 
-  const { data:data_deletedTaskGroup, fetchData:deleteTaskGroup } = useFetch('http://localhost:8000/deleteTaskGroup', {
+  const { /*data:data_deletedTaskGroup,*/ fetchData:deleteTaskGroup } = useFetch('http://localhost:8000/deleteTaskGroup', {
     method: "DELETE",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -64,66 +62,12 @@ function CalendarGroupsManager() {
   }, [data])
 
 
-  // // ADD NEW
-  // useEffect(() => {
-  //   if (data_addedTaskGroup) { // Ensure it's valid before updating state
-  //     setGroups(prevGroups => [...prevGroups, data_addedTaskGroup]);
-  //   }
-  // }, [data_addedTaskGroup]);
-
-  // // UPDATE
-  // useEffect(() => {
-  //   setGroups(groups.map(group => group.id === data_updatedTaskGroup.id ? data_updatedTaskGroup : group))
-  // }, [data_updatedTaskGroup])
-
-  // // DELETE
-  // useEffect(() => {
-  //   setGroups(groups.filter(group => group.id !== currentId))
-  // }, [data_deletedTaskGroup])
-  
-
-  // Handle adding a new group
-  // async function addGroup() {
-  //   if (!newGroup.name.trim()) return
-
-  //   try {
-  //     addTaskGroup()
-  //   } catch (error) {
-  //     console.error('Error adding group', error);
-  //   }
-  // }
-
-  // // Handle updating an existing group
-  // async function updateGroup(id: number) {
-  //   setCurrentId(id)
-  //   try {
-  //     updateTaskGroup()
-  //   } catch (error) {
-  //     console.error('Error updating group', error);
-  //   }
-  // }
-
-  // // Handle deleting a group
-  // async function deleteGroup(id: number) {
-  //   setCurrentId(id)
-  //   if (window.confirm("Are you sure you want to delete this group?")) {
-  //     try {
-  //       deleteTaskGroup();
-  //     } catch (error) {
-  //       console.error('Error deleting group', error);
-  //     }
-  //   }
-  // }
-
-  // Handle start editing a group
-  function startEditing(group: GroupTask) {
-    setInteractingGroup(group)
-    // setEditingGroup(group.id);
-    // if (group.id) {
-    //    setEditValues({id: group.id, name: group.name, parentId: group.parentId });
-    //  } else {
-    //    setEditValues({id: undefined, name: group.name, parentId: group.parentId });
-    //  }
+  function clearInteractingGroup() {
+    setInteractingGroup({
+      id: 0,
+      name: "",
+      parentId: 0,
+    })
   }
 
 
@@ -132,13 +76,15 @@ function CalendarGroupsManager() {
 
     try {
       if (interactingGroup.id) {
-        const updatedGroup = await updateGroup(interactingGroup);
+        await updateTaskGroup()
+        const updatedGroup:GroupTask = data_updatedTaskGroup 
         setGroups(prev => prev.map(g => (g.id === updatedGroup.id ? updatedGroup : g)));
       } else {
-        const addedGroup = await saveGroup(interactingGroup);
+        await addTaskGroup();
+        const addedGroup:GroupTask =data_addedTaskGroup
         setGroups(prev => [...prev, addedGroup]);
       }
-      setInteractingGroup(null);
+      clearInteractingGroup();
     } catch (error) {
       console.error("Error saving group", error);
     }
@@ -148,29 +94,33 @@ function CalendarGroupsManager() {
     if (!group.id || !window.confirm("Are you sure you want to delete this group?")) return;
 
     try {
-      await deleteGroup({ id: group.id });
+      await deleteTaskGroup();
       setGroups(prev => prev.filter(g => g.id !== group.id));
-      setInteractingGroup(null);
+      clearInteractingGroup();
     } catch (error) {
       console.error("Error deleting group", error);
     }
   }
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-
     const { name, value, type, checked } = event.target;
 
-    setInteractingGroup(prevUserData => {
+    setInteractingGroup(() => {
       let newInteractingGroup = { ...interactingGroup };
 
       if (type === "checkbox") {
-          newInteractingGroup[name] = checked;
-        } else {
-          newInteractingGroup[name] = value;
-        }
-        return newInteractingGroup;    
+        // For checkboxes, the value will be a boolean, not a string
+        newInteractingGroup[name] = checked;
+      } else if (type === "number") {
+        // If the input type is number, parse the value to a number
+        newInteractingGroup[name] = value === "" ? "" : Number(value);
+      } else {
+        // Default case: treat as string
+        newInteractingGroup[name] = value;
+      }
 
-    })
+      return newInteractingGroup;
+    });
   }
 
 
@@ -197,7 +147,7 @@ function CalendarGroupsManager() {
 
                     <select
                       value={interactingGroup.parentId || ""}
-                      onChange={e => setInteractingGroup({ ...interactingGroup, parentId: e.target.value || undefined })}
+                      onChange={e => setInteractingGroup({ ...interactingGroup, parentId: parseInt(e.target.value) })}
                     >
                       <option value="">No Parent</option>
                       {groups.filter(group => group.id !== interactingGroup.id).map(group => (
@@ -205,7 +155,7 @@ function CalendarGroupsManager() {
                       ))}
                     </select>
                     <button className="btn accept" onClick={handleSave}>Save</button>
-                    <button className="btn reject" onClick={() => setInteractingGroup(null)}>Cancel</button>
+                    <button className="btn reject" onClick={clearInteractingGroup}>Cancel</button>
                   </>
                 ) : (
                   <>
@@ -239,7 +189,7 @@ function CalendarGroupsManager() {
                 />
                 <select
                   value={interactingGroup?.parentId || ""}
-                  onChange={e => setInteractingGroup({ ...interactingGroup, parentId: e.target.value || undefined })}
+                  onChange={e => setInteractingGroup({ ...interactingGroup, parentId: parseInt(e.target.value) || 0 })}
                 >
                   <option value="">No Parent</option>
                   {groups.map(group => (
@@ -247,7 +197,7 @@ function CalendarGroupsManager() {
                   ))}
                 </select>
                 <button className="btn accept" onClick={handleSave}>Save Group</button>
-                <button className="btn reject" onClick={() => setInteractingGroup(null)}>Cancel</button>
+                <button className="btn reject" onClick={clearInteractingGroup}>Cancel</button>
               </>
             ) : (
               <>
@@ -258,7 +208,7 @@ function CalendarGroupsManager() {
                   Add New Group
                 </h3>
                 <button 
-                  onClick={() => setInteractingGroup({ id: -1, name: "", parentId: undefined })}
+                  onClick={() => setInteractingGroup({ id: -1, name: "", parentId: 0 })}
                   className ="btn accept"
                 >
                   Create New Group!

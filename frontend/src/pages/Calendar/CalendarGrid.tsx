@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, getISOWeek } from "date-fns";
 import { addDays, addMonths, addYears } from "date-fns";
 import classNames from 'classnames';
@@ -9,30 +8,42 @@ import useModal from "../../hooks/useModal";
 
 import TaskFormModal from "./TaskFormModal";
 
+interface Task {
+  id: number;
+  taskName: string;
+  startDayTime: Date; 
+  endDayTime: Date;
+  place: string;
+  fullDay: boolean;
+  taskDescription: string;
+  status: string;
+}
+
 
 interface ModeState {
   mode: "Month" | "Week" | "Day"
-  param: number | null
-  day: Date | null
+  param: number
+  day: Date
 }
+
+
+type OnTaskClick = (task: Task) => void;
 
 // ---------------- UTILS -----------------------
 
-function getWeek(i) {
+function getWeek(i: Date) {
   return (i.getDay() === 0) ? getISOWeek(i) + 1 : getISOWeek(i);
 }
 
 function CalendarGrid(){
 
-  let navigate = useNavigate()
-
   const [mode, setMode] = useState<ModeState>({
     mode: "Month",
-    param: null,
+    param: -1,
     day: new Date(Date.now())
   })
 
-  const [tasks, setTasks] = useState([])
+  const [tasks, setTasks] = useState<Task[]>([])
 
   // --------------- DEBUG ------------------------ //
   // useEffect(() => {
@@ -42,9 +53,10 @@ function CalendarGrid(){
   // }, [tasks, mode]);
 
 
+
   // ------------------- FETCHES ---------------- //
 
-  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/myTasks', {
+  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/myTasks', {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -63,11 +75,39 @@ function CalendarGrid(){
 
   // ----------------   CONTROLE DE MODAL ------------------
 
-  const { isOpen, openModal, closeModal, toggleModal } = useModal()
-  const [selectedTask, setSelectedTask] = useState<task>(null)
+  const { isOpen, openModal, closeModal/*, toggleModal*/ } = useModal()
+  const [selectedTask, setSelectedTask] = useState<Task>({
+    id: 0,
+    taskName: "",
+    startDayTime: new Date(),
+    endDayTime: new Date(),
+    place: "",
+    fullDay: false,
+    taskDescription: "",
+    status: "",
+
+  })
+
+  function resetSelectedTask(){
+
+    setSelectedTask({
+      id: 0,
+      taskName: "",
+      startDayTime: new Date(),
+      endDayTime: new Date(),
+      place: "",
+      fullDay: false,
+      taskDescription: "",
+      status: ""}
+      )
+
+
+  }
+
 
   useEffect(() => {
-    const handleClickOutModal = (event) => {
+    const handleClickOutModal = (event: MouseEvent) => {
+      // Casting event target to HTMLDivElement to access the correct property
       if (event.target === document.getElementById('modalDiv')) {
         closeModal();
       }
@@ -85,17 +125,17 @@ function CalendarGrid(){
   // ------------------ EVENT HANDLERS ---------------------------
 
 
-  const onTaskClick = (task) => {
+  const onTaskClick:OnTaskClick = (task: Task) => {
     console.log(task)
     setSelectedTask(task)
     openModal();
   }
 
-  const onNewTaskClick = (day) => {
+  const onNewTaskClick = (day: Date) => {
     let task = {
         endDayTime : day,
         fullDay: false,
-        id: null,
+        id: 0,
         place :"",
         startDayTime: day,
         status :"",
@@ -104,13 +144,13 @@ function CalendarGrid(){
     }
 
     setSelectedTask(task)
-    openModal(true)
+    openModal()
   }
 
   // --------------------  MOVENDO DIAS/MÊS/ANO --------------------
 
 
-  const DayContent = (day, dayTasks, mode, onTaskClick) => {
+  const DayContent = (day: Date, dayTasks: Task[], mode: ModeState, onTaskClick: OnTaskClick) => {
 
     return([
 
@@ -178,11 +218,11 @@ function CalendarGrid(){
     'October', 'November', 'December',
   ]
 
-function changeDay(delta: number) {
-  setMode((prev) => {
-    return {...prev, day: addDays(prev.day, delta)}
-  });
-}
+// function changeDay(delta: number) {
+//   setMode((prev) => {
+//     return {...prev, day: addDays(prev.day, delta)}
+//   });
+// }
 
 function changeMonth(delta: number) {
   setMode((prev) => {
@@ -208,7 +248,7 @@ function changeYear(delta: number) {
       <p> Week </p>
     </div>,
 
-    ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name, i) => (
+    ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name) => (
       <div
         key={"weekHeader"+name}
         className={classNames("calHeader", "showColumn")}
@@ -325,7 +365,7 @@ const calendarBody = useMemo(() => {
             <TaskFormModal
               id = {selectedTask.id}
               closeModal={() => {
-                setSelectedTask(null);   // Clear the selected event
+                resetSelectedTask();   // Clear the selected event
                 closeModal();             // Close the modal
               }}
               triggerRender = {triggerRender}

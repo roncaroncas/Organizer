@@ -1,7 +1,15 @@
-import {useState, useEffect} from "react";
-import {useNavigate} from 'react-router-dom'
+import { useEffect } from "react"
+import { useNavigate } from 'react-router-dom'
 
-import useFetch from "../../hooks/useFetch";
+import { useCookies } from 'react-cookie';
+
+import useFetch from "../../hooks/useFetch"
+import useForm from "../../hooks/useForm"
+
+interface FormData {
+  username: string;
+  password: string;
+}
 
 interface UserData {
   username: string
@@ -13,13 +21,40 @@ interface UserData {
 };
 
 // function Login({setToken}) {
-function Login({ setCookie }:{setCookie:any} ) {
+function Login() {
 
-  const [userData, setUserData] = useState({
-    username: "",
-    password: ""
-  })
 
+  // ------------- FORM VARS --------- //
+
+  const initialValues: FormData = {
+      username: "",
+      password: "",
+  }
+
+  const formatForAPI = (values: FormData):UserData => {
+    return {
+      username: values.username,
+      password: values.password,
+      id: 0,
+      name: "",
+      dateOfBirth: 0,
+      email: "",
+    };
+  };
+
+  // const [userData, setUserData] = useState<FormData>({
+  //     username: "",
+  //     password: ""
+  //   })
+
+  const { formValues, handleInputChange, getFormattedData/*, resetForm*/ } = useForm<FormData>(initialValues, formatForAPI);
+  const formattedData = getFormattedData()
+  
+
+ // ------------COOKIE HANDLER ----------- //
+
+  const [/*cookie*/, setCookie, /*removeCookie*/] = useCookies(['token']);
+  
   let navigate = useNavigate()
 
   // ----- FETCHES ------ //
@@ -28,7 +63,7 @@ function Login({ setCookie }:{setCookie:any} ) {
   const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/login', {   // RETORNA O TOKEN!!!!!
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData)
+    body: JSON.stringify(formattedData)
   });
 
 
@@ -50,22 +85,22 @@ function Login({ setCookie }:{setCookie:any} ) {
 
   // ------- EVENT HANDLERS ---------- //
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 
-    const { name, value, type, checked } = event.target;
+  //   const { name, value, type, checked } = event.target;
 
-    setUserData(prevUserData => {
-      let newUserData = { ...prevUserData };
+  //   setUserData(prevUserData => {
+  //     let newUserData = { ...prevUserData };
 
-      if (type === "checkbox") {
-          newUserData[name] = checked;
-        } else {
-          newUserData[name] = value;
-        }
-        return newUserData;    
+  //     if (type === "checkbox") {
+  //         newUserData[name] = checked;
+  //       } else {
+  //         newUserData[name] = value;
+  //       }
+  //       return newUserData;    
 
-    })
-  }
+  //   })
+  // }
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -74,7 +109,7 @@ function Login({ setCookie }:{setCookie:any} ) {
       return; // Prevent multiple submissions
     }
 
-    if (!userData.username || !userData.password) {
+    if (!formValues.username || !formValues.password) {
       alert("Please fill in both fields.");
     return;
   }
@@ -97,10 +132,10 @@ function Login({ setCookie }:{setCookie:any} ) {
         </div>
 
         <label><b>Username</b></label>
-        <input className="login-input" type="text" name="username" value={userData.username} onChange={handleInputChange} />
+        <input className="login-input" type="text" name="username" value={formValues.username} onChange={handleInputChange} />
 
         <label><b>Password</b></label>
-        <input className="login-input" type="password" name="password" value={userData.password} onChange={handleInputChange} />
+        <input className="login-input" type="password" name="password" value={formValues.password} onChange={handleInputChange} />
 
         <div className="centralized-button">
           <button type="submit">Login</button><br/>

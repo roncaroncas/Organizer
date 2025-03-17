@@ -1,22 +1,29 @@
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+
+// import { useCookie }  from "../context/CookieContext"
+import { useCookies } from 'react-cookie';
+
 
 import Notifications from "./Notifications";
 
 import classNames from 'classnames'
 
-function Header({ removeCookie }) {
+function Header() {
+
+  const [/*cookie, setCookie*/, removeCookie] = useCookies(['token']);
+
   let navigate = useNavigate();
-  let locationPath = useLocation().pathname;
-  const [openDropdown, setOpenDropdown] = useState(null);
+
+  const [openDropdown, setOpenDropdown] = useState<string>("");
 
   function handleLogout() {
     removeCookie('token', { path: '/' });
     navigate("/login");
   }
 
-  function toggleDropdown(menu) {
-    setOpenDropdown(openDropdown === menu ? null : menu);
+  function toggleDropdown(menu: string) {
+    setOpenDropdown(openDropdown === menu ? "" : menu);
   }
 
   return (

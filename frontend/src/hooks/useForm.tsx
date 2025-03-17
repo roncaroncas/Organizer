@@ -17,9 +17,9 @@ const useForm = <T extends Record<string, any>>(
     // For date inputs, ensure the format stays correct
     if (type === "date") {
       // Ensure correct format, and pad single digits with 0
-      let [year, month, day] = value.split("-");
+      let [year, month, day] = value.split("-")
 
-      if (day == 0 || month == 0 || year == 0){
+      if (parseInt(day) == 0 || parseInt(month) == 0 || parseInt(year) == 0){
         return
       }
       

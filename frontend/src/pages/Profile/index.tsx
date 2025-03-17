@@ -1,38 +1,65 @@
-import {useEffect, useState} from "react";
-// import {useNavigate} from 'react-router-dom'
+import {useEffect, useState} from "react"
 
-import Header from "../../components/Header";
-import Notifications from "../../components/Notifications";
+import Header from "../../components/Header"
+import useFetch from "../../hooks/useFetch"
 
-function Profile ({removeCookie }: { removeCookie: any })  {
+interface ProfileData {
+  id: string;
+  name: string;
+  birthday: string;
+}
 
-  const [myselfData, setMyselfData] = useState([])
+function Profile ()  {
 
-  const [notificationList, setNotification] = useState([])
+  const [myselfData, setMyselfData] = useState<ProfileData>({
+    id: "",
+    name: "",
+    birthday: ""
+  })
+
+  // useEffect(() => {
+  //   fetch('http://localhost:8000/profile', {
+  //     method: "GET",
+  //     credentials: "include",
+  //     headers: { "Content-Type": "application/json" },
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         setMyselfData(data)
+  //         console.log(data)
+  //       })}, [])
+
+  //Fetch groupsData
+  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/profile', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
 
   useEffect(() => {
-    fetch('http://localhost:8000/profile', {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setMyselfData(data)
-          console.log(data)
-        })}, [])
+    if (data) {
+      setMyselfData({
+        id: data[0],
+        name: data[1],
+        birthday: data[2]
+      });
+    }
+  }, [data]);
 
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   return (
 
     <div>
-      <Header removeCookie={removeCookie}/>      
+      <Header/>      
 
       <div className = "pagebody">
 
-        <div className="container">
+{/*        <div className="container">
           <Notifications/>          
-        </div>
+        </div>*/}
 
         <br/>
 
@@ -46,10 +73,10 @@ function Profile ({removeCookie }: { removeCookie: any })  {
               </tr>
             </thead>
             <tbody>
-              <tr key={myselfData[0]}>
-                <td>{myselfData[0]}</td>
-                <td>{myselfData[1]}</td>
-                <td>{myselfData[2]}</td>
+              <tr key={myselfData.id}>
+                <td>{myselfData.id}</td>
+                <td>{myselfData.name}</td>
+                <td>{myselfData.birthday}</td>
               </tr>
             </tbody>
           </table>

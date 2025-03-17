@@ -1,5 +1,5 @@
 
-import React, {useState, useRef, useEffect} from 'react'
+import {useState} from 'react'
 
 
 
@@ -7,7 +7,7 @@ import React, {useState, useRef, useEffect} from 'react'
 function CalendarGroups () {
 
 
-	const [taskGroups, setTaskGroups] = useState<{ id: number; name: string }[]>([
+	const [taskGroups, /*setTaskGroups*/] = useState<{ id: number; name: string }[]>([
 		{id: 1, name: "Group 1"}, 
 		{id: 2, name: "Group 2"}, 
 		{id: 3, name: "Group 3"},

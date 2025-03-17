@@ -1,14 +1,13 @@
-import { CookiesProvider, useCookies } from 'react-cookie'
-import { useEffect } from "react"
+import { useEffect, createContext } from "react"
+import { CookiesProvider, useCookies } from 'react-cookie';
+
 import { Route, Routes, useNavigate, useLocation} from 'react-router-dom'
 
-import Home from "./pages/Home/index";
 import Feed from "./pages/Feed/index";
 import Friends from "./pages/Friends/index";
 import FriendsGroups from "./pages/Groups/index";
 import GroupPage from "./pages/Groups/GroupPage";
 import Calendar from "./pages/Calendar/index";
-import CalendarDay from "./pages/Calendar/CalendarDay";
 import Profile from "./pages/Profile/index";
 import Profile_id from "./pages/Profile/Profile_id";
 
@@ -18,6 +17,13 @@ import Login from "./pages/Login/index";
 import CreateAccount from "./pages/Login/CreateAccount";
 
 import Error404 from "./pages/Errors/Error404";
+
+
+
+
+// ------------------------------------
+
+const CookieContext = createContext<any>(null)
 
 function App() {
 
@@ -34,28 +40,29 @@ function App() {
         navigate('/login')
       }
     }
-  }, []);
+  }, [cookie.token]);
 
 
   return (
-      <CookiesProvider>
+    <CookiesProvider>
+      <CookieContext.Provider value={{ cookie, setCookie, removeCookie }}> {/* Provide the context value */}
         <Routes>
-          <Route path="/" element=<Calendar setCookie={setCookie} />/>
-          <Route path="/login" element=<Login setCookie={setCookie} />/>
-          <Route path="/createAccount" element=<CreateAccount/>/>
-          <Route path="/feed" element = <Feed removeCookie={removeCookie} />/>
-          <Route path="/friends" element = <Friends removeCookie={removeCookie} />/>
-          <Route path="/groups" element = <FriendsGroups removeCookie={removeCookie} />/>
-          <Route path="/group/:id" element = <GroupPage removeCookie={removeCookie} />/>
-          <Route path="/calendar" element = <Calendar removeCookie={removeCookie} />/>
-          <Route path="/taskGroups" element = <CalendarGroupsManager/>/>
-          <Route path="/profile" element = <Profile removeCookie={removeCookie} />/>
-          <Route path="/profile/:id" element = <Profile_id removeCookie={removeCookie} />/>
-          {/*<Route path="/test" element = <Test/>/>*/}
+          <Route path="/" element = {<Calendar/>} />
+          <Route path="/login" element = {<Login/>} />
+          <Route path="/createAccount" element = {<CreateAccount/>} />
+          <Route path="/feed" element = {<Feed/>} />
+          <Route path="/friends" element = {<Friends/>} />
+          <Route path="/groups" element = {<FriendsGroups/>} />
+          <Route path="/group/:id" element = {<GroupPage/>} />
+          <Route path="/calendar" element = {<Calendar/>} />
+          <Route path="/taskGroups" element = {<CalendarGroupsManager/>} />
+          <Route path="/profile" element = {<Profile/>} />
+          <Route path="/profile/:id" element = {<Profile_id/>} />
 
-          <Route path="*" element = <Error404/>/>
+          <Route path="*" element = {<Error404/>} />
         </Routes>
-      </CookiesProvider>
+      </CookieContext.Provider>
+    </CookiesProvider>
   )
 }
 

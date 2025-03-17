@@ -1,14 +1,73 @@
-import {useState, useEffect} from "react";
-import {useNavigate, useLocation} from 'react-router-dom'
+import {useState, useEffect} from "react"
+// import {useNavigate} from 'react-router-dom'
+
+import useFetch from "../hooks/useFetch";
+
+interface updStatus {
+    idUserTask: number,
+    newStatus: number,
+}
+
+interface Notification {
+  id: number;
+  taskName: string;
+}
 
 function Notifications ()  {
 
-  let navigate = useNavigate()
-  let locationPath = useLocation()["pathname"]
+  // let navigate = useNavigate()
+  let [notificationsList, setNotificationsList] = useState<Notification[]>([])
 
-  let [notificationsList, setNotificationsList] = useState([])
+  let [updateStatus, setUpdateStatus] = useState<updStatus>({
+    idUserTask: 0,
+    newStatus: 0,
+  })
 
-  async function handleChangeStatus (idUserTask: string, newStatus: string){
+
+
+  // ---------------- FETCHES ---------- //
+
+
+  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/posts/myNotifications', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  const { /*data:data_update, error:error_update, isLoading:isLoading_update,*/ fetchData:fetchData_update } = useFetch('http://localhost:8000/posts/updateNotificationStatus', {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updateStatus)
+  });
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+
+  useEffect(() => {
+    if (Array.isArray(data)) {
+      // Convert tuples into objects
+      const formattedData = data.map(([id, taskName]) => ({
+        id,
+        taskName,
+      }));
+      setNotificationsList(formattedData);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (updateStatus.idUserTask && updateStatus.newStatus) {
+     fetchData_update()
+     fetchData()
+    }
+  }, [updateStatus])
+
+
+  // ------ EVENT HANDLERS --------- //
+
+    async function handleChangeStatus (idUserTask: number, newStatus: number){
 
       // newStatus:
       //   0 = Invited,
@@ -16,40 +75,23 @@ function Notifications ()  {
       //  20 = Confirmed,
       //  30 = Declined
 
-     console.log("aceitei! "+idUserTask)
-
-      await fetch('http://localhost:8000/updateNotificationStatus', {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({'idUserTask': idUserTask, 'newStatus': newStatus})
-      }).then(navigate(0))
+      setUpdateStatus({
+        idUserTask,
+        newStatus,
+      })
   }
 
-
-  useEffect(() => {
-    fetch('http://localhost:8000/myNotifications', {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setNotificationsList(data)
-
-        })}, [])
-
-  let structuredNotifications = notificationsList.map( function (notification){
-    let k = notification[0]
-    return (
-      <tr key={notification[0]}>
-        <td>{notification[0]}</td>
-        <td><a>{notification[1]}</a></td>
-        <td><button className = "btn accept" onClick={() => {console.log(k); handleChangeStatus(k, 20)}}>Accept</button></td>
-        <td><button className = "btn reject" onClick={() => {console.log(k); handleChangeStatus(k, 30)}}>Decline</button></td>
-      </tr>
-    )
-  })
+  // let structuredNotifications = notificationsList.map( function (notification){
+  //   let k = notification[0]
+  //   return (
+  //     <tr key={notification[0]}>
+  //       <td>{notification[0]}</td>
+  //       <td><a>{notification[1]}</a></td>
+  //       <td><button className = "btn accept" onClick={() => {console.log(k); handleChangeStatus(k, "20")}}>Accept</button></td>
+  //       <td><button className = "btn reject" onClick={() => {console.log(k); handleChangeStatus(k, "30")}}>Decline</button></td>
+  //     </tr>
+  //   )
+  // })
 
 
   return (
@@ -66,7 +108,22 @@ function Notifications ()  {
           </tr>
         </thead>
         <tbody>
-          {structuredNotifications}
+          {notificationsList.map((notification: Notification) => (
+            <tr key={notification.id}>
+              <td>{notification.id}</td>
+              <td><a>{notification.taskName}</a></td>
+              <td>
+                <button className="btn accept" onClick={() => handleChangeStatus(notification.id, 20)}>
+                  Accept
+                </button>
+              </td>
+              <td>
+                <button className="btn reject" onClick={() => handleChangeStatus(notification.id, 30)}>
+                  Decline
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 

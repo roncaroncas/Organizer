@@ -1,29 +1,34 @@
-import { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from "react"
+import { useParams } from 'react-router-dom'
 
-import Header from "../../components/Header";
+import Header from "../../components/Header"
+import useFetch from "../../hooks/useFetch"
 
-function Profile_id ({removeCookie }: { removeCookie: any }) {
+function Profile_id () {
 
   const [profileData, setProfileData] = useState([])
 
   const { id } = useParams()
 
+  //Fetch groupsData
+  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/profile/' + id!.toString(), {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
   useEffect(() => {
-    fetch('http://localhost:8000/profile/' + id!.toString(), {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setProfileData(data)
-      })
-  }, [id])
+    setProfileData(data)
+  }, [data])
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
 
   return (
     <div>
-      <Header removeCookie={removeCookie} />
+      <Header />
       <br />
 
       <div className="pagebody">

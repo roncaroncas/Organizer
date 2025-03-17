@@ -95,7 +95,7 @@ function FriendsTable() {
           </a>
         </td>
         <td>{friend.status} ({friend.statusNmbr})</td>
-        {console.log(friend)}
+       
         {goodMsg}
         {badMsg}
       </tr>

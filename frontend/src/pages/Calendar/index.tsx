@@ -1,7 +1,7 @@
 // import {useEffect, useState} from "react";
 // import {useNavigate} from 'react-router-dom'
 
-import React, { memo } from "react"; 
+import { memo } from "react"; 
 
 import Header from "../../components/Header";
 
@@ -10,13 +10,12 @@ import CalendarGroups from "./CalendarGroups"
 import CalendarGrid from "./CalendarGrid"
 // import AddNewTask from "./AddNewTask"
 
-function Calendar ({ removeCookie }:{removeCookie:any})  {
+function Calendar ()  {
 
   return (
     <div>
 
-
-      <Header removeCookie={removeCookie}/>
+      <Header/>
       <br/>
 
       <div className="pagebody calendarbody">

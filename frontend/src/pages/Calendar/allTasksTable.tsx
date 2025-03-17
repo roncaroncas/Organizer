@@ -1,6 +1,17 @@
 import {useEffect, useState} from "react";
 // import {useNavigate} from 'react-router-dom'
 
+interface Task {
+  id: number;
+  taskName: string;
+  startDayTime: string;
+  endDayTime: string;  
+  place: string;
+  fullDay: boolean;
+  taskDescription: string;
+  status: string;
+}
+
 
 function AllTasksTable ()  {
 
@@ -11,7 +22,7 @@ function AllTasksTable ()  {
 
   /////////////TABELA DE TASKS ///////////////////////////
 
-  const [taskList, setTaskList] = useState([])
+  const [taskList, setTaskList] = useState<Task[]>([])
 
   useEffect(() => {
     fetch('http://localhost:8000/myTasks', {

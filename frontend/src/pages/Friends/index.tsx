@@ -8,11 +8,11 @@ import AddFriendInput from "./addFriendInput"
 
 
 
-function Friends ( {removeCookie}: {removeCookie:any} )  {
+function Friends ()  {
 
   return (
     <div>
-      <Header removeCookie={removeCookie}/>
+      <Header />
 
       <div className="pagebody">
 
