@@ -19,8 +19,6 @@ import CreateAccount from "./pages/Login/CreateAccount";
 import Error404 from "./pages/Errors/Error404";
 
 
-
-
 // ------------------------------------
 
 const CookieContext = createContext<any>(null)
