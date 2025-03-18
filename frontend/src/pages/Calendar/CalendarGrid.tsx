@@ -9,23 +9,21 @@ import useModal from "../../hooks/useModal";
 import TaskFormModal from "./TaskFormModal";
 
 interface Task {
-  id: number;
-  taskName: string;
-  startDayTime: Date; 
-  endDayTime: Date;
-  place: string;
-  fullDay: boolean;
-  taskDescription: string;
-  status: string;
+  id: number
+  taskName: string
+  startDayTime: Date;
+  endDayTime: Date
+  place: string
+  fullDay: boolean
+  taskDescription: string
+  status: string
 }
-
 
 interface ModeState {
   mode: "Month" | "Week" | "Day"
   param: number
   day: Date
 }
-
 
 type OnTaskClick = (task: Task) => void;
 
@@ -46,13 +44,11 @@ function CalendarGrid(){
   const [tasks, setTasks] = useState<Task[]>([])
 
   // --------------- DEBUG ------------------------ //
-  // useEffect(() => {
-  //   console.log("Re-rendering CalendarGrid");
-  //   console.log("tasks:", tasks);
-  //   console.log("mode:", mode);
-  // }, [tasks, mode]);
-
-
+  useEffect(() => {
+    console.log("Re-rendering CalendarGrid");
+    console.log("tasks:", tasks);
+    console.log("mode:", mode);
+  }, [tasks, mode]);
 
   // ------------------- FETCHES ---------------- //
 
@@ -64,14 +60,14 @@ function CalendarGrid(){
 
   useEffect(() => {
     fetchData();    
-  }, []); // Fetch once when tasks are empty
+  }, []);
 
-  // Update tasks only if data changes (to avoid unnecessary re-renders)
+  // Update tasks only if data changes
   useEffect(() => {
     if (data && data.length !== tasks.length) {
       setTasks(data);
     }
-  }, [data]); // Depend only on tasks length
+  }, [data]);
 
   // ----------------   CONTROLE DE MODAL ------------------
 
@@ -85,11 +81,9 @@ function CalendarGrid(){
     fullDay: false,
     taskDescription: "",
     status: "",
-
   })
 
   function resetSelectedTask(){
-
     setSelectedTask({
       id: 0,
       taskName: "",
@@ -100,30 +94,30 @@ function CalendarGrid(){
       taskDescription: "",
       status: ""}
       )
-
-
   }
 
-
-  useEffect(() => {
-    const handleClickOutModal = (event: MouseEvent) => {
-      // Casting event target to HTMLDivElement to access the correct property
-      if (event.target === document.getElementById('modalDiv')) {
-        closeModal();
-      }
-    };
-
-    window.addEventListener('click', handleClickOutModal);
-
-    return () => window.removeEventListener('click', handleClickOutModal);
-  }, [closeModal]);
-
-  const triggerRender = () => {
-    fetchData();
-  }
 
   // ------------------ EVENT HANDLERS ---------------------------
 
+  function setModeAsDay (day: date):void {
+    console.log(day)
+    setMode({
+      mode: "Day",
+      param: 0,
+      day: new Date (day),
+    })
+    return
+  }
+
+  function setModeAsMonth():void {
+    let month = mode.day.getMonth()
+    setMode({
+      mode: "Month",
+      param: month,
+      day: new Date (mode.day),
+    })
+    return
+  }
 
   const onTaskClick:OnTaskClick = (task: Task) => {
     console.log(task)
@@ -147,20 +141,43 @@ function CalendarGrid(){
     openModal()
   }
 
+  // ----- MOUSE HANDLER FOR MODAL:
+
+  useEffect(() => {
+    const handleClickOutModal = (event: MouseEvent) => {
+      // Casting event target to HTMLDivElement to access the correct property
+      if (event.target === document.getElementById('modalDiv')) {
+        closeModal();
+      }
+    };
+
+    window.addEventListener('click', handleClickOutModal);
+
+    return () => window.removeEventListener('click', handleClickOutModal);
+  }, [closeModal]);
+
+  const triggerRender = () => {
+    fetchData();
+  }
+
   // --------------------  MOVENDO DIAS/MÊS/ANO --------------------
 
 
-  const DayContent = (day: Date, dayTasks: Task[], mode: ModeState, onTaskClick: OnTaskClick) => {
+  const DayInMonthContent = (day: Date, dayTasks: Task[], mode: ModeState, onTaskClick: OnTaskClick) => {
 
     return([
 
         <div key="dateTitle" className="dateTitle">
-          <strong>{format(day, "dd/MM/yyyy")}</strong>
-           <a onClick={() => {
-              onNewTaskClick(day)
-            }}>          
-              (+)
-            </a>
+          <a onClick={() => setModeAsDay(day)}> 
+            <strong>
+              {format(day, "dd/MM/yyyy")}
+            </strong>
+          </a>
+         <a onClick={() => {
+            onNewTaskClick(day)
+          }}>          
+            (+)
+          </a>
         </div>,
           
 
@@ -238,36 +255,32 @@ function changeYear(delta: number) {
 
 
 
-  // ------------------- CALENDAR ----------------------
+  // ------------------- CALENDAR MONTH ----------------------
 
   // -------------- CALENDAR HEAD ------------------
 
-   const calendarHead = [
-    // GRID HEADER
-    <div key="weekHeader" className="weekNumber">
-      <p> Week </p>
-    </div>,
+const calendarMonthHead = [
+  // GRID HEADER
+  <div key="weekHeader" className="weekNumber">
+    <p> Week </p>
+  </div>,
 
-    ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name) => (
-      <div
-        key={"weekHeader"+name}
-        className={classNames("calHeader", "showColumn")}
-      >
-        <p>{name}</p>
-      </div>
-    ))
-  ];
+  ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name) => (
+    <div
+      key={"weekHeader"+name}
+      className={classNames("calHeader", "showColumn")}
+    >
+      <p>{name}</p>
+    </div>
+  ))
+];
 
   // --------------- CALENDAR BODY ----------------
-
-  // PREPARANDO OS DADOS:
 
 
 // Inside your CalendarGrid component:
 
-const calendarBody = useMemo(() => {
-
-  // console.log("Recalculating calendar body...");
+const calendarMonthBody = useMemo(() => {
 
   const monthStart = startOfMonth(mode.day);
   const monthEnd = endOfMonth(monthStart);
@@ -287,7 +300,7 @@ const calendarBody = useMemo(() => {
       );
       week.push({
         day: day,
-        content: DayContent(day, dayTasks, mode, onTaskClick),
+        content: DayInMonthContent(day, dayTasks, mode, onTaskClick),
       });
       day = addDays(day, 1);
     }
@@ -334,25 +347,91 @@ const calendarBody = useMemo(() => {
   });
 }, [mode.day, tasks]); // Only re-calculate when mode.day or tasks change
 
+
+  // ------ CALENDAR DAY ------- //
+
+  const calendarDayBody = () => {
+
+    const timeSlots = Array.from({ length: 24+1 }, (_, i) => {
+      const hours = String(Math.floor(12* i / 12)).padStart(2, "0");
+      const minutes = String((0* i % 12) * 5).padStart(2, "0");
+      return `${hours}:${minutes}`;
+    });
+
+    console.log(timeSlots)
+
+    const dayTasks = tasks.filter(
+      (task) => new Date(task.startDayTime).toDateString() === mode.day.toDateString()
+    );
+
+
+    return(
+     <div>
+      <div className = "dateTitle">
+        <h2>{mode.mode + " - " + format(mode.day, "dd/MM/yyyy")}</h2>
+      </div>
+      <div className="dateContent">
+        {timeSlots.map((time, index) => {
+          return(
+          <div key={time} className="card-container">
+            <strong>{time}</strong>
+
+            {dayTasks.filter(task => {
+              const taskTime = format(new Date(task.startDayTime), "HH:mm");
+
+              return taskTime >= time && taskTime < timeSlots[timeSlots.indexOf(time) + 1];
+            }).map((task, index) => (
+              <div key={index} className="card-container">
+                ({task.id}) - <strong>{format(task.startDayTime, "HH:mm")}</strong>: {task.taskName}
+              </div>
+            ))}
+          </div>
+          )
+        })}
+      </div>
+    </div>
+    )
+  }
+  
+
+
+
+  // ----- RETURN -------- //
+
   return (
     <>
 
       {/* HEADER */}
-        
-      <h1>
-        <a onClick= {() => changeMonth(-1)}> (-) </a>
-        <a> {monthNumberToLabelMap[mode.day.getMonth()]} </a>
-        <a onClick= {() => changeMonth(+1)}> (+) </a>
-        <a onClick= {() => changeYear(-1)}> (-) </a>
-        <a> {mode.day.getFullYear()} </a>
-        <a onClick= {() => changeYear(+1)}> (+) </a>
-      </h1>
-    
-      {/* GRID */}
-      <div className = "calendarGrid">
-        {calendarHead}
-        {calendarBody}
+      <div className="card-container">
+        <h1>
+          <span onClick= {() => changeMonth(-1)}> (-) </span>
+          <span onClick= {() => setModeAsMonth()}> {monthNumberToLabelMap[mode.day.getMonth()]} </span>
+          <span onClick= {() => changeMonth(+1)}> (+) </span>
+          <span onClick= {() => changeYear(-1)}> (-) </span>
+          <span> {mode.day.getFullYear()} </span>
+          <span onClick= {() => changeYear(+1)}> (+) </span>
+        </h1>
       </div>
+    
+
+      {/* MONTHGRID */}
+      <div className = "card-container">
+        {mode.mode == "Month"? 
+        <div className = "calendarGrid">
+          {calendarMonthHead}
+          {calendarMonthBody}
+        </div>
+        : mode.mode == "Day"?
+        <div>
+          {calendarDayBody()}
+        </div>
+        :
+
+        ""
+        }
+      </div>
+
+
 
       {/*MODAL*/}
       <div 

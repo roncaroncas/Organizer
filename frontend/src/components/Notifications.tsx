@@ -24,17 +24,16 @@ function Notifications ()  {
   })
 
 
-
   // ---------------- FETCHES ---------- //
 
 
-  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/posts/myNotifications', {
+  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/notification/getAll', {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
 
-  const { /*data:data_update, error:error_update, isLoading:isLoading_update,*/ fetchData:fetchData_update } = useFetch('http://localhost:8000/posts/updateNotificationStatus', {
+  const { /*data:data_update, error:error_update, isLoading:isLoading_update,*/ fetchData:fetchData_update } = useFetch('http://localhost:8000/notification/updateStatus', {
     method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -67,18 +66,18 @@ function Notifications ()  {
 
   // ------ EVENT HANDLERS --------- //
 
-    async function handleChangeStatus (idUserTask: number, newStatus: number){
+  async function handleChangeStatus (idUserTask: number, newStatus: number){
 
-      // newStatus:
-      //   0 = Invited,
-      //  10 = Maybe,
-      //  20 = Confirmed,
-      //  30 = Declined
+    // newStatus:
+    //   0 = Invited,
+    //  10 = Maybe,
+    //  20 = Confirmed,
+    //  30 = Declined
 
-      setUpdateStatus({
-        idUserTask,
-        newStatus,
-      })
+    setUpdateStatus({
+      idUserTask,
+      newStatus,
+    })
   }
 
   // let structuredNotifications = notificationsList.map( function (notification){

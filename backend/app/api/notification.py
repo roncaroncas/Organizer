@@ -8,8 +8,8 @@ from typing import List
 
 router = APIRouter()
 
-@router.get("/myNotifications")
-async def get_notifications(request: Request):
+@router.get("/getAll")
+async def get_all_notifications(request: Request):
 
     #USER ID
     sql = (f"SELECT users.id " 
@@ -34,7 +34,7 @@ async def get_notifications(request: Request):
 
     return results
 
-@router.put("/updateNotificationStatus")
+@router.put("/updateStatus")
 async def update_notification_status(body: dict, request: Request):
 
     #USER ID
