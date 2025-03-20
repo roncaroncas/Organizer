@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, getISOWeek } from "date-fns";
 import { addDays, addMonths, addYears } from "date-fns";
 import classNames from 'classnames';
@@ -44,11 +44,11 @@ function CalendarGrid(){
   const [tasks, setTasks] = useState<Task[]>([])
 
   // --------------- DEBUG ------------------------ //
-  useEffect(() => {
-    console.log("Re-rendering CalendarGrid");
-    console.log("tasks:", tasks);
-    console.log("mode:", mode);
-  }, [tasks, mode]);
+  // useEffect(() => {
+  //   console.log("Re-rendering CalendarGrid");
+  //   console.log("tasks:", tasks);
+  //   console.log("mode:", mode);
+  // }, [tasks, mode]);
 
   // ------------------- FETCHES ---------------- //
 
@@ -64,8 +64,9 @@ function CalendarGrid(){
 
   // Update tasks only if data changes
   useEffect(() => {
-    if (data && data.length !== tasks.length) {
+    if (data) {
       setTasks(data);
+      console.log("Atualizei o bagui")
     }
   }, [data]);
 
@@ -100,7 +101,6 @@ function CalendarGrid(){
   // ------------------ EVENT HANDLERS ---------------------------
 
   function setModeAsDay (day: date):void {
-    console.log(day)
     setMode({
       mode: "Day",
       param: 0,
@@ -120,6 +120,7 @@ function CalendarGrid(){
   }
 
   const onTaskClick:OnTaskClick = (task: Task) => {
+    console.log("task clicqued")
     console.log(task)
     setSelectedTask(task)
     openModal();
@@ -155,6 +156,7 @@ function CalendarGrid(){
 
     return () => window.removeEventListener('click', handleClickOutModal);
   }, [closeModal]);
+
 
   const triggerRender = () => {
     fetchData();
@@ -235,11 +237,11 @@ function CalendarGrid(){
     'October', 'November', 'December',
   ]
 
-// function changeDay(delta: number) {
-//   setMode((prev) => {
-//     return {...prev, day: addDays(prev.day, delta)}
-//   });
-// }
+function changeDay(delta: number) {
+  setMode((prev) => {
+    return {...prev, day: addDays(prev.day, delta)}
+  });
+}
 
 function changeMonth(delta: number) {
   setMode((prev) => {
@@ -350,48 +352,141 @@ const calendarMonthBody = useMemo(() => {
 
   // ------ CALENDAR DAY ------- //
 
+  const calendarDayHeader = [
+    <div key="dayHeader">
+      <h2>
+        <span onClick={()=>changeDay(-1)}> (-) </span>
+        {format(mode.day, "dd/MM/yyyy")}
+        <span onClick={()=>changeDay(+1)}> (+) </span>
+      </h2>
+    </div>
+  ]
+
+  const taskRef = useRef(null);
+  const [taskRightPos, setTaskRightmostPositions] = useState({});
+
+  const onTaskRendered = (taskId, rightmostPosition) => {
+    if (taskRightPos[taskId] != rightmostPosition) {
+      // console.log(taskId, taskRightPos[taskId], rightmostPosition, "me chamaram de novo puts")
+      setTaskRightmostPositions((prevState) => ({
+        ...prevState,
+        [taskId]: rightmostPosition, // Store the rightmost position
+      }));
+    }
+  };
+
   const calendarDayBody = () => {
 
-    const timeSlots = Array.from({ length: 24+1 }, (_, i) => {
+    // TODO: CORRIGIR O BUG QUE QUEBRA QUANDO UM EVENTO ACABA EM HORARIO CHEIO E O OUTRO COMEÇA NO MESMO HORARIO CHEIO
+    // NAO FAÇO IDEIA DO PORQUE kkkkkkkkkk
+
+    const timeSlots = Array.from({ length: 24 }, (_, i) => {
       const hours = String(Math.floor(12* i / 12)).padStart(2, "0");
       const minutes = String((0* i % 12) * 5).padStart(2, "0");
       return `${hours}:${minutes}`;
     });
 
-    console.log(timeSlots)
 
     const dayTasks = tasks.filter(
       (task) => new Date(task.startDayTime).toDateString() === mode.day.toDateString()
     );
 
 
-    return(
-     <div>
-      <div className = "dateTitle">
-        <h2>{mode.mode + " - " + format(mode.day, "dd/MM/yyyy")}</h2>
-      </div>
-      <div className="dateContent">
-        {timeSlots.map((time, index) => {
-          return(
-          <div key={time} className="card-container">
+  return (
+    <div className="day-container">
+      {timeSlots.map((time, index) => {
+        
+        // Filter tasks that span this specific time slot
+        const tasksStartsInTime = dayTasks.filter(task => {
+          const taskStart = new Date(task.startDayTime);
+          // const taskEnd = new Date(task.endDayTime);
+          const timeSlotStart = new Date(`${mode.day.toDateString()} ${time}`);
+          const timeSlotEnd = new Date(timeSlotStart.getTime() + 60 * 60 * 1000); // 1 hour slot
+          return taskStart <= timeSlotEnd && taskStart > timeSlotStart;
+        });
+
+        const tasksInTime = dayTasks.filter(task => {
+          const taskStart = new Date(task.startDayTime);
+          const taskEnd = new Date(task.endDayTime);
+          const timeSlotStart = new Date(`${mode.day.toDateString()} ${time}`);
+          const timeSlotEnd = new Date(timeSlotStart.getTime() + 60 * 60 * 1000); // 1 hour slot
+          return taskStart <= timeSlotEnd && taskStart > timeSlotStart;
+        });
+
+        console.log(time, tasksStartsInTime)
+
+
+        return (
+          <div key={time} className="hour-container">
             <strong>{time}</strong>
+            {tasksStartsInTime.map((task, taskIndex) => {
 
-            {dayTasks.filter(task => {
-              const taskTime = format(new Date(task.startDayTime), "HH:mm");
+              // Calculate the start and end hour indexes
+              const taskStart = new Date(task.startDayTime);
+              const taskEnd = new Date(task.endDayTime);
 
-              return taskTime >= time && taskTime < timeSlots[timeSlots.indexOf(time) + 1];
-            }).map((task, index) => (
-              <div key={index} className="card-container">
-                ({task.id}) - <strong>{format(task.startDayTime, "HH:mm")}</strong>: {task.taskName}
-              </div>
-            ))}
+              const startIndex = taskStart.getHours()+taskStart.getMinutes()/60; // Start hour
+              const endIndex = taskEnd.getHours()+taskEnd.getMinutes()/60; // End hour
+
+              const taskHeight = Math.max((endIndex - startIndex),1) * 2; // Estimate height in 'em' based on hours spanned
+
+              const overlappingTasks = tasksInTime.filter((t) => {
+                const otherStart = new Date(t.startDayTime);
+                const otherEnd = new Date(t.endDayTime);
+                return taskStart < otherEnd && taskEnd > otherStart; // Check if times overlap
+              });
+
+              console.log(task.id, overlappingTasks)
+
+              // Calculate dynamic left offset based on previous tasks' widths
+              const horizontalOffset = taskIndex === 0 
+                ? 100 // Starting position for the first task (you can adjust this)
+                : Math.max(
+                    100, // Starting position for the first task (you can adjust this)
+                    ...overlappingTasks.filter((t, index) => index < taskIndex).map(t => {
+                      // Get the width of each previous overlapping task
+                      const previousTaskWidth = taskRightPos[t.id] || 50; // Use previously calculated width
+
+                      // Calculate the `left` position based on the previous task's width and spacing
+                      return previousTaskWidth + 5; // Add spacing between tasks
+                    })
+                  );
+
+              return (
+                <div
+                  key={taskIndex}
+                  className="task-container"
+                  style={{
+                    // Position the task based on start time
+                    top: `${(startIndex - index) * 2}em`, // Adjusts task starting position vertically
+                    height: `${taskHeight}em`, // Adjusts the task's vertical span
+                    left: `${horizontalOffset}px`, // Shift horizontally to prevent overlap
+                  }}
+                  onClick = {() => {onTaskClick(task)}}
+                  ref={(ref) => {
+                    if (ref) {
+                      // Calculate the rightmost position (left + width)
+                      const rightmostPosition = ref.offsetLeft + ref.offsetWidth;
+
+                      // Call your function to store or use the rightmost position
+                      onTaskRendered(task.id, rightmostPosition);
+                    }
+                  }}
+                >
+                  <span >
+                  ({task.id}) - <strong>{format(task.startDayTime, "HH:mm")} </strong>
+                  to <strong>{format(task.endDayTime, "HH:mm")}</strong>: {task.taskName}
+                  </span>
+                </div>
+
+              );
+            })}
           </div>
-          )
-        })}
-      </div>
+        );
+      })}
     </div>
-    )
-  }
+  );
+}
   
 
 
@@ -423,6 +518,7 @@ const calendarMonthBody = useMemo(() => {
         </div>
         : mode.mode == "Day"?
         <div>
+          {calendarDayHeader}
           {calendarDayBody()}
         </div>
         :
@@ -439,9 +535,10 @@ const calendarMonthBody = useMemo(() => {
           isOpen ? "modal-shown" : "modal-hidden",
         ])}>
 
-        {selectedTask && (
+        {selectedTask.id != 0 && (
           <div className="modal-content">
             <TaskFormModal
+              key = {selectedTask.id}
               id = {selectedTask.id}
               closeModal={() => {
                 resetSelectedTask();   // Clear the selected event
