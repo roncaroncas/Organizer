@@ -98,14 +98,14 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
 
   // ------------------- CONTROLE DO FETCH ----------------
 
-  const { fetchData:createTask } = useFetch('http://localhost:8000/createTask', {
+  const { data, fetchData:createTask } = useFetch('http://localhost:8000/createTask', {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formatTaskForAPI(formValues))
   }) 
 
-  const { fetchData:updateTask } = useFetch('http://localhost:8000/updateTask', {
+  const { data:data_updated, fetchData:updateTask } = useFetch('http://localhost:8000/updateTask', {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -121,12 +121,18 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    console.log(formValues.id)
+
     // console.log(formValues)
-    formValues.id ? await updateTask() : await createTask()
+    formValues.id!=0 ? await updateTask() : await createTask()
     triggerRender()
     closeModal()
     console.log("Submitei")
   }
+
+  useEffect(() => {
+    triggerRender()
+  },[data, data_updated])
 
   return (
 
