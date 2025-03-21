@@ -120,14 +120,8 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
-    console.log(formValues.id)
-
-    // console.log(formValues)
     formValues.id!=0 ? await updateTask() : await createTask()
-    triggerRender()
     closeModal()
-    console.log("Submitei")
   }
 
   useEffect(() => {
@@ -136,66 +130,64 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
 
   return (
 
-    <div>
+    <div id="modalDiv" className="modal-shown">
 
-      <div id="modalDiv" className="modal-shown">
+      {/*Modal Container*/}
+      <form className="modal-content" onSubmit={handleSubmit}>
+        <p className="modal-title">Novo evento</p>
 
-        {/*Modal Container*/}
-        <form className="modal-content" onSubmit={handleSubmit}>
-            <p className="modal-title">Novo evento</p>
+        <input name="taskName" placeholder="Título do Evento" value={formValues.taskName} onChange={handleInputChange} type="text" /><br />
 
-            <input name="taskName" placeholder="Título do Evento" value={formValues.taskName} onChange={handleInputChange} type="text" /><br />
+        <div className="event-details">
+          <section className="event-duration">
+            <div>
+              <label> Hora Início </label>
+              <input
+                name="startDay" onChange={handleInputChange} type="date"
+                value={formValues.startDay}
+              />
 
-            <div className="event-details">
-              <section className="event-duration">
-                <div>
-                  <label> Hora Início </label>
-                  <input
-                    name="startDay" onChange={handleInputChange} type="date"
-                    value={formValues.startDay}
-                  />
-
-                  {formValues.fullDay?
-                    "":
-                    <input name="startTime" onChange={handleInputChange} type="time"
-                      value={formValues.startTime}
-                    />
-                  }
-                </div>
-               
-                <div>
-                  <label> Hora Fim </label>
-                  <input name="endDay" onChange={handleInputChange} type="date"
-                  value={formValues.endDay}/>
-                  {formValues.fullDay? "":<input name="endTime" onChange={handleInputChange} type="time" 
-                  value={formValues.endTime} />}
-                </div>
-              </section>
-              
-              <label>
-                <input
-                  name="fullDay"
-                  type="checkbox"
-                  onChange={handleInputChange}
-                  // value={formValues.fullDay}/*/
-                  checked={formValues.fullDay}
+              {formValues.fullDay?
+                "":
+                <input name="startTime" onChange={handleInputChange} type="time"
+                  value={formValues.startTime}
                 />
-                Dia Inteiro
-              </label><br/>
-
-              <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
-              <input name="taskDescription" placeholder="Descrição" value={formValues.taskDescription} onChange={handleInputChange} type="text"/><br />
-
+              }
             </div>
-            <div className="form-footer">
-              <button type="button" onClick={closeModal}>Fechar</button>
-              <button type="submit">Salvar</button>
-
+           
+            <div>
+              <label> Hora Fim </label>
+              <input name="endDay" onChange={handleInputChange} type="date"
+              value={formValues.endDay}/>
+              {formValues.fullDay? "":<input name="endTime" onChange={handleInputChange} type="time" 
+              value={formValues.endTime} />}
             </div>
-          </form>
-        <br />
+          </section>
+          
+          <label>
+            <input
+              name="fullDay"
+              type="checkbox"
+              onChange={handleInputChange}
+              // value={formValues.fullDay}/*/
+              checked={formValues.fullDay}
+            />
+            Dia Inteiro
+          </label><br/>
 
-      </div>
+          <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
+          <input name="taskDescription" placeholder="Descrição" value={formValues.taskDescription} onChange={handleInputChange} type="text"/><br />
+
+        </div>
+        <div className="form-footer">
+          <button type="button" onClick={closeModal}>Fechar</button>
+          <button type="submit">Salvar</button>
+
+        </div>
+      </form>
+
+      <br/>
+
     </div>
 
   );
