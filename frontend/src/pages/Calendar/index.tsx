@@ -48,15 +48,14 @@ function Calendar ()  {
         
         <br/>
 
-
       </div>
       <br/>
-
+{/*
       <div className="container">
         Apenas para debug!
         <AllTasksTable/>
       </div>
-   
+   */}
     </div>
 
   );

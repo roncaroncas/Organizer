@@ -477,6 +477,7 @@ table th {
 /* ------- CONTAINERS --------------*/
 
 /* Global Container Styling for All Forms & Tables */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -497,48 +498,59 @@ table th {
 
 .card-container {
   max-width: 1200px;
-  margin: 0 auto 20px auto;
-  padding: 20px;
+  margin: 5px auto 5px auto;
+  padding: 5px;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .day-container {
-  display: flex;
-  flex-direction: column; /* Stacks hour-containers vertically */
-  height: 30em; /* Limit the height */
-  overflow-y: auto; /* Enable scrolling */
+  display: relative;
+  position: relative;
+/*  height: 30em;*/
+  flex-direction: column;
+  overflow-y: auto;
   padding: 0;
   margin: 0;
   border: none;
   scrollbar-width: thin;
+  box-sizing: border-box; /* Added for consistency */
 }
 
-.hour-container {
+.time-container {
   position: relative;
   width: 100%; /* Takes the full width of the container */
-  height: 2em; /* Fixed height */
+  height: 0.5em; /* 2em = 1h */
   overflow: visible;
   margin: 0;
   padding: 0;
-  border-bottom: 1px solid rgba(211, 211, 211, 0.6);
-  display: flex; /* Ensures inner elements are arranged horizontally */
+  border-top: 1px solid rgba(211, 211, 211, 0.6);
+  display: flex; 2/* Ensures inner elements are arranged horizontally */
   align-items: center; /* Centers content vertically */
   box-sizing: border-box; /* Includes padding/border in height calculation */
   white-space: nowrap; /* Prevent text wrapping */
+}
+
+.time-text {
+  font-size: 0.75em;
+  font-weight: 300; /* Applies a light font weight */
+  position: absolute;
+  left: 0;
+  top: -4px;
 }
 
 .task-container {
   position: absolute;
   width: auto;
   min-width: 50px;
+  max-width: 30%;
   margin: 0 5px; /* Spacing between tasks */
   padding: 0px 5px; /* Padding for better visibility */
   background-color: #FFCC99; /* Background color */
   border: 1px solid gray; /* Border around task */
   border-radius: 8px; /* Smooth rounded corners */
-  font-size: 0.8em; /* Adjust text size if needed */
+  box-sizing: border-box;
   z-index: 1; 
 }
 
