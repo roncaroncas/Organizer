@@ -145,7 +145,8 @@ function Feed ()  {
       <div className="pagebody">
 
         {/* --- Novo Post --- */}
-        <div className="card-container">
+        <div className="container">
+          <div className = "card-container">
           <form onSubmit={(e) => {
               e.preventDefault(); // Prevent default form submission
               handleSubmit(); // Trigger delete when form is submitted
@@ -160,6 +161,9 @@ function Feed ()  {
             </button>
           </form>
         </div>
+        </div>
+
+        <br/>
 
         <div className="container">
           <h3> Meu Feed! </h3>      

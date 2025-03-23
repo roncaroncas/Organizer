@@ -1,6 +1,6 @@
 import { format, addHours } from 'date-fns';
 
-import {useEffect} from "react"
+import {useEffect, useState} from "react"
 
 import useForm from "../../hooks/useForm"
 import useFetch from "../../hooks/useFetch"
@@ -112,8 +112,6 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
       body: JSON.stringify(formatTaskForAPI(formValues))
     })
 
-  // -------------- USE EFFECTS ---------------------- / /
-
 
   // --------------EVENT HANDLERS----------------------
 
@@ -128,17 +126,44 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
     triggerRender()
   },[data, data_updated])
 
+
+  // ---------------------- 
+
+  const [users, setUsers] = useState([
+    { id: 1, name: 'Usuário 1' },
+    { id: 2, name: 'Usuário 2' },
+  ]);
+
+  const [newUser, setNewUser] = useState('');
+
+  const handleAddUser = () => {
+    if (newUser.trim()) {
+      setUsers([...users, { id: users.length + 1, name: newUser }]);
+      setNewUser(''); // Clear input after adding
+    }
+  };
+
+  const handleDeleteUser = (id) => {
+    setUsers(users.filter(user => user.id !== id));
+  };
+
+  // ----------------------
+
   return (
 
     <div id="modalDiv" className="modal-shown">
 
       {/*Modal Container*/}
       <form className="modal-content" onSubmit={handleSubmit}>
-        <p className="modal-title">Novo evento</p>
 
-        <input name="taskName" placeholder="Título do Evento" value={formValues.taskName} onChange={handleInputChange} type="text" /><br />
+        <div> 
+          <label className="modal-title">Novo evento
+            <input name="taskName" placeholder="Título do Evento" value={formValues.taskName} onChange={handleInputChange} type="text" /><br />
+          </label>
+        </div>
 
         <div className="event-details">
+
           <section className="event-duration">
             <div>
               <label> Hora Início </label>
@@ -162,8 +187,11 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
               {formValues.fullDay? "":<input name="endTime" onChange={handleInputChange} type="time" 
               value={formValues.endTime} />}
             </div>
+
+            
+
           </section>
-          
+
           <label>
             <input
               name="fullDay"
@@ -173,15 +201,45 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
               checked={formValues.fullDay}
             />
             Dia Inteiro
-          </label><br/>
+          </label>
 
-          <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
-          <input name="taskDescription" placeholder="Descrição" value={formValues.taskDescription} onChange={handleInputChange} type="text"/><br />
+          {/*// USERS */}
+          <div className="event-users">
+            {users.map((user)=>{
+              return(
+              <div>
+                <a href={"/profile/"+user.id}> {user.name} </a>
+                <button type="button" className="reject" onClick={() => handleDeleteUser(user.id)}>Deletar</button>
+              </div>
+              )
+            })}
+            <div className="add-user-section">
+              <input
+                type="text"
+                placeholder="Adicionar novo usuário"
+                value={newUser}
+                onChange={(e) => setNewUser(e.target.value)}
+              />
+              <button className = "btn accept" type="button" onClick={handleAddUser}>Adicionar</button>
+            </div>
+          </div>
 
+          <div>          
+            <br/>
+
+            <label>Local
+              <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
+            </label>
+
+            <label>Descrição
+            <input name="taskDescription" placeholder="Descrição" value={formValues.taskDescription} onChange={handleInputChange} type="text"/><br />
+            </label>
+
+          </div>
         </div>
         <div className="form-footer">
-          <button type="button" onClick={closeModal}>Fechar</button>
-          <button type="submit">Salvar</button>
+          <button className= "btn cancel" type="button" onClick={closeModal}>Fechar</button>
+          <button className= "btn accept" type="submit">Salvar</button>
 
         </div>
       </form>

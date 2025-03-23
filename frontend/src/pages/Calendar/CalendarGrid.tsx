@@ -226,10 +226,10 @@ function CalendarGrid(){
   }
 
   const monthNumberToLabelMap = [
-    'January', 'February', 'March',
-    'April', 'May', 'June',
-    'July', 'August', 'September',
-    'October', 'November', 'December',
+    'JAN', 'FEV', 'MAR',
+    'ABR', 'MAI', 'JUN',
+    'JUL', 'AGO', 'SET',
+    'OUT', 'NOV', 'DEZ',
   ]
 
 function changeDay(delta: number) {
@@ -350,9 +350,9 @@ const calendarMonthBody = useMemo(() => {
   const calendarDayHeader = [
     <div key="dayHeader">
       <h2>
-        <span onClick={()=>changeDay(-1)}> (-) </span>
+        <span onClick={()=>changeDay(-1)}> - </span>
         {format(mode.day, "dd/MM/yyyy")}
-        <span onClick={()=>changeDay(+1)}> (+) </span>
+        <span onClick={()=>changeDay(+1)}> + </span>
       </h2>
     </div>
   ]
@@ -583,16 +583,28 @@ function calculateAllOffsetsGeometry(dayTasks) {
 
       {/* HEADER */}
       <div className="card-container">
-        <h1>
-          <span onClick= {() => changeMonth(-1)}> (-) </span>
-          <span onClick= {() => setModeAsMonth()}> {monthNumberToLabelMap[mode.day.getMonth()]} </span>
-          <span onClick= {() => changeMonth(+1)}> (+) </span>
-          <span onClick= {() => changeYear(-1)}> (-) </span>
-          <span> {mode.day.getFullYear()} </span>
-          <span onClick= {() => changeYear(+1)}> (+) </span>
+        <h1 style={{ margin: "0px 0px 0px 20px", textAlign: "left", display: "flex", gap: "40px", fontSize: "2em" }}>
+          {/* Year Section */}
+          <div style={{ display: "flex", width: "100px", alignItems: "center" }}>
+            <span>{mode.day.getFullYear()}</span>
+            <div style={{ display: "flex", flexDirection: "column", marginLeft: "30px", fontSize: "0.5em", alignItems: "center" }}>
+              <span onClick={() => changeYear(+1)} style={{ cursor: "pointer" }}>+</span>
+              <span onClick={() => changeYear(-1)} style={{ cursor: "pointer" }}>-</span>
+            </div>
+          </div>
+
+          {/* Month Section with Fixed Width */}
+          <div style={{ display: "flex", alignItems: "center"}}>
+            <span onClick={() => setModeAsMonth()} style={{ width: "140px", textAlign: "center" }}>
+              {monthNumberToLabelMap[mode.day.getMonth()]}
+            </span>
+            <div style={{ display: "flex", flexDirection: "column", marginLeft: "10px", fontSize: "0.5em", alignItems: "center" }}>
+              <span onClick={() => changeMonth(+1)} style={{ cursor: "pointer" }}>+</span>
+              <span onClick={() => changeMonth(-1)} style={{ cursor: "pointer" }}>-</span>
+            </div>
+          </div>
         </h1>
-      </div>
-    
+      </div>    
 
       {/* MONTHGRID */}
       <div className = "card-container">

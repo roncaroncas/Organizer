@@ -21,11 +21,12 @@ import Error404 from "./pages/Errors/Error404";
 
 // ------------------------------------
 
-const CookieContext = createContext<any>(null)
+export const CookieContext = createContext<any>(null);
 
 function App() {
 
   // Cookies
+  // debugger;
   const [cookie, setCookie, removeCookie] = useCookies(['token'])
 
   let navigate = useNavigate()  

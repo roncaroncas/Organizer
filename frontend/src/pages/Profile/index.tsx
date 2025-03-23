@@ -17,18 +17,6 @@ function Profile ()  {
     birthday: ""
   })
 
-  // useEffect(() => {
-  //   fetch('http://localhost:8000/profile', {
-  //     method: "GET",
-  //     credentials: "include",
-  //     headers: { "Content-Type": "application/json" },
-  //     })
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         setMyselfData(data)
-  //         console.log(data)
-  //       })}, [])
-
   //Fetch groupsData
   const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/profile', {
     method: 'GET',

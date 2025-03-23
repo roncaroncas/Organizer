@@ -1,9 +1,7 @@
-import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 
-// import { useCookie }  from "../context/CookieContext"
 import { useCookies } from 'react-cookie';
-
+import { CookieContext } from '../App';
 
 import Notifications from "./Notifications";
 
@@ -11,68 +9,129 @@ import classNames from 'classnames'
 
 function Header() {
 
-  const [/*cookie, setCookie*/, removeCookie] = useCookies(['token']);
-
-  let navigate = useNavigate();
-
+ const { removeCookie } = useContext(CookieContext);
   const [openDropdown, setOpenDropdown] = useState<string>("");
 
   function handleLogout() {
-    removeCookie('token', { path: '/' });
-    navigate("/login");
+    removeCookie('token');
   }
 
   function toggleDropdown(menu: string) {
     setOpenDropdown(openDropdown === menu ? "" : menu);
   }
 
+  function handleMouseEnter(menu: string) {
+    setOpenDropdown(menu);
+  }
+
+  function handleMouseLeave() {
+    setOpenDropdown("");
+  }
+
+  // Define menu structure
+  const menus = [
+    {
+      title: "Feed",
+      key: "feed",
+      links: [{ name: "Feed", href: "/feed" }]
+    },
+    {
+      title: "Tasks",
+      key: "tasks",
+      links: [
+        { name: "Calendar", href: "/calendar" },
+        { name: "TaskGroups", href: "/taskGroups" }
+      ]
+    },
+    {
+      title: "Friends",
+      key: "friends",
+      links: [
+        { name: "Friends", href: "/friends" },
+        { name: "Groups", href: "/groups" }
+      ]
+    }
+  ];
+
+  // Right section dropdowns
+  const rightMenus = [
+    {
+      title: "Notificações",
+      key: "notificacoes",
+      content: <Notifications />
+    },
+    {
+      title: "User",
+      key: "user",
+      links: [
+        { name: "Profile", href: "/profile" },
+        { name: "Logout", action: handleLogout } // Logout as an action
+      ]
+    }
+  ];
+
   return (
     <div className="header">
       <h1>
         <a href="/" style={{ color: 'white', textDecoration: 'none' }}>
-          Organizer
+          Tempo
         </a>
       </h1>
       <div className="menuContainer">
         <nav>
           <ul className="menu">
-            <li className="menuItem" onClick={() => toggleDropdown('feed')}>
-              Feed
-              <ul className = {classNames(["dropdown", openDropdown === 'feed' ? 'dropdownOpen' : ''])}>
-                <li><a href="/feed" className="dropdownItem">Feed</a></li>
-              </ul>
-            </li>
-            <li className="menuItem" onClick={() => toggleDropdown('tasks')}>
-              Tasks
-              <ul className = {classNames(["dropdown", openDropdown === 'tasks' ? 'dropdownOpen' : ''])}>
-                <li><a href="/calendar" className="dropdownItem">Calendar</a></li>
-                <li><a href="/taskGroups" className="dropdownItem">TaskGroups</a></li>
-              </ul>
-            </li>
-            <li className="menuItem" onClick={() => toggleDropdown('friends')}>
-              Friends
-              <ul className= {classNames(["dropdown", openDropdown === 'friends' ? 'dropdownOpen' : ''])}>
-                <li><a href="/friends" className="dropdownItem">Friends</a></li>
-                <li><a href="/groups" className="dropdownItem">Groups</a></li>
-              </ul>
-            </li>
+            {menus.map(({ title, key, links }) => (
+              <li 
+                key={key}
+                className="menuItem"
+                onClick={() => toggleDropdown(key)}
+                onMouseEnter={() => handleMouseEnter(key)}
+                onMouseLeave={handleMouseLeave}
+              >
+                {title}
+                <ul className={classNames(["dropdown", openDropdown === key ? 'dropdownOpen' : ''])}>
+                  {links.map(({ name, href }) => (
+                    <li key={name}>
+                      <a href={href} className="dropdownItem">{name}</a>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
           </ul>
         </nav>
       </div>
+      
+      {/* Right Section */}
       <div className="rightSection">
-
-        <li className="menuItem" onClick={() => toggleDropdown('notificacoes')}>
-          Notificações
-          <ul className= {classNames(["dropdown", openDropdown === 'notificacoes' ? 'dropdownOpen' : ''])}>
-            <Notifications/>
-          </ul>
-        </li>
-        <a href="/profile" className="link">
-          Profile
-        </a>
-        <a href="/" onClick={handleLogout} className="link">
-          Logout
-        </a>
+        <ul className="menu">
+          {rightMenus.map(({ title, key, links, content }) => (
+            <li 
+              key={key}
+              className="menuItem"
+              onClick={() => toggleDropdown(key)}
+              onMouseEnter={() => handleMouseEnter(key)}
+              onMouseLeave={handleMouseLeave}
+            >
+              {title}
+              <ul className={classNames(["dropdown", openDropdown === key ? 'dropdownOpen' : ''])}>
+                {links 
+                  ? links.map(({ name, href, action }) => (
+                      <li key={name}>
+                        {action ? (
+                          <a onClick={action} className="dropdownItem" style={{ cursor: 'pointer' }}>
+                            {name}
+                          </a>
+                        ) : (
+                          <a href={href} className="dropdownItem">{name}</a>
+                        )}
+                      </li>
+                    )) 
+                  : content}
+              </ul>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

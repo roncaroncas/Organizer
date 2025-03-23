@@ -4,10 +4,19 @@ import { useParams } from 'react-router-dom'
 import Header from "../../components/Header"
 import useFetch from "../../hooks/useFetch"
 
+interface ProfileData {
+  id: string;
+  name: string;
+  birthday: string;
+}
+
 function Profile_id () {
 
-  const [profileData, setProfileData] = useState([])
-
+  const [profileData, setProfileData] = useState<ProfileData>({
+    id: "",
+    name: "",
+    birthday: ""
+  })
   const { id } = useParams()
 
   //Fetch groupsData
@@ -18,8 +27,15 @@ function Profile_id () {
   });
 
   useEffect(() => {
-    setProfileData(data)
-  }, [data])
+    if (data) {
+      console.log(data[0], data[1], data[2])
+      setProfileData({
+        id: data[0],
+        name: data[1],
+        birthday: data[2]
+      });
+    }
+  }, [data]);
 
   useEffect(() => {
     fetchData()
@@ -45,13 +61,11 @@ function Profile_id () {
             </thead>
 
             <tbody>
-              {profileData.length > 0 && (
-                <tr key={profileData[0]}>
-                  <td>{profileData[0]}</td>
-                  <td>{profileData[1]}</td>
-                  <td>{profileData[2]}</td>
-                </tr>
-              )}
+              <tr key={profileData.id}>
+                <td>{profileData.id}</td>
+                <td>{profileData.name}</td>
+                <td>{profileData.birthday}</td>
+              </tr>
             </tbody>
           </table>
         </div>
