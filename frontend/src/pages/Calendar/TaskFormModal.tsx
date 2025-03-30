@@ -207,7 +207,7 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
           <div className="event-users">
             {users.map((user)=>{
               return(
-              <div>
+              <div key={user.id}>
                 <a href={"/profile/"+user.id}> {user.name} </a>
                 <button type="button" className="reject" onClick={() => handleDeleteUser(user.id)}>Deletar</button>
               </div>

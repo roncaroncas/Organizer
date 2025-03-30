@@ -4,7 +4,7 @@ import useFetch from "../../hooks/useFetch";
 
 //----------------
 
-interface GroupTask {
+interface Tempo {
   id: number;
   name: string;
   parentId: number | null
@@ -13,9 +13,9 @@ interface GroupTask {
 
 //---------------
 
-function CalendarGroups() {
+function CalendarTempos() {
   // DISPLAYED GROUPS
-  const [groups, setGroups] = useState<GroupTask[]>([]);
+  const [tempos, setTempos] = useState<Tempo[]>([]);
   
   // ------FETCHES-------------- //
   const { data, fetchData } = useFetch('http://localhost:8000/myTaskGroups', {
@@ -31,34 +31,34 @@ function CalendarGroups() {
   useEffect(() => {
     if (data) {
       console.log(data)
-      setGroups(data);
+      setTempos(data);
     }
   }, [data]);
 
   // Build a tree structure from flat data
-  const buildTree = (groups: GroupTask[]) => {
+  const buildTree = (tempos: Tempo[]) => {
 
-    const map: { [key: number]: GroupTask } = {};
-    const roots: GroupTask[] = [];
+    const map: { [key: number]: Tempo } = {};
+    const roots: Tempo[] = [];
 
-    // Build a map of all group tasks
-    groups.forEach((group) => {
-      map[group.id] = { ...group, children: [] };
+    // Build a map of all tempo tasks
+    tempos.forEach((tempo) => {
+      map[tempo.id] = { ...tempo, children: [] };
     });
 
     // Now, build the tree by assigning children to the parent
-    groups.forEach((group) => {
-      if (group.parentId === null || group.parentId === 0) {
-        roots.push(map[group.id]);
+    tempos.forEach((tempo) => {
+      if (tempo.parentId === null || tempo.parentId === 0) {
+        roots.push(map[tempo.id]);
       } else {
-        map[group.parentId]?.children.push(map[group.id]);
+        map[tempo.parentId]?.children.push(map[tempo.id]);
       }
     });
 
     return roots;
   };
 
-  const renderTree = (node: GroupTask) => (
+  const renderTree = (node: Tempo) => (
     <div key={node.id}>
       <label>
         <input type="checkbox" value={node.name} />
@@ -73,16 +73,16 @@ function CalendarGroups() {
   );
 
   // Build the tree structure from the flat list
-  const treeData = buildTree(groups);
+  const treeData = buildTree(tempos);
 
   return (
-    <div className="checkbox-group">
+    <div className="checkbox-tempo">
       <h3>
-        Calendar Groups <a href="/taskGroups">⚙️</a>
+        Tempos <a href="/taskGroups">⚙️</a>
       </h3>
       {treeData.map((root) => renderTree(root))}
     </div>
   );
 }
 
-export default CalendarGroups;
+export default CalendarTempos;

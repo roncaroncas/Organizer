@@ -6,7 +6,7 @@ import { memo } from "react";
 import Header from "../../components/Header";
 
 import AllTasksTable from "./AllTasksTable"
-import CalendarGroups from "./CalendarGroups"
+import CalendarTempos from "./CalendarTempos"
 import CalendarGrid from "./CalendarGrid"
 // import AddNewTask from "./AddNewTask"
 
@@ -33,7 +33,7 @@ function Calendar ()  {
             </div>
             <hr/>
 
-            <CalendarGroups/>
+            <CalendarTempos/>
 
             <hr/>
             
