@@ -143,7 +143,7 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
     }
   };
 
-  const handleDeleteUser = (id) => {
+  const handleDeleteUser = (id: number) => {
     setUsers(users.filter(user => user.id !== id));
   };
 

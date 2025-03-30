@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react'
 
-import { useCookies } from 'react-cookie';
+// import { useCookies } from 'react-cookie';
 import { CookieContext } from '../App';
 
 import Notifications from "./Notifications";

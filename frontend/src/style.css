@@ -567,7 +567,7 @@ table th {
   margin: 0;
   padding: 0;
   border-top: 1px solid rgba(211, 211, 211, 0.6);
-  display: flex; 2/* Ensures inner elements are arranged horizontally */
+  display: flex;/* Ensures inner elements are arranged horizontally */
   align-items: center; /* Centers content vertically */
   box-sizing: border-box; /* Includes padding/border in height calculation */
   white-space: nowrap; /* Prevent text wrapping */
@@ -646,7 +646,7 @@ table th {
   justify-content: center;
   align-items: center;
   height: auto;
-  weight: auto;
+  width: auto;
 }
 
 .login-title {

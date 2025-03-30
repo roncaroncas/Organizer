@@ -5,7 +5,7 @@ import { memo } from "react";
 
 import Header from "../../components/Header";
 
-import AllTasksTable from "./AllTasksTable"
+// import AllTasksTable from "./AllTasksTable"
 import CalendarTempos from "./CalendarTempos"
 import CalendarGrid from "./CalendarGrid"
 // import AddNewTask from "./AddNewTask"

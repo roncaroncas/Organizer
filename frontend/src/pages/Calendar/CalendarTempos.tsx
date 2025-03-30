@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import Header from "../../components/Header";
+import { useState, useEffect } from "react";
 import useFetch from "../../hooks/useFetch";
 
 //----------------
@@ -66,7 +65,7 @@ function CalendarTempos() {
       </label>''
       {node.children.length > 0 && (
         <div style={{ marginLeft: "20px" }}>
-          {node.children.map((child) => renderTree(child))}
+          {node.children.map((child: Tempo) => renderTree(child))}
         </div>
       )}
     </div>

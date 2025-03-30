@@ -1,0 +1,7 @@
+
+> organizer2@0.0.0 build
+> tsc -b && vite build
+
+src/pages/Calendar/CalendarMonth.tsx(18,53): error TS1005: ',' expected.
+src/pages/Calendar/CalendarMonth.tsx(18,54): error TS1109: Expression expected.
+src/pages/Calendar/CalendarMonth.tsx(18,55): error TS1005: ':' expected.

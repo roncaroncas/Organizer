@@ -1,13 +1,42 @@
 
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, getISOWeek } from "date-fns";
-import { addDays, addMonths, addYears } from "date-fns";
+import { addDays, /*addMonths, addYears*/ } from "date-fns";
 
-import {useEffect, useMemo} from "react"
+import {/*useEffect,*/ useMemo} from "react"
 
-import useForm from "../../hooks/useForm"
-import useFetch from "../../hooks/useFetch"
+// import useForm from "../../hooks/useForm"
+// import useFetch from "../../hooks/useFetch"
 
 import classNames from 'classnames';
+
+type OnTaskClick = (task: Task) => void;
+type SetModeAsDay = (date: Date) => void;
+type OnNewTaskClick = () => void;
+
+interface ModeState {
+  mode: "Month" | "Week" | "Day"
+  param: number
+  day: Date
+}
+
+interface Task {
+  id: number
+  taskName: string
+  startDayTime: Date;
+  endDayTime: Date
+  place: string
+  fullDay: boolean
+  taskDescription: string
+  status: string
+}
+
+interface CalendarMonthProps{
+  mode: ModeState,
+  tasks: Task[] ,
+  onTaskClick: OnTaskClick ,
+  setModeAsDay: SetModeAsDay,
+  onNewTaskClick: OnNewTaskClick,
+}
 
 //  --------- UTILS --------- //
 
@@ -15,7 +44,7 @@ function getWeek(i: Date) {
   return (i.getDay() === 0) ? getISOWeek(i) + 1 : getISOWeek(i);
 }
 
-function CalendarMonth({mode, tasks, onTaskClick, setModeAsDay, onNewTaskClick}) {
+function CalendarMonth({mode, tasks,onTaskClick, setModeAsDay, onNewTaskClick}:CalendarMonthProps) {
 
   // ------ HEADER ----------- //
 
@@ -47,7 +76,7 @@ function CalendarMonth({mode, tasks, onTaskClick, setModeAsDay, onNewTaskClick})
             </strong>
           </a>
          <a onClick={() => {
-            onNewTaskClick(day)
+            onNewTaskClick()
           }}>          
             (+)
           </a>
@@ -157,7 +186,7 @@ const calendarMonthBody = useMemo(() => {
           ])}
 
           onClick={(e) => {
-            if (e.target === e.currentTarget) {onNewTaskClick(day.day)}
+            if (e.target === e.currentTarget) {onNewTaskClick()}
           }}
         >
           {day.content}
