@@ -1,0 +1,70 @@
+table {
+    margin: 0px auto;
+    table-layout: fixed;
+    border: 1px solid black;
+}
+
+td {
+    border: 1px solid black;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    background-color: #eeeeee;
+}
+
+h1,
+h2,
+p {
+    text-align: center;
+}
+
+
+h1,
+h2,
+p {
+    text-align: center;
+}
+
+.wrapper {
+    text-align: center;
+}
+
+.button {
+    position: absolute;
+    top: 50%;
+}
+
+
+div {
+  width: 100%;
+  text-align: center;
+}
+
+
+/* Add a black background color to the top navigation */
+.topnav {
+  background-color: #333333;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.topnav span {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav span:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topnav span.active {
+  background-color: #ff8000;
+  color: white;
+}
