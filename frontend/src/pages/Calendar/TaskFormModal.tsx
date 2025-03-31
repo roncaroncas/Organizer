@@ -1,6 +1,6 @@
 import { format, addHours } from 'date-fns';
 
-import {useEffect} from "react"
+import {useEffect, useState} from "react"
 
 import useForm from "../../hooks/useForm"
 import useFetch from "../../hooks/useFetch"
@@ -98,21 +98,19 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
 
   // ------------------- CONTROLE DO FETCH ----------------
 
-  const { fetchData:createTask } = useFetch('http://localhost:8000/createTask', {
+  const { data, fetchData:createTask } = useFetch('http://localhost:8000/createTask', {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formatTaskForAPI(formValues))
   }) 
 
-  const { fetchData:updateTask } = useFetch('http://localhost:8000/updateTask', {
+  const { data:data_updated, fetchData:updateTask } = useFetch('http://localhost:8000/updateTask', {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formatTaskForAPI(formValues))
     })
-
-  // -------------- USE EFFECTS ---------------------- / /
 
 
   // --------------EVENT HANDLERS----------------------
@@ -120,76 +118,134 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
-    // console.log(formValues)
-    formValues.id ? await updateTask() : await createTask()
-    triggerRender()
+    formValues.id!=0 ? await updateTask() : await createTask()
     closeModal()
-    console.log("Submitei")
   }
+
+  useEffect(() => {
+    triggerRender()
+  },[data, data_updated])
+
+
+  // ---------------------- 
+
+  const [users, setUsers] = useState([
+    { id: 1, name: 'Usuário 1' },
+    { id: 2, name: 'Usuário 2' },
+  ]);
+
+  const [newUser, setNewUser] = useState('');
+
+  const handleAddUser = () => {
+    if (newUser.trim()) {
+      setUsers([...users, { id: users.length + 1, name: newUser }]);
+      setNewUser(''); // Clear input after adding
+    }
+  };
+
+  const handleDeleteUser = (id: number) => {
+    setUsers(users.filter(user => user.id !== id));
+  };
+
+  // ----------------------
 
   return (
 
-    <div>
+    <div id="modalDiv" className="modal-shown">
 
-      <div id="modalDiv" className="modal-shown">
+      {/*Modal Container*/}
+      <form className="modal-content" onSubmit={handleSubmit}>
 
-        {/*Modal Container*/}
-        <form className="modal-content" onSubmit={handleSubmit}>
-            <p className="modal-title">Novo evento</p>
-
+        <div> 
+          <label className="modal-title">Novo evento
             <input name="taskName" placeholder="Título do Evento" value={formValues.taskName} onChange={handleInputChange} type="text" /><br />
+          </label>
+        </div>
 
-            <div className="event-details">
-              <section className="event-duration">
-                <div>
-                  <label> Hora Início </label>
-                  <input
-                    name="startDay" onChange={handleInputChange} type="date"
-                    value={formValues.startDay}
-                  />
+        <div className="event-details">
 
-                  {formValues.fullDay?
-                    "":
-                    <input name="startTime" onChange={handleInputChange} type="time"
-                      value={formValues.startTime}
-                    />
-                  }
-                </div>
-               
-                <div>
-                  <label> Hora Fim </label>
-                  <input name="endDay" onChange={handleInputChange} type="date"
-                  value={formValues.endDay}/>
-                  {formValues.fullDay? "":<input name="endTime" onChange={handleInputChange} type="time" 
-                  value={formValues.endTime} />}
-                </div>
-              </section>
-              
-              <label>
-                <input
-                  name="fullDay"
-                  type="checkbox"
-                  onChange={handleInputChange}
-                  // value={formValues.fullDay}/*/
-                  checked={formValues.fullDay}
+          <section className="event-duration">
+            <div>
+              <label> Hora Início </label>
+              <input
+                name="startDay" onChange={handleInputChange} type="date"
+                value={formValues.startDay}
+              />
+
+              {formValues.fullDay?
+                "":
+                <input name="startTime" onChange={handleInputChange} type="time"
+                  value={formValues.startTime}
                 />
-                Dia Inteiro
-              </label><br/>
+              }
+            </div>
+           
+            <div>
+              <label> Hora Fim </label>
+              <input name="endDay" onChange={handleInputChange} type="date"
+              value={formValues.endDay}/>
+              {formValues.fullDay? "":<input name="endTime" onChange={handleInputChange} type="time" 
+              value={formValues.endTime} />}
+            </div>
 
+            
+
+          </section>
+
+          <label>
+            <input
+              name="fullDay"
+              type="checkbox"
+              onChange={handleInputChange}
+              // value={formValues.fullDay}/*/
+              checked={formValues.fullDay}
+            />
+            Dia Inteiro
+          </label>
+
+          {/*// USERS */}
+          <div className="event-users">
+            {users.map((user)=>{
+              return(
+              <div key={user.id}>
+                <a href={"/profile/"+user.id}> {user.name} </a>
+                <button type="button" className="reject" onClick={() => handleDeleteUser(user.id)}>Deletar</button>
+              </div>
+              )
+            })}
+            <div className="add-user-section">
+              <input
+                type="text"
+                placeholder="Adicionar novo usuário"
+                value={newUser}
+                onChange={(e) => setNewUser(e.target.value)}
+              />
+              <button className = "btn accept" type="button" onClick={handleAddUser}>Adicionar</button>
+            </div>
+          </div>
+
+          <div>          
+            <br/>
+
+            <label>Local
               <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
-              <input name="taskDescription" placeholder="Descrição" value={formValues.taskDescription} onChange={handleInputChange} type="text"/><br />
+            </label>
 
-            </div>
-            <div className="form-footer">
-              <button type="button" onClick={closeModal}>Fechar</button>
-              <button type="submit">Salvar</button>
+            <label>Descrição
+            <input name="taskDescription" placeholder="Descrição" value={formValues.taskDescription} onChange={handleInputChange} type="text"/><br />
+            </label>
 
-            </div>
-          </form>
-        <br />
+          </div>
+        </div>
+        <div className="form-footer">
+          <button className= "btn cancel" type="button" onClick={closeModal}>Fechar</button>
+          <button className= "btn accept" type="submit">Salvar</button>
 
-      </div>
+        </div>
+      </form>
+
+      <br/>
+
     </div>
 
   );

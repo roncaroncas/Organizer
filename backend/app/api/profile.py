@@ -18,7 +18,7 @@ async def my_profile(request: Request):
         f"ON tokenAuth.userId = users.id "
         f"WHERE token = ?")
 
-    userData = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0]
+    userData = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
 
     # logger.debug(userData)
     
@@ -33,7 +33,7 @@ async def get_profile_by_id(id: int, request: Request):
         f"FROM users "
         f"WHERE users.id = ?")
 
-    userData = db.cursor.execute(sql, [id]).fetchall()[0]
+    userData = db.cursor.execute(sql, [id]).fetchone()
 
     # logger.debug(userData)
     

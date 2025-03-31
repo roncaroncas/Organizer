@@ -5,8 +5,8 @@ import { memo } from "react";
 
 import Header from "../../components/Header";
 
-import AllTasksTable from "./AllTasksTable"
-import CalendarGroups from "./CalendarGroups"
+// import AllTasksTable from "./AllTasksTable"
+import CalendarTempos from "./CalendarTempos"
 import CalendarGrid from "./CalendarGrid"
 // import AddNewTask from "./AddNewTask"
 
@@ -16,7 +16,6 @@ function Calendar ()  {
     <div>
 
       <Header/>
-      <br/>
 
       <div className="pagebody calendarbody">
 
@@ -34,7 +33,7 @@ function Calendar ()  {
             </div>
             <hr/>
 
-            <CalendarGroups/>
+            <CalendarTempos/>
 
             <hr/>
             
@@ -48,15 +47,14 @@ function Calendar ()  {
         
         <br/>
 
-
       </div>
       <br/>
-
+{/*
       <div className="container">
         Apenas para debug!
         <AllTasksTable/>
       </div>
-   
+   */}
     </div>
 
   );

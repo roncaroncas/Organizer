@@ -22,6 +22,7 @@ body, ul, li, p {
 h1,
 h2{
     text-align: center;
+    margin: 0px;
 }
 
 /* Placeholder styling for all input types */
@@ -29,7 +30,6 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   color: #888888;
   opacity: 1;
 }
-
 
 /* ---------- HEADER ------------  */
 .header {
@@ -41,10 +41,14 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  color: white;
   align-items: center;
-  padding: 20px;
+  box-sizing: border-box; /* Added for consistency */
+  height: 60px;  /* <-- Set the height explicitly */
+  padding: 5px 5px; /* Adjust padding to fit inside 60px */
   z-index: 1000; /* Ensures the header is above other content */
 }
+
 
 .logo {
   width: 50px;
@@ -52,7 +56,6 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
 
 .header h1 {
   display: block;
-  margin: 0; /* Remove any default margin */
 }
 
 .header a {
@@ -79,14 +82,7 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
 }
 
 /* Header.module.css */
-.header {
-  background-color: #FF8C00;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: white;
-}
+
 
 .menuContainer {
   flex: 1;
@@ -143,6 +139,7 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  position: relative;
 }
 
 .link {
@@ -161,12 +158,13 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
 /* ----------- PAGE BODY -------- */
 
 .pagebody {
-  padding-top: 80px;  /* Para compensar o fixed menu */ 
+  position: relative;
+  padding-top: 60px;
 }
 
 .calendarbody{
-  display: flex; /* Makes the container a flex container */
-  width: 100%; /* Ensure the container takes up the full width */
+  display: flex; 
+  width: 100%; 
 }
 
 .calendarbody .leftcolumn{
@@ -181,10 +179,7 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
 
 /* ---------- BUTTON STYLES ------------ */
 
-/*button {
-  background-color: #1a1a1a;
-  color: #ffffff;
-}*/
+
 button {
   border-radius: 12px;
   border: 1px solid transparent;
@@ -287,9 +282,11 @@ button:focus, button:focus-visible {
   flex-direction: column;
 }
 
-.modal-title {
-  
+.event-users{
+  display: flex;
+  flex-direction: column;
 }
+
 
 .event-duration {
   display: flex;
@@ -478,8 +475,9 @@ table th {
 /* ------- CONTAINERS --------------*/
 
 /* Global Container Styling for All Forms & Tables */
+
 .container {
-  max-width: 1200px;
+  width: 90%;
   margin: 0 auto;
   padding: 20px;
   background-color: #f9f9f9;
@@ -490,19 +488,118 @@ table th {
 .full-container {
   margin: auto;
   width: 95%;
-  padding: 20px;
+  padding: 10px;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Main layout */
+.login-container {
+  display: flex;
+  align-items: centero aut;
+  justify-content: center;
+  gap: 10px; /* Reduce spacing between columns */
+}
+
+
+/* Left column (Logo) */
+.left-column {
+  flex: 1; /* Takes 1 part of the space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+.left-column img {
+  width: 80%;
+  max-width: 300px; /* Adjust max size */
+  height: auto;
+}
+
+/* Vertical Separator */
+.separator {
+  width: 2px;
+  height: 70%;
+  margin: auto;
+  background-color: rgba(0, 0, 0, 0.1); /* Almost transparent */
+}
+
+/* Right column (Form) */
+.right-column {
+  flex: 1.5; /* Takes 1.5 parts of the space */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
 .card-container {
   max-width: 1200px;
-  margin: 0 auto 20px auto;
-  padding: 20px;
+  padding: 5px;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.day-container {
+  display: relative;
+  position: relative;
+/*  height: 30em;*/
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  border: none;
+  scrollbar-width: thin;
+  box-sizing: border-box; /* Added for consistency */
+}
+
+.time-container {
+  position: relative;
+  width: 100%; /* Takes the full width of the container */
+  height: 0.5em; /* 2em = 1h */
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(211, 211, 211, 0.6);
+  display: flex;/* Ensures inner elements are arranged horizontally */
+  align-items: center; /* Centers content vertically */
+  box-sizing: border-box; /* Includes padding/border in height calculation */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.time-text {
+  font-size: 0.75em;
+  font-weight: 300; /* Applies a light font weight */
+  position: absolute;
+  left: 0;
+  top: -4px;
+}
+
+.task-container {
+  position: absolute;
+  width: auto;
+  min-width: 50px;
+  max-width: 30%;
+  margin: 0 5px; /* Spacing between tasks */
+  padding: 0px 5px; /* Padding for better visibility */
+  background-color: #FFCC99; /* Background color */
+  border: 1px solid gray; /* Border around task */
+  border-radius: 8px; /* Smooth rounded corners */
+  box-sizing: border-box;
+  z-index: 1; 
+}
+
+
+
+/* Optional: Apply a hover effect for tasks to make them interactive */
+.task-container:hover {
+  background-color: orange;  /* Slightly darker blue on hover */
 }
 
 
@@ -520,17 +617,40 @@ table th {
 
 /* --------------------- */
 
-
 .loginform{
   border-radius: 5px;
   border-color: #888888;
   padding: 25px;
   width: 30%;
-  margin: 20px auto auto auto;
+  margin: auto auto auto auto;
 }
 
 .login-input {
   background-color: #fcfcfc;
+}
+
+.login-page {
+  display: grid;
+  overflow: hidden;
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+  padding: 5%;
+  box-sizing: border-box; 
+  border: 1px solid;
+}
+
+/* Title stays in the center */
+.title-container{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+  width: auto;
+}
+
+.login-title {
+  text-align: center;
 }
 
 .button-container {
