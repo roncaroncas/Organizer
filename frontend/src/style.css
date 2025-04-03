@@ -142,6 +142,11 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   position: relative;
 }
 
+.rightSection .menuItem .dropdown {
+  right: 0; /* Align dropdown to the right edge of the parent */
+  left: auto; /* Prevent it from inheriting a default left alignment */
+}
+
 .link {
   background-color: #E67E22;
   color: white;

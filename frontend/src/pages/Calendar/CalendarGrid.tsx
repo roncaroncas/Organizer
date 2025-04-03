@@ -52,7 +52,7 @@ function CalendarGrid(){
 
   // ------------------- FETCHES ---------------- //
 
-  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/myTasks', {
+  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/tempo/getAll', {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

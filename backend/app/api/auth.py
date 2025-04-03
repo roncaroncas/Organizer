@@ -6,44 +6,33 @@ from typing import List
 import secrets
 
 from app.models import User, Token
+from app.database.queries.auth_queries import getUserIdByCredentials
 
 router = APIRouter()
 
 @router.post("/login")
-async def generate_token(user: User) -> (Token):
+async def generate_token(user: User) -> Token:
 
-    # 2) Se existe, criar um SESSION_ID no DB e retorna-lo como token <----- falta essa parte!!
+    # Verificar Login
+    userId = await getUserIdByCredentials(user.username, user.password)
 
-    sql = (f"SELECT id "
-        f"FROM users "
-        f" WHERE (username = ?) "
-        f" AND (password = ?) "
-        )
-
-    val = [user.username, user.password]
-
-    row = db.cursor.execute(sql, val).fetchall()
-
-    if len(row) != 1:
+    if not(userId):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-
-    #id = id (auto increment)
-    userId = row[0][0]
-
+    # Gerando Token
     token = Token(token=secrets.token_hex(nbytes=16))
-
     status = 10 #0 = Inativo, #10 = Ativo
     validUntil = 0
 
-    #Desativar todos os outros tokens
-    db.cursor.execute("UPDATE tokenAuth SET status = 0 WHERE userId = ?", [userId])
+    # Desativar todos os outros tokens do mesmo user
+    query = 'UPDATE authentication SET "statusId" = 0 WHERE "userId" = $1'
+    val = [userId]
+    await db.execute(query, val)
 
-    #Ativar o token novo
-    db.cursor.execute("INSERT INTO tokenAuth (userId, token, status, validUntil) VALUES (?, ?, ?, ?)",
-        [userId, token.token, status, validUntil])
-    db.connection.commit()
-
-    logger.debug("salvei o token em tokenAuth!")
+    # Ativar o token novo
+    query = 'INSERT INTO "authentication" ("userId", "token", "statusId") VALUES ($1, $2, $3)'
+    val = [userId, token.token, status]
+    await db.execute(query, val)
+    
 
     return token
