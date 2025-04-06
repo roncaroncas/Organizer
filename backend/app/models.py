@@ -54,3 +54,8 @@ class Notification(BaseModel):
     id: Optional[int] = None
     name: Optional[str] = None
     statusId: Optional[int] = None
+
+class Profile(BaseModel):
+    id: int
+    name: str
+    birthday: Optional[datetime]

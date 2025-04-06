@@ -7,7 +7,7 @@ async function createUser(credentials: any) {
   console.log(JSON.stringify(credentials))
   console.log(credentials)
 
-  await fetch('http://localhost:8000/createAccount', {
+  await fetch('http://localhost:8000/account/new', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials)

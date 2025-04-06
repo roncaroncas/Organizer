@@ -1,21 +1,22 @@
 import {useEffect, useState} from "react"
+import { parseISO, format } from 'date-fns'
 
 import Header from "../../components/Header"
 import useFetch from "../../hooks/useFetch"
 
 interface ProfileData {
-  id: string;
+  id: number;
   name: string;
-  birthday: string;
+  birthday: Date | null;
 }
 
 function Profile ()  {
 
   const [myselfData, setMyselfData] = useState<ProfileData>({
-    id: "",
+    id: 0,
     name: "",
-    birthday: ""
-  })
+    birthday: null
+    })
 
   //Fetch groupsData
   const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/profile', {
@@ -27,12 +28,20 @@ function Profile ()  {
   useEffect(() => {
     if (data) {
       setMyselfData({
-        id: data[0],
-        name: data[1],
-        birthday: data[2]
+        ...data,
+        birthday: data.birthday ? new Date(data.birthday) : null
       });
     }
   }, [data]);
+
+  // useEffect(() => {
+  //   if (myselfData){
+  //     console.log("myselfData: ", myselfData)
+  //     console.log("id: ", myselfData.id)
+  //     console.log("name: ", myselfData.name)
+  //     console.log("birthday: ", myselfData.birthday)
+  //   }      
+  // }, [myselfData])
 
   useEffect(() => {
     fetchData()
@@ -44,10 +53,6 @@ function Profile ()  {
       <Header/>      
 
       <div className = "pagebody">
-
-{/*        <div className="container">
-          <Notifications/>          
-        </div>*/}
 
         <br/>
 
@@ -64,7 +69,11 @@ function Profile ()  {
               <tr key={myselfData.id}>
                 <td>{myselfData.id}</td>
                 <td>{myselfData.name}</td>
-                <td>{myselfData.birthday}</td>
+                <td>
+                  {myselfData.birthday
+                    ? format((myselfData.birthday), 'dd/MM/yyyy')
+                    : ''}
+                </td>
               </tr>
             </tbody>
           </table>

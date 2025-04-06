@@ -2,12 +2,12 @@ from app.database.connection import db
 
 async def getAllPosts():
 
-	query = '\
-		SELECT p."id", p."authorId", u."name", p."groupId", p."text", p."timestamp"\
-		FROM "post" p\
-		LEFT JOIN "user" u ON u."id" = p."authorId"\
-		ORDER BY p."timestamp" DESC\
-		'
+	query = '''
+		SELECT p."id", p."authorId", u."name", p."groupId", p."text", p."timestamp"
+		FROM "post" p
+		LEFT JOIN "user" u ON u."id" = p."authorId"
+		ORDER BY p."timestamp" DESC
+		'''
 
 	val = []
 
@@ -18,11 +18,11 @@ async def getAllPosts():
 
 async def addNewPost(userId, text):
 
-	query = (\
-		'INSERT INTO "post" \
-		("authorId", "text") \
-		VALUES ($1, $2) \
-		')
+	query = ('''
+		INSERT INTO "post" 
+		("authorId", "text") 
+		VALUES ($1, $2) 
+		''')
 
 	val = [userId, text]
 
@@ -31,10 +31,10 @@ async def addNewPost(userId, text):
 
 async def deletePost(postId):
 
-	query = (\
-		'DELETE FROM "post" \
-		WHERE "id" = $1 \
-		')
+	query = ('''
+		DELETE FROM "post" 
+		WHERE "id" = $1 
+		''')
 
 	val = [postId]
 

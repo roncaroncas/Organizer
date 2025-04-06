@@ -13,7 +13,7 @@ function FriendsTable() {
   const [friendList, setFriendList] = useState<Friend[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/myFriends', {
+    fetch('http://localhost:8000/friend/getAll', {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -25,25 +25,25 @@ function FriendsTable() {
   }, []);
 
   function handleUnfriendClick(f_id: string) {
-    fetch('http://localhost:8000/deleteFriend', {
+    fetch('http://localhost:8000/friend/delete', {
       method: "DELETE",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ "friendId": f_id })
     });
 
-    navigate(0);
+    // navigate(0); /*PORCO!*/
   }
 
   function handleAcceptFriendClick(f_id: string) {
-    fetch('http://localhost:8000/acceptFriend', {
+    fetch('http://localhost:8000/friend/accept', {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ "friendId": f_id })
     });
 
-    navigate(0);
+    // navigate(0); /*PORCO!*/
   }
 
   const structuredFriends = friendList.map((friend: Friend) => {
@@ -51,7 +51,7 @@ function FriendsTable() {
     let goodMsg = null;
     let badMsg = null;
 
-    if (friend.statusNmbr === 1) {
+    if (friend.statusNmbr === 10) {
       goodMsg = (
         <td>
           <button className="table-actions accept" onClick={() => handleAcceptFriendClick(f_id)}>
@@ -66,7 +66,7 @@ function FriendsTable() {
           </button>
         </td>
       );
-    } else if (friend.statusNmbr === 2) {
+    } else if (friend.statusNmbr === 11) {
       goodMsg = <td />;
       badMsg = (
         <td>

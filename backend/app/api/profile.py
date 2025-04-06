@@ -3,35 +3,35 @@ from app.database.connection import db
 from app.config import logger
 from typing import List
 
-from app.models import User, Token
+from app.models import Profile
 
+from app.database.queries.auth_queries import getUserIdByToken
+from app.database.queries.profile_queries import getSelfProfileData, getOtherProfileData
 
 router = APIRouter()
 
-
-@router.get("/profile")
+@router.get("/")
 async def my_profile(request: Request):
 
-    sql = (f"SELECT users.id, users.name, users.dateOfBirth " 
-        f"FROM tokenAuth "
-        f"INNER JOIN users "
-        f"ON tokenAuth.userId = users.id "
-        f"WHERE token = ?")
+    # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
 
-    userData = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
+    # Get Data
+    row = await getSelfProfileData(userId)
 
-    return userData
+    return Profile(**dict(row))
 
-@router.get("/profile/{id}")
-async def get_profile_by_id(id: int, request: Request):
+@router.get("/{id}")
+async def get_profile_by_id(id: int, request: Request) -> Profile:
 
+     # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
 
-    sql = (f"SELECT users.id, users.name, users.dateOfBirth " 
-        f"FROM users "
-        f"WHERE users.id = ?")
+    # Get Data
+    row = await getOtherProfileData(userId)
 
-    userData = db.cursor.execute(sql, [id]).fetchone()
-
-    # logger.debug(userData)
-    
-    return userData
+    return Profile(**dict(row))

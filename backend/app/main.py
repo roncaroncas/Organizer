@@ -18,23 +18,23 @@ app.add_exception_handler(Exception, generic_exception_handler)
 
 # CORS settings
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+	CORSMiddleware,
+	allow_origins=origins,
+	allow_credentials=True,
+	allow_methods=["*"],
+	allow_headers=["*"],
 )
 
 @app.on_event("startup")
 async def startup():
-    await db.initialize()
+	await db.initialize()
 
 @app.on_event("shutdown")
 async def shutdown():
-    await db._pool.close()
+	await db._pool.close()
 
 # Include API routes
 app.include_router(router)
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+	uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
