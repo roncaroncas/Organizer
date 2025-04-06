@@ -10,9 +10,9 @@ interface Post {
   id: number,
   authorName: string,
   authorId: number,
-  groupPostId: number,
+  groupId: number,
   text: string,
-  timestamp: string,
+  timestamp: Date,
   type: string,
 }
 
@@ -32,7 +32,7 @@ const formatTaskForAPI = (values: FormData): Post => {
     authorId: 0,
     groupPostId: 0,
     text: values.text,
-    timestamp: "",
+    timestamp: new Date(),
     type: "",
   }
   

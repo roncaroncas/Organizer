@@ -64,7 +64,7 @@ function FriendGroups ()  {
   });
 
   //Fetch addNewGroup
-  const { data: data_post, /*error: error_post, isLoading: isLoading_post,*/ fetchData: fetchData_post } = useFetch('http://localhost:8000/group/addNew', {
+  const { data: data_post, /*error: error_post, isLoading: isLoading_post,*/ fetchData: fetchData_post } = useFetch('http://localhost:8000/group/add', {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

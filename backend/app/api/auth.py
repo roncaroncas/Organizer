@@ -6,44 +6,46 @@ from typing import List
 import secrets
 
 from app.models import User, Token
+from app.database.queries.auth_queries import getUserIdByCredentials, checkIfUsernameExists, createUser
 
 router = APIRouter()
 
 @router.post("/login")
-async def generate_token(user: User) -> (Token):
+async def generate_token(user: User) -> Token:
 
-    # 2) Se existe, criar um SESSION_ID no DB e retorna-lo como token <----- falta essa parte!!
+	# Verificar Login
+	userId = await getUserIdByCredentials(user.username, user.password)
 
-    sql = (f"SELECT id "
-        f"FROM users "
-        f" WHERE (username = ?) "
-        f" AND (password = ?) "
-        )
+	if not(userId):
+		raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    val = [user.username, user.password]
+	# Gerando Token
+	token = Token(token=secrets.token_hex(nbytes=16))
+	status = 10 #0 = Inativo, #10 = Ativo
+	validUntil = 0
 
-    row = db.cursor.execute(sql, val).fetchall()
+	# Desativar todos os outros tokens do mesmo user
+	query = '''
+		UPDATE authentication SET "statusId" = 0 WHERE "userId" = $1
+		'''
+	val = [userId]
+	await db.execute(query, val)
 
-    if len(row) != 1:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+	# Ativar o token novo
+	query = 'INSERT INTO "authentication" ("userId", "token", "statusId") VALUES ($1, $2, $3)'
+	val = [userId, token.token, status]
+	await db.execute(query, val)
+	
 
+	return token
 
-    #id = id (auto increment)
-    userId = row[0][0]
+@router.post("/new")
+async def create_account(user: User):
 
-    token = Token(token=secrets.token_hex(nbytes=16))
+	# Verificar se já existe!
 
-    status = 10 #0 = Inativo, #10 = Ativo
-    validUntil = 0
+	if await checkIfUsernameExists(user.username):
+		raise HTTPException(status_code=409, detail="User with this login already exists")  # 409 Conflict
 
-    #Desativar todos os outros tokens
-    db.cursor.execute("UPDATE tokenAuth SET status = 0 WHERE userId = ?", [userId])
+	await createUser(user.username, user.password)
 
-    #Ativar o token novo
-    db.cursor.execute("INSERT INTO tokenAuth (userId, token, status, validUntil) VALUES (?, ?, ?, ?)",
-        [userId, token.token, status, validUntil])
-    db.connection.commit()
-
-    logger.debug("salvei o token em tokenAuth!")
-
-    return token

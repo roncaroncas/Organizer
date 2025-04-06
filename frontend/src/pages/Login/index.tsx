@@ -61,7 +61,7 @@ function Login() {
 
   // ----- FETCHES ------ //
 
-  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/login', {   // RETORNA O TOKEN!!!!!
+  const { data, error, isLoading, fetchData } = useFetch('http://localhost:8000/account/login', {   // RETORNA O TOKEN!!!!!
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(formattedData)

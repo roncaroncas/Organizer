@@ -21,12 +21,12 @@ interface ModeState {
 
 interface Task {
   id: number
-  taskName: string
-  startDayTime: Date;
-  endDayTime: Date
+  name: string
+  startTimestamp: Date;
+  endTimestamp: Date
   place: string
   fullDay: boolean
-  taskDescription: string
+  description: string
   status: string
 }
 
@@ -90,12 +90,12 @@ function CalendarMonth({mode, tasks,onTaskClick, setModeAsDay, onNewTaskClick}:C
               <>
                 {dayTasks.slice(0, 3).map(task => (
                   <div key={"task__"+ task.id} className="calendarTask">
-                    {format(task.startDayTime, "HH:mm")}
+                    {format(task.startTimestamp, "HH:mm")}
                     <span
                       style={{ color: "blue", cursor: "pointer" }}
                       onClick={() => onTaskClick(task)}
                     >        
-                      ({task.id}): {task.taskName}
+                      ({task.id}): {task.name}
                     </span>
 
                   </div>
@@ -111,12 +111,12 @@ function CalendarMonth({mode, tasks,onTaskClick, setModeAsDay, onNewTaskClick}:C
             ) : (
               dayTasks.map(task => (
                 <div key={"task__"+ task.id} className="calendarTask">
-                  {format(task.startDayTime, "HH:mm")}
+                  {format(task.startTimestamp, "HH:mm")}
                   <a
                     href="#"
                     onClick={() => onTaskClick(task)}
                   >        
-                    ({task.id}): {task.taskName}
+                    ({task.id}): {task.name}
                   </a>
 
                 </div>
@@ -145,7 +145,7 @@ const calendarMonthBody = useMemo(() => {
 
     for (let i = 0; i < 7; i++) {
       const dayTasks = tasks.filter(
-        (task) => new Date(task.startDayTime).toDateString() === day.toDateString()
+        (task) => new Date(task.startTimestamp).toDateString() === day.toDateString()
       );
       week.push({
         day: day,
@@ -201,14 +201,14 @@ const calendarMonthBody = useMemo(() => {
 //   const { formValues, handleInputChange, /*getFormattedData */} = useForm<FormData>(
 //     {
 //       id: id ? id : 0,
-//       taskName: initialTask.taskName || "",
-//       startDay: initialTask.startDayTime ? format(initialTask.startDayTime, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-//       startTime: initialTask.startDayTime ? format(initialTask.startDayTime, "HH:mm") : "",
-//       endDay: initialTask.endDayTime ? format(initialTask.endDayTime, "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
-//       endTime: initialTask.endDayTime ? format(initialTask.endDayTime, "HH:mm") : "",
+//       name: initialTask.name || "",
+//       startDay: initialTask.startTimestamp ? format(initialTask.startTimestamp, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+//       startTime: initialTask.startTimestamp ? format(initialTask.startTimestamp, "HH:mm") : "",
+//       endDay: initialTask.endTimestamp ? format(initialTask.endTimestamp, "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
+//       endTime: initialTask.endTimestamp ? format(initialTask.endTimestamp, "HH:mm") : "",
 //       place: initialTask.place || "",
 //       fullDay: initialTask.fullDay || false,
-//       taskDescription: initialTask.taskDescription || "",
+//       description: initialTask.description || "",
 //     },
 //     formatTaskForAPI
 //   );
@@ -262,7 +262,7 @@ const calendarMonthBody = useMemo(() => {
 //         <form className="modal-content" onSubmit={handleSubmit}>
 //             <p className="modal-title">Novo evento</p>
 
-//             <input name="taskName" placeholder="Título do Evento" value={formValues.taskName} onChange={handleInputChange} type="text" /><br />
+//             <input name="name" placeholder="Título do Evento" value={formValues.name} onChange={handleInputChange} type="text" /><br />
 
 //             <div className="event-details">
 //               <section className="event-duration">
@@ -302,7 +302,7 @@ const calendarMonthBody = useMemo(() => {
 //               </label><br/>
 
 //               <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
-//               <input name="taskDescription" placeholder="Descrição" value={formValues.taskDescription} onChange={handleInputChange} type="text"/><br />
+//               <input name="description" placeholder="Descrição" value={formValues.description} onChange={handleInputChange} type="text"/><br />
 
 //             </div>
 //             <div className="form-footer">

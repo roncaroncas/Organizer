@@ -6,8 +6,6 @@ import FriendsTable from "./friendsTable"
 import AddFriendInput from "./addFriendInput"
 
 
-
-
 function Friends ()  {
 
   return (

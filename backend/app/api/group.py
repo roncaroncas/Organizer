@@ -5,172 +5,106 @@ from typing import List
 
 from app.models import User, Group
 
+from app.database.queries.auth_queries import getUserIdByToken
+from app.database.queries.group_queries import getAllGroupsByUserId, getGroupByIdWithMembers, addGroup
 
 router = APIRouter()
 
-@router.get("/get/{id}")
-async def get_group(id: int, request: Request) -> (Group):
-
-    sql = (f"SELECT users.id " 
-        f"FROM tokenAuth "
-        f"INNER JOIN users "
-        f"ON tokenAuth.userId = users.id "
-        f"WHERE token = ?")
-
-    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
-    
-    if row == None:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    else:
-        userId = row[0]
-
-
-    # Invited Tasks:
-    sql = (f"SELECT fg.id, fg.name, fg.description, u.id, u.name "
-        f"FROM friendGroup fg "
-        f"INNER JOIN usersToFriendGroups utfg ON utfg.friendGroupId = fg.id "
-        f"INNER JOIN users u ON utfg.userId = u.id "
-        f"WHERE fg.id = ?"
-        )
-
-    val = [id] 
-
-    rows = db.cursor.execute(sql, val).fetchall()
-
-    members = []
-
-    for r in rows:
-        logger.debug(r)
-        members.append(User(id=r[3], name=r[4]))
-
-
-    group = Group(
-        id=rows[0][0],
-        name=rows[0][1],
-        description=rows[0][2],
-        users=members
-    )
-
-
-    return group
 
 @router.get("/getAll")
 async def get_all_groups(request: Request) -> (List[Group]):
 
-    sql = (f"SELECT users.id " 
-        f"FROM tokenAuth "
-        f"INNER JOIN users "
-        f"ON tokenAuth.userId = users.id "
-        f"WHERE token = ?")
+	# Check if logged in
+	userId = await getUserIdByToken(str(request.cookies.get("token")))
+	if not(userId):
+		raise HTTPException(status_code=401, detail="Not logged in")
 
-    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
-    
-    if row == None:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    else:
-        userId = row[0]
+	# Get Groups
+	rows = await getAllGroupsByUserId(userId)
 
+	#Convert to Pydantic model
+	groups = []
 
-    # Invited Tasks:
-    sql = (f"SELECT fg.id, fg.name, fg.description "
-        f"FROM friendGroup fg "
-        f"INNER JOIN usersToFriendGroups utfg ON utfg.friendGroupId = fg.id "
-        f"INNER JOIN users u ON utfg.userId = u.id "
-        f"WHERE u.id = ?"
-        )
-
-    logger.debug(sql)
-
-    val = [userId] 
-
-    rows = db.cursor.execute(sql, val).fetchall()
-
-    logger.debug(rows)
+	for r in rows:		
+		groups.append(Group(
+			id=r['id'],
+			name=r['name'],
+			description=r['description'],
+			users=[]
+		))
 
 
-    groups = []
-
-    for r in rows:
-        
-        groups.append(Group(
-            id=r[0],
-            name=r[1],
-            description=r[2],
-            users=[]
-        ))
-
-    return groups
+	return groups
 
 
-@router.post("/addNew")
-async def get_group(group: Group, request: Request) -> (Group):
+@router.get("/get/{id}")
+async def get_group(id: int, request: Request) -> (Group):
 
-    sql = (f"SELECT users.id " 
-        f"FROM tokenAuth "
-        f"INNER JOIN users "
-        f"ON tokenAuth.userId = users.id "
-        f"WHERE token = ?")
+	# Check if logged in
+	userId = await getUserIdByToken(str(request.cookies.get("token")))
+	if not(userId):
+		raise HTTPException(status_code=401, detail="Not logged in")
 
-    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
-    
-    if row == None:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    else:
-        userId = row[0]
+	# Get Group:
+	rows = await getGroupByIdWithMembers(id)
 
-    #CRIANDO NEW GROUP
-    sql = (f"INSERT INTO friendGroup "
-        f"(name, description) "
-        f"VALUES (?, ?) "
-        f"RETURNING id")
+	logger.debug(rows)
+  
+	members = []
+	for r in rows:
+		logger.debug(r)
+		members.append(User(id=r['userId'], name=r['userName']))
 
-    val = [group.name, group.description] 
+	group = Group(
+		id=rows[0]['groupId'],
+		name=rows[0]['groupName'],
+		description=rows[0]['description'],
+		users=members
+	)
 
-    groupId = db.cursor.execute(sql, val).fetchone()[0]
-    db.connection.commit()
+	return group
 
-    #CONECTANDO GRUPO AO USUARIO
-    sql = (f"INSERT INTO usersToFriendGroups "
-        f"(userId, friendGroupId) "
-        f"VALUES (?, ?) "
-        )
+@router.post("/add")
+async def add_group(group: Group, request: Request) -> (Group):
 
-    val = [userId, groupId]
+	# Check if logged in
+	userId = await getUserIdByToken(str(request.cookies.get("token")))
+	if not(userId):
+		raise HTTPException(status_code=401, detail="Not logged in")
 
-    db.cursor.execute(sql, val)
-    db.connection.commit()
-
-
-    return group
-
-@router.post("/inviteMember/{id}")
-async def get_group(id: int, user: User, request: Request) -> bool:
-
-    sql = (f"SELECT users.id " 
-        f"FROM tokenAuth "
-        f"INNER JOIN users "
-        f"ON tokenAuth.userId = users.id "
-        f"WHERE token = ?")
-
-    row = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
-    
-    if row == None:
-        raise HTTPException(status_code=401, detail="Not logged in")
-    else:
-        userId = row[0]
-
-    #CONECTANDO GRUPO AO USUARIO
-    sql = (f"INSERT INTO usersToFriendGroups "
-        f"(userId, friendGroupId) "
-        f"VALUES (?, ?) "
-        )
-
-    val = [user.id, id]
-
-    logger.debug(val)
-
-    db.cursor.execute(sql, val)
-    db.connection.commit()
+	await addGroup(group.name, group.description, userId)
 
 
-    return True
+	return group
+
+# @router.post("/inviteMember/{id}")
+# async def get_group(id: int, user: User, request: Request) -> bool:
+
+# 	query = (f"SELECT users.id " 
+# 		f"FROM tokenAuth "
+# 		f"INNER JOIN users "
+# 		f"ON tokenAuth.userId = users.id "
+# 		f"WHERE token = ?")
+
+# 	row = db.cursor.execute(query, [str(request.cookies.get("token"))]).fetchone()
+	
+# 	if row == None:
+# 		raise HTTPException(status_code=401, detail="Not logged in")
+# 	else:
+# 		userId = row[0]
+
+# 	#CONECTANDO GRUPO AO USUARIO
+# 	query = (f"INSERT INTO usersToFriendGroups "
+# 		f"(userId, friendGroupId) "
+# 		f"VALUES (?, ?) "
+# 		)
+
+# 	val = [user.id, id]
+
+# 	logger.debug(val)
+
+# 	db.cursor.execute(query, val)
+# 	db.connection.commit()
+
+
+# 	return True

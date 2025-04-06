@@ -3,13 +3,23 @@ import useFetch from "../../hooks/useFetch";
 
 //----------------
 
-interface Tempo {
-  id: number;
-  name: string;
-  parentId: number | null
+interface TempoTempo {
+  childId: number
+  parentId: number
   [key: string]: any;
 }
 
+interface Tempo {
+  id: number
+  name: string
+  startDayTime: Date
+  endDayTime: Date
+  place: string
+  fullDay: boolean
+  taskDescription: string
+  status: string
+  parentId: int
+}
 //---------------
 
 function CalendarTempos() {
@@ -17,7 +27,7 @@ function CalendarTempos() {
   const [tempos, setTempos] = useState<Tempo[]>([]);
   
   // ------FETCHES-------------- //
-  const { data, fetchData } = useFetch('http://localhost:8000/myTaskGroups', {
+  const { data, fetchData } = useFetch('http://localhost:8000/tempo/getAllWithParent', {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -29,10 +39,15 @@ function CalendarTempos() {
 
   useEffect(() => {
     if (data) {
-      console.log(data)
       setTempos(data);
     }
   }, [data]);
+
+  // useEffect(() => {
+  //   if (tempos) {
+  //     console.log("Tempos:",  tempos);
+  //   }
+  // }, [tempos]);
 
   // Build a tree structure from flat data
   const buildTree = (tempos: Tempo[]) => {
@@ -77,7 +92,7 @@ function CalendarTempos() {
   return (
     <div className="checkbox-tempo">
       <h3>
-        Tempos <a href="/taskGroups">⚙️</a>
+        Filtros {/*<a href="/taskGroups">⚙️</a>*/}
       </h3>
       {treeData.map((root) => renderTree(root))}
     </div>

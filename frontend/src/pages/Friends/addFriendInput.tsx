@@ -8,7 +8,7 @@ function AddFriendInput() {
   async function addFriend(friendId: string) {
     console.log(friendId);
 
-    const results = await fetch('http://localhost:8000/addFriend', {
+    const results = await fetch('http://localhost:8000/friend/add', {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -30,7 +30,7 @@ function AddFriendInput() {
       console.log("Amigo não existe :(");
     }
 
-    navigate(0);
+    // navigate(0); PORCO!
   }
 
   return (

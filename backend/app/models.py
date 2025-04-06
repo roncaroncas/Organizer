@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, List
+from datetime import datetime
 
 class User(BaseModel):  #FROM users
     id: Optional[int] = None
@@ -24,26 +25,37 @@ class Group(BaseModel): #Groups
     description: Optional[str] = None
     users: Optional[List[User]] = None
 
-class Task(BaseModel):
+class Tempo(BaseModel):
     id: Optional[int] = None
-    taskName: str
-    startDayTime: str   #salvo em timestamp!
-    endDayTime: str   #salvo em timestamp!
+    name: str
+    startTimestamp: str   #salvo em timestamp!
+    endTimestamp: str   #salvo em timestamp!
     place: Optional[str]
     fullDay: bool
-    taskDescription: str
+    description: str
     status: Optional[str] = None
+    parentId: Optional[int] = None
 
-class GroupTask(BaseModel):
-    id: Optional[int]
-    name: str
-    parentId: Optional[int]
+# class GroupTask(BaseModel):
+#     id: Optional[int]
+#     name: str
+#     parentId: Optional[int]
 
 class Post(BaseModel):
     id: Optional[int] = None
     authorName: Optional[str] = None
     authorId: Optional[int] = None
-    groupPostId: Optional[int] = None
+    groupId: Optional[int] = None
     text: str
-    timestamp: Optional[str] = None
+    timestamp: Optional[datetime] = None
     type: Optional[str] = None
+
+class Notification(BaseModel):
+    id: Optional[int] = None
+    name: Optional[str] = None
+    statusId: Optional[int] = None
+
+class Profile(BaseModel):
+    id: int
+    name: str
+    birthday: Optional[datetime]

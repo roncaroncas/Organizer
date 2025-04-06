@@ -1,0 +1,1 @@
+pg_dump -U postgres -d TempoDB --schema-only --no-owner -f full_schema_dump.sql

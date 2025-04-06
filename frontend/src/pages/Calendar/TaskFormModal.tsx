@@ -91,21 +91,21 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
 
   // --------- DEBUG ------------ //
 
-  useEffect(() => {
-    console.log(formValues)
-  },[])
+  // useEffect(() => {
+  //   console.log(formValues)
+  // },[])
 
 
   // ------------------- CONTROLE DO FETCH ----------------
 
-  const { data, fetchData:createTask } = useFetch('http://localhost:8000/createTask', {
+  const { data, fetchData:createTask } = useFetch('http://localhost:8000/tempo/create', {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formatTaskForAPI(formValues))
   }) 
 
-  const { data:data_updated, fetchData:updateTask } = useFetch('http://localhost:8000/updateTask', {
+  const { data:data_updated, fetchData:updateTask } = useFetch('http://localhost:8000/tempo/update', {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

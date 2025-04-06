@@ -11,7 +11,7 @@ import Calendar from "./pages/Calendar/index";
 import Profile from "./pages/Profile/index";
 import Profile_id from "./pages/Profile/Profile_id";
 
-import CalendarGroupsManager from "./pages/TaskGroups/CalendarGroupsManager"
+// import CalendarGroupsManager from "./pages/TaskGroups/CalendarGroupsManager"
 
 import Login from "./pages/Login/index";
 import CreateAccount from "./pages/Login/CreateAccount";
@@ -54,7 +54,7 @@ function App() {
           <Route path="/groups" element = {<FriendsGroups/>} />
           <Route path="/group/:id" element = {<GroupPage/>} />
           <Route path="/calendar" element = {<Calendar/>} />
-          <Route path="/taskGroups" element = {<CalendarGroupsManager/>} />
+          {/*<Route path="/taskGroups" element = {<CalendarGroupsManager/>} />*/}
           <Route path="/profile" element = {<Profile/>} />
           <Route path="/profile/:id" element = {<Profile_id/>} />
 
