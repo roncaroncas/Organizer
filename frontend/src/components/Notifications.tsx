@@ -1,16 +1,16 @@
 import {useState, useEffect} from "react"
-// import {useNavigate} from 'react-router-dom'
 
 import useFetch from "../hooks/useFetch";
 
-interface updStatus {
-    idUserTask: number,
-    newStatus: number,
+interface updTempo {
+    tempoId: number,
+    newStatusId: number,
 }
 
 interface Notification {
-  id: number;
-  taskName: string;
+  id: number
+  name: string
+  statusId: number
 }
 
 function Notifications ()  {
@@ -18,9 +18,9 @@ function Notifications ()  {
   // let navigate = useNavigate()
   let [notificationsList, setNotificationsList] = useState<Notification[]>([])
 
-  let [updateStatus, setUpdateStatus] = useState<updStatus>({
-    idUserTask: 0,
-    newStatus: 0,
+  let [updateTempo, setUpdateTempo] = useState<updTempo>({
+    tempoId: 0,
+    newStatusId: 0,
   })
 
 
@@ -37,7 +37,7 @@ function Notifications ()  {
     method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updateStatus)
+    body: JSON.stringify(updateTempo)
   });
 
   useEffect(() => {
@@ -46,37 +46,39 @@ function Notifications ()  {
 
 
   useEffect(() => {
-    if (Array.isArray(data)) {
-      // Convert tuples into objects
-      const formattedData = data.map(([id, taskName]) => ({
-        id,
-        taskName,
-      }));
-      setNotificationsList(formattedData);
+    if (data) {
+      setNotificationsList(data);
     }
   }, [data]);
 
+  // useEffect(() => {
+  //   if (notificationsList) {
+  //     console.log("Notification List:", notificationsList)
+  //   }
+  // }, [notificationsList])
+
+
   useEffect(() => {
-    if (updateStatus.idUserTask && updateStatus.newStatus) {
+    if (updateTempo.tempoId && updateTempo.newStatusId) {
      fetchData_update()
      fetchData()
     }
-  }, [updateStatus])
+  }, [updateTempo])
 
 
   // ------ EVENT HANDLERS --------- //
 
-  async function handleChangeStatus (idUserTask: number, newStatus: number){
+  async function handleChangeStatus (tempoId: number, newStatusId: number){
 
-    // newStatus:
+    // newStatusId:
     //   0 = Invited,
     //  10 = Maybe,
     //  20 = Confirmed,
     //  30 = Declined
 
-    setUpdateStatus({
-      idUserTask,
-      newStatus,
+    setUpdateTempo({
+      tempoId,
+      newStatusId,
     })
   }
 
@@ -110,14 +112,14 @@ function Notifications ()  {
           {notificationsList.map((notification: Notification) => (
             <tr key={notification.id}>
               <td>{notification.id}</td>
-              <td><a>{notification.taskName}</a></td>
+              <td><a>{notification.name}</a></td>
               <td>
-                <button className="btn accept" onClick={() => handleChangeStatus(notification.id, 20)}>
+                <button className="btn accept" onClick={() => handleChangeStatus(notification.id, 2)}>
                   Accept
                 </button>
               </td>
               <td>
-                <button className="btn reject" onClick={() => handleChangeStatus(notification.id, 30)}>
+                <button className="btn reject" onClick={() => handleChangeStatus(notification.id, 3)}>
                   Decline
                 </button>
               </td>

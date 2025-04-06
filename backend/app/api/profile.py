@@ -20,14 +20,11 @@ async def my_profile(request: Request):
 
     userData = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchone()
 
-    # logger.debug(userData)
-    
     return userData
 
 @router.get("/profile/{id}")
 async def get_profile_by_id(id: int, request: Request):
 
-    # logger.debug(id)
 
     sql = (f"SELECT users.id, users.name, users.dateOfBirth " 
         f"FROM users "

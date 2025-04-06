@@ -5,11 +5,12 @@ from typing import List
 
 from datetime import datetime ### SOLUÇÃO TEMPORAAAAARIA!!! TEM QUE TIRAR SAPORRA!
 
-from app.models import Task
+from app.models import Tempo
 
 from app.database.queries.auth_queries import getUserIdByToken
 from app.database.queries.tempo_queries import (
     getAllTemposByUserId,
+    getAllTemposWithParentByUserId,
     createNewTempo,
     connectTempoToUser,
     updateTempo)
@@ -17,7 +18,7 @@ from app.database.queries.tempo_queries import (
 router = APIRouter()
 
 @router.get("/getAll")
-async def my_tempos(request: Request) -> List[Task]:
+async def my_tempos(request: Request) -> List[Tempo]:
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -30,16 +31,37 @@ async def my_tempos(request: Request) -> List[Task]:
     # CONVERT TEMPOS TO MODEL
     tempos = []
     for r in rows:
-        tempos.append(Task(
-            id= r['id'], taskName= r['name'], startDayTime= r['startTime'].strftime('%Y-%m-%d %H:%M:%S'),
-            endDayTime= r['endTime'].strftime('%Y-%m-%d %H:%M:%S'), place= r['place'], fullDay= r['fullDay'],
-            taskDescription= r['description'], status=r['text']))
+        tempos.append(Tempo(
+            id= r['id'], name= r['name'], startTimestamp= r['startTimestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+            endTimestamp= r['endTimestamp'].strftime('%Y-%m-%d %H:%M:%S'), place= r['place'], fullDay= r['fullDay'],
+            description= r['description'], status=r['text']))
 
     return (tempos)
 
+@router.get("/getAllWithParent")
+async def my_tempos(request: Request) -> List[Tempo]:
+
+    # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    # GET ALL TEMPOS LINKED TO USER ID
+    rows = await getAllTemposWithParentByUserId(userId)
+
+    # CONVERT TEMPOS TO MODEL
+    tempos = []
+    for r in rows:
+        tempos.append(Tempo(
+            id= r['id'], name= r['name'], startTimestamp= r['startTimestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+            endTimestamp= r['endTimestamp'].strftime('%Y-%m-%d %H:%M:%S'), place= r['place'], fullDay= r['fullDay'],
+            description= r['description'], status=r['text'], parentId=r['parentId']))
+
+    return (tempos)   
+
     
 @router.post("/create")
-async def create_tempo(task: Task, request: Request) -> (bool):
+async def create_tempo(task: Tempo, request: Request) -> (bool):
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -47,16 +69,16 @@ async def create_tempo(task: Task, request: Request) -> (bool):
         raise HTTPException(status_code=401, detail="Not logged in")
 
     #CRIANDO TEMPO
-    timestamp_startTime = datetime.strptime(task.startDayTime[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-    timestamp_endTime = datetime.strptime(task.endDayTime[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_startTime = datetime.strptime(task.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_endTime = datetime.strptime(task.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
 
     tempoId = await createNewTempo(
-        name = task.taskName,
-        startTime = timestamp_startTime,
-        endTime = timestamp_endTime,
+        name = task.name,
+        startTimestamp = timestamp_startTime,
+        endTimestamp = timestamp_endTime,
         place = task.place,
         fullDay = task.fullDay,
-        description = task.taskDescription,
+        description = task.description,
         )
 
     # CONECTANDO O TEMPO AO USUARIO
@@ -66,7 +88,7 @@ async def create_tempo(task: Task, request: Request) -> (bool):
     return True
 
 @router.put("/update")
-async def update_tempo(task: Task, request: Request) -> (bool):
+async def update_tempo(task: Tempo, request: Request) -> (bool):
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -76,21 +98,22 @@ async def update_tempo(task: Task, request: Request) -> (bool):
 
     #ATUALIZANDO TEMPO
 
-    timestamp_startTime = datetime.strptime(task.startDayTime[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-    timestamp_endTime = datetime.strptime(task.endDayTime[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_startTime = datetime.strptime(task.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_endTime = datetime.strptime(task.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
     
     await updateTempo(
-        name= task.taskName,
-        startTime= timestamp_startTime,
+        name= task.name,
+        startTimestamp= timestamp_startTime,
         endTime= timestamp_endTime,
         place= task.place,
         fullDay= task.fullDay,
-        description= task.taskDescription,
+        description= task.description,
         id= task.id,
         )
 
     #RETURN
     return True
+
 
 # @router.get("/task/{taskId}")
 # async def get_tempo_by_id(taskId: int, request: Request):
@@ -106,7 +129,7 @@ async def update_tempo(task: Task, request: Request) -> (bool):
 # async def get_task_by_id_user(taskId: int, request: Request):
 
 #     query = (f"SELECT u.id, u.name " 
-#         f"FROM usersTasks ut "
+#         f"FROM usersTempos ut "
 #         f"LEFT JOIN users u "
 #         f"ON u.id = ut.userId "
 #         f"WHERE ut.taskId = ?")
@@ -120,7 +143,7 @@ async def update_tempo(task: Task, request: Request) -> (bool):
 
 #     # logger.debug(userId)
 
-#     query = (f"INSERT INTO usersTasks "
+#     query = (f"INSERT INTO usersTempos "
 #         f"(userId, taskId) "
 #         f"VALUES (?, ?)")
 

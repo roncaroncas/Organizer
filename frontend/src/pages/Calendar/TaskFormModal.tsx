@@ -91,9 +91,9 @@ function TaskFormModal({id, closeModal,  triggerRender, initialTask = {}}: TaskM
 
   // --------- DEBUG ------------ //
 
-  useEffect(() => {
-    console.log(formValues)
-  },[])
+  // useEffect(() => {
+  //   console.log(formValues)
+  // },[])
 
 
   // ------------------- CONTROLE DO FETCH ----------------

@@ -4,7 +4,8 @@ from app.database.connection import db
 
 async def getAllTemposByUserId(userId):
 
-	query = ('SELECT t."id", t."name", t."startTime", t."endTime", t."place", t."fullDay", t."description", l."text" \
+	query = (
+		'SELECT t."id", t."name", t."startTimestamp", t."endTimestamp", t."place", t."fullDay", t."description", l."text" \
 		FROM "tempo" AS t \
 		LEFT JOIN "user_tempo" AS ut ON ut."tempoId" = t."id" \
 		LEFT JOIN "user" AS u ON u."id" = ut."userId" \
@@ -17,12 +18,30 @@ async def getAllTemposByUserId(userId):
 
 	return rows
 
+async def getAllTemposWithParentByUserId(userId):
+
+	query = (
+		'SELECT t."id", t."name", t."startTimestamp", t."endTimestamp", t."place", t."fullDay", t."description", l."text", tt."parentId" \
+		FROM tempo AS t \
+		LEFT JOIN "tempo_tempo" AS tt ON tt."childId" = t."id" \
+		LEFT JOIN "user_tempo" AS ut ON ut."tempoId" = t."id" \
+		LEFT JOIN "user" AS u ON u."id" = ut."userId"\
+		LEFT JOIN "lookup" AS l ON l."id" = ut."statusId" \
+		WHERE u."id" = $1; \
+		')
+
+	val = [userId]
+
+	rows = await db.fetch(query, val)
+
+	return rows
+
 # CREATE
 
 async def createNewTempo(name, startTime, endTime, place, fullDay, description):
 
 	query = ('INSERT INTO "tempo" \
-		("name", "startTime", "endTime", "place", "fullDay", "description") \
+		("name", "startTimestamp", "endTimestamp", "place", "fullDay", "description") \
 		VALUES ($1, $2, $3, $4, $5, $6) \
 		RETURNING "id"')
 
@@ -47,7 +66,7 @@ async def connectTempoToUser(tempoId, userId):
 async def updateTempo(name, startTime, endTime, place, fullDay, description, id):
 
 	query = ('UPDATE "tempo" \
-		SET "name" = $1, "startTime" = $2, "endTime" = $3, "place" = $4, "fullDay" = $5, "description" = $6 \
+		SET "name" = $1, "startTimestamp" = $2, "endTimestamp" = $3, "place" = $4, "fullDay" = $5, "description" = $6 \
 		WHERE id = $7')
 
 	val = [name, startTime, endTime, place, fullDay, description, id]

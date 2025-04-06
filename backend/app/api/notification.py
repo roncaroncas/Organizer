@@ -4,66 +4,37 @@ from app.config import logger
 from typing import List
 
 # from app.models import User, Token
+from app.models import Notification
+
+from app.database.queries.auth_queries import getUserIdByToken
+from app.database.queries.notification_queries import getAllNotificationsByUserId, updateStatusByUserTempoId
 
 
 router = APIRouter()
 
 @router.get("/getAll")
-async def get_all_notifications(request: Request):
+async def get_all_notifications(request: Request) -> List:
 
-    #USER ID
-    sql = (f"SELECT users.id " 
-        f"FROM tokenAuth "
-        f"INNER JOIN users "
-        f"ON tokenAuth.userId = users.id "
-        f"WHERE token = ?")
-
-    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+    # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
 
     # Invited Tasks:
+    rows = await getAllNotificationsByUserId(userId)
 
-    sql = (f"SELECT ut.id, t.taskName "
-        f"FROM tasks t "
-        f"INNER JOIN usersTasks ut ON t.id = ut.taskId "
-        f"WHERE ut.userId = ? and ut.statusId = ?"
-        )
-
-    val = [userId, 0]   #ut.taskStatus = 0 -> "Invited"
-
-    results = db.cursor.execute(sql, val).fetchall()
-
-    return results
+    return [Notification(**dict(row)) for row in rows]
+    
 
 @router.put("/updateStatus")
 async def update_notification_status(body: dict, request: Request):
 
-    #USER ID
-    sql = (f"SELECT users.id " 
-        f"FROM tokenAuth "
-        f"INNER JOIN users "
-        f"ON tokenAuth.userId = users.id "
-        f"WHERE token = ?")
-
-    userId = db.cursor.execute(sql, [str(request.cookies.get("token"))]).fetchall()[0][0]
+    # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
 
     # Invited Tasks:
-    sql = (f"UPDATE usersTasks "
-        f"SET statusId = ? "
-        # f"FROM usersTasks  "
-        # f"INNER JOIN users u on ut.userId = u.id " 
-        f"WHERE usersTasks.id = ?"
-        # f"WHERE ut.id = ? and u.id = ?"
-        )
-
-    logger.debug(sql)
-
-    # val = [body['idUserTask'], userId]   #ut.taskStatus = 0 -> "Invited"
-    val = [body['newStatus'], body['idUserTask']]  #ut.taskStatus = 0 -> "Invited"
-
-    logger.debug(val)
-
-
-    db.cursor.execute(sql, val)
-    db.connection.commit()
-
+    await updateStatusByUserTempoId(userId, body['tempoId'], body['newStatusId'])
+   
     return True
