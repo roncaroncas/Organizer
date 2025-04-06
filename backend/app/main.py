@@ -1,12 +1,20 @@
 import uvicorn
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import router
 from app.config import origins
 from app.database.connection import db
 
+from app.exception_handlers import validation_exception_handler, generic_exception_handler
+from fastapi.exceptions import RequestValidationError
+
 # FastAPI app
 app = FastAPI()
+
+# Register global exception handlers
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
 
 # CORS settings
 app.add_middleware(
@@ -23,7 +31,7 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
-    await db._pool.close()  # Gracefully close the database connection
+    await db._pool.close()
 
 # Include API routes
 app.include_router(router)
