@@ -8,8 +8,7 @@ logger.setLevel(logging.DEBUG)
 
 # Handler for validation errors (422)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logger.error("⚠️ Validation error 422 - Pydantic:")
-    logger.error(f"⚠️ URL: {request.url}")
+    logger.error("⚠️ Validation error 422 (Pydantic) at {request.url}:")
     logger.error(f"⚠️ Errors: {exc.errors()}")
     logger.error(f"⚠️ Body: {await request.body()}")
     return JSONResponse(

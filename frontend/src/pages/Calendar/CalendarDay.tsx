@@ -3,18 +3,18 @@ import {useState, useRef, useEffect} from 'react'
 import { format /*, startOfMonth, endOfMonth, startOfWeek, endOfWeek, getISOWeek */} from "date-fns";
 // import { addDays, addMonths, addYears } from "date-fns";
 
-interface Task {
+interface Tempo {
 	id: number
-	taskName: string
-	startDayTime: Date;
-	endDayTime: Date
+	name: string
+	startTimestamp: Date;
+	endTimestamp: Date
 	place: string
 	fullDay: boolean
-	taskDescription: string
+	description: string
 	status: string
 }
 
-interface TaskGeometry {
+interface TempoGeometry {
 	id: number,
 	overlaps: number[],
 	horizontalOffset: number,
@@ -22,64 +22,55 @@ interface TaskGeometry {
 }
 
 
-interface ModeState {
-	mode: "Month" | "Week" | "Day"
+interface GridState {
+	grid: "Month" | "Week" | "Day"
 	param: number
 	day: Date
 }
 
 interface CalendarDayProps{
-	mode: ModeState,
-	tasks: Task[]
-	onTaskClick: OnTaskClick
+	grid: GridState,
+	tempos: Tempo[]
+	onTempoClick: OnTempoClick
 }
 
-type OnTaskClick = (task: Task) => void;
+type OnTempoClick = (tempo: Tempo) => void;
 
 
 // ------ CALENDAR DAY ------- //
 
 
-function CalendarDay({mode, tasks, onTaskClick}:CalendarDayProps) {
+function CalendarDay({grid, tempos, onTempoClick}:CalendarDayProps) {
 
-  // const calendarDayHeader = [
-// 	<div key="dayHeader">
-  //     <h2>
-  //       <span onClick={()=>changeDay(-1)}> - </span>
-  //       {format(mode.day, "dd/MM/yyyy")}
-  //       <span onClick={()=>changeDay(+1)}> + </span>
-  //     </h2>
-  //   </div>
-  // ]
-
-  const [tasksGeometry, setTasksGeometry] = useState<TaskGeometry[]>([]);
-  const taskRefs = useRef<{ [key: number]: HTMLDivElement}>({});
+  const [temposGeometry, setTemposGeometry] = useState<TempoGeometry[]>([]);
+  const tempoRefs = useRef<{ [key: number]: HTMLDivElement}>({});
 
   // // LOAD EMPTY TASKS GEOMETRY
   useEffect(() => {
-    console.log("Resetando tasksGeometry!")
-    const dayTasks = tasks.filter(
-      (task) => new Date(task.startDayTime).toDateString() === mode.day.toDateString()
+    console.log("Resetando temposGeometry!")
+    console.log("tempos: ", tempos)
+    const dayTempos = tempos.filter(
+      (tempo) => new Date(tempo.startTimestamp).toDateString() === grid.day.toDateString()
     );
-    setTasksGeometry(
-      dayTasks.map((task) => ({
-        id: task.id,
+    setTemposGeometry(
+      dayTempos.map((tempo) => ({
+        id: tempo.id,
         width: 0, // Default
         horizontalOffset: 0, // Default
         overlaps: [], // Default
       }))
     );
-  }, [tasks, mode]);
+  }, [tempos, grid]);
 
   // CALCULATING ALL WIDTHS
-	function setTaskGeometryWidth(task: Task, width: number) {
-    const taskGeom = tasksGeometry.find((taskGeom) => taskGeom.id === task.id);
-    if (!taskGeom) return;
+	function setTempoGeometryWidth(tempo: Tempo, width: number) {
+    const tempoGeom = temposGeometry.find((tempoGeom) => tempoGeom.id === tempo.id);
+    if (!tempoGeom) return;
 
-    if (width != taskGeom.width){
-      setTasksGeometry((prevGeometry) =>
+    if (width != tempoGeom.width){
+      setTemposGeometry((prevGeometry) =>
         prevGeometry.map((t) =>
-          t.id === task.id ? { ...t, width, offset: 0 } : { ...t, offset: 0 } // resseta todos os offsets!
+          t.id === tempo.id ? { ...t, width, offset: 0 } : { ...t, offset: 0 } // resseta todos os offsets!
         )
       )
     }
@@ -87,99 +78,99 @@ function CalendarDay({mode, tasks, onTaskClick}:CalendarDayProps) {
 
   // CALCULATING OFFSETS AFTER CALCULATE ALL WIDTHS!
 
-  function calculateAllOffsetsGeometry(dayTasks: Task[]) {
+  function calculateAllOffsetsGeometry(dayTempos: Tempo[]) {
 
-	  setTasksGeometry((prevGeometry) =>
-	    prevGeometry.map((taskGeom, index) => {
-	      // Find the task from dayTasks based on task id
-	      const task = dayTasks.find((task: Task) => task.id === taskGeom.id);
-	      if (!task) return taskGeom;
+	  setTemposGeometry((prevGeometry) =>
+	    prevGeometry.map((tempoGeom, index) => {
+	      // Find the tempo from dayTempos based on tempo id
+	      const tempo = dayTempos.find((tempo: Tempo) => tempo.id === tempoGeom.id);
+	      if (!tempo) return tempoGeom;
 
-	      // Find overlapping tasks from the previous tasks (tasks processed before this one)
-	      const overlappingTasks = prevGeometry.slice(0, index).filter((t) => {
-	        const otherTask = dayTasks.find((task: Task) => task.id === t.id);
-	        if (!otherTask) return false;
+	      // Find overlapping tempos from the previous tempos (tempos processed before this one)
+	      const overlappingTempos = prevGeometry.slice(0, index).filter((t) => {
+	        const otherTempo = dayTempos.find((tempo: Tempo) => tempo.id === t.id);
+	        if (!otherTempo) return false;
 
-	        const taskStart = new Date(task.startDayTime);
-	        const taskEnd = new Date(task.endDayTime);
-	        const otherStart = new Date(otherTask.startDayTime);
-	        const otherEnd = new Date(otherTask.endDayTime);
+	        const tempoStart = new Date(tempo.startTimestamp);
+	        const tempoEnd = new Date(tempo.endTimestamp);
+	        const otherStart = new Date(otherTempo.startTimestamp);
+	        const otherEnd = new Date(otherTempo.endTimestamp);
 
-	        // Check if the tasks overlap
-	        return taskStart < otherEnd && taskEnd > otherStart;
+	        // Check if the tempos overlap
+	        return tempoStart < otherEnd && tempoEnd > otherStart;
 	      });
 
-	      // Calculate the new horizontal offset based on the maximum offset of the overlapping tasks
-	      const newOffset = 50 + // Starting position for the first task
+	      // Calculate the new horizontal offset based on the maximum offset of the overlapping tempos
+	      const newOffset = 50 + // Starting position for the first tempo
 	        Math.max(
 	          0,
-	          ...overlappingTasks.map((t) => {
-	            const prevTaskGeom = prevGeometry.find((tg) => tg.id === t.id);
-	            return prevTaskGeom ? prevTaskGeom.horizontalOffset + prevTaskGeom.width + 5 : 50;
+	          ...overlappingTempos.map((t) => {
+	            const prevTempoGeom = prevGeometry.find((tg) => tg.id === t.id);
+	            return prevTempoGeom ? prevTempoGeom.horizontalOffset + prevTempoGeom.width + 5 : 50;
 	          })
 	        );
 
-	      return { ...taskGeom, horizontalOffset: newOffset };
+	      return { ...tempoGeom, horizontalOffset: newOffset };
 	    })
 	  );
 	}
 
   useEffect(() => {
-    console.log("tasksGeometry changed: ", tasksGeometry)
+    console.log("temposGeometry changed: ", temposGeometry)
     if (
-      tasksGeometry.some((task) => task.horizontalOffset === 0) &&
-      tasksGeometry.every((task) => task.width > 0)
+      temposGeometry.some((tempo) => tempo.horizontalOffset === 0) &&
+      temposGeometry.every((tempo) => tempo.width > 0)
     ) {
       console.log("Calculating offsets...");
-      const dayTasks = tasks.filter(
-        (task) => new Date(task.startDayTime).toDateString() === mode.day.toDateString()
+      const dayTempos = tempos.filter(
+        (tempo) => new Date(tempo.startTimestamp).toDateString() === grid.day.toDateString()
       );
-      calculateAllOffsetsGeometry(dayTasks);
+      calculateAllOffsetsGeometry(dayTempos);
 
     }
-  }, [tasksGeometry]);
+  }, [temposGeometry]);
 
 
   // CALCULATE ALL OVERLAPS!
-  function setTaskOverlaps(task: Task) {
+  function setTempoOverlaps(tempo: Tempo) {
 
-    const taskGeom = tasksGeometry.find((taskGeom:TaskGeometry) => taskGeom.id === task.id);
-    if (!taskGeom) return;
+    const tempoGeom = temposGeometry.find((tempoGeom:TempoGeometry) => tempoGeom.id === tempo.id);
+    if (!tempoGeom) return;
 
-    // Get the start and end times for the current task
-    const taskStart = new Date(task.startDayTime);
-    const taskEnd = new Date(task.endDayTime);
+    // Get the start and end times for the current tempo
+    const tempoStart = new Date(tempo.startTimestamp);
+    const tempoEnd = new Date(tempo.endTimestamp);
 
-    // Find overlapping tasks
-    const overlappingTasks = tasksGeometry.filter((otherTaskGeom:TaskGeometry) => {
+    // Find overlapping tempos
+    const overlappingTempos = temposGeometry.filter((otherTempoGeom:TempoGeometry) => {
 
-      const otherTask = tasks.find((t) => t.id === otherTaskGeom.id);
+      const otherTempo = tempos.find((t) => t.id === otherTempoGeom.id);
 
-      if (!otherTask || otherTask.id >= task.id) return false;
+      if (!otherTempo || otherTempo.id >= tempo.id) return false;
 
-      const otherStart = new Date(otherTask.startDayTime);
-      const otherEnd = new Date(otherTask.endDayTime);
+      const otherStart = new Date(otherTempo.startTimestamp);
+      const otherEnd = new Date(otherTempo.endTimestamp);
 
-      // Check if the tasks overlap
-      return taskStart < otherEnd && taskEnd > otherStart;
+      // Check if the tempos overlap
+      return tempoStart < otherEnd && tempoEnd > otherStart;
     });
 
-    const newOverlaps = overlappingTasks.map((t) => t.id);
+    const newOverlaps = overlappingTempos.map((t) => t.id);
 
     // Update the state only if the overlaps have changed
-    if (JSON.stringify(newOverlaps) !== JSON.stringify(taskGeom.overlaps)) {
-      setTasksGeometry((prevTasksGeometry) =>
-        prevTasksGeometry.map((taskGeom) =>
-          taskGeom.id === task.id
-            ? { ...taskGeom, overlaps: newOverlaps } // Store overlap ids
-            : taskGeom
+    if (JSON.stringify(newOverlaps) !== JSON.stringify(tempoGeom.overlaps)) {
+      setTemposGeometry((prevTemposGeometry) =>
+        prevTemposGeometry.map((tempoGeom) =>
+          tempoGeom.id === tempo.id
+            ? { ...tempoGeom, overlaps: newOverlaps } // Store overlap ids
+            : tempoGeom
         )
       );
     }
   }
 
   // useEffect(() => {
-  // }, [tasks]);
+  // }, [tempos]);
 
 
 
@@ -191,14 +182,15 @@ function CalendarDay({mode, tasks, onTaskClick}:CalendarDayProps) {
       return `${hours}:${minutes}`;
     });
 
-    console.log(timeSlots)
-
-    const dayTasks = tasks.filter(
-      (task) => new Date(task.startDayTime).toDateString() === mode.day.toDateString()
+    const dayTempos = tempos.filter(
+      (tempo) => new Date(tempo.startTimestamp).toDateString() === grid.day.toDateString()
     );
 
     return (
+
       <div className="day-container">
+
+        <div className="times-containers">
 
         {timeSlots.map((time) => {
 
@@ -222,61 +214,68 @@ function CalendarDay({mode, tasks, onTaskClick}:CalendarDayProps) {
               </span>
             </div>
           )})}
+          </div>
 
-        {dayTasks.map((task, taskIndex) => {
-          const taskStart = new Date(task.startDayTime);
-          const taskEnd = new Date(task.endDayTime);
-          const startIndex = taskStart.getHours() + taskStart.getMinutes() / 60;
-          const endIndex = taskEnd.getHours() + taskEnd.getMinutes() / 60;
-          const taskHeight = Math.max(endIndex - startIndex, 0) * 2;
+        <div className = "tempos-containers">
+          {dayTempos.map((tempo, tempoIndex) => {
+            const tempoStart = new Date(tempo.startTimestamp);
+            const tempoEnd = new Date(tempo.endTimestamp);
+            const startIndex = tempoStart.getHours() + tempoStart.getMinutes() / 60;
+            const endIndex = tempoEnd.getHours() + tempoEnd.getMinutes() / 60;
+            const tempoHeight = Math.max(endIndex - startIndex, 2) * 2;
 
-          // const overlappingTasks = dayTasks.filter((t, index) => {
-          //   const otherStart = new Date(t.startDayTime);
-          //   const otherEnd = new Date(t.endDayTime);
-          //   return taskStart <= otherEnd && taskEnd >= otherStart && taskIndex > index;
-          // });
+            console.log("tempoStart, tempoEnd, startIndex, endIndex, tempoHeight")
+            console.log(tempoStart, tempoEnd, startIndex, endIndex, tempoHeight)
 
-          const taskGeom = tasksGeometry.find((tg) => tg.id === task.id) || {
-            width: 50,
-            horizontalOffset: 0,
-            overlaps: [],
-            id: 0
-          };
+            // const overlappingTempos = dayTempos.filter((t, index) => {
+            //   const otherStart = new Date(t.startTimestamp);
+            //   const otherEnd = new Date(t.endTimestamp);
+            //   return tempoStart <= otherEnd && tempoEnd >= otherStart && tempoIndex > index;
+            // });
 
-          return (
-            <div
-              key={taskIndex}
-              className="task-container"
-              style={{
-                top: `${startIndex * 2}em`,
-                height: `${taskHeight}em`,
-                left: `${taskGeom.horizontalOffset}px`,
-              }}
-              onClick={() => {
-                onTaskClick(task);
-              }}
-              ref={(el) => {
-                if (el) {
-                  taskRefs.current[task.id] = el;
-                  setTaskGeometryWidth(task, el.offsetWidth);
-                  setTaskOverlaps(task) // Não precisava esperar renderizar para calcular isso...
-                }
-              }}
-            >
-              <span>
-                ({task.id}) - <strong>{format(task.startDayTime, "HH:mm")}</strong> to{" "}
-                <strong>{format(task.endDayTime, "HH:mm")}</strong>: {task.taskName}
-              </span>
-            </div>
-          );
-        })}
+            const tempoGeom = temposGeometry.find((tg) => tg.id === tempo.id) || {
+              width: 50,
+              horizontalOffset: 0,
+              overlaps: [],
+              id: 0
+            };
+
+            return (
+              <div
+                key={tempoIndex}
+                className="tempo-container"
+                style={{
+                  top: `${startIndex * 2}em`,
+                  height: `${tempoHeight}em`,
+                  left: `${tempoGeom.horizontalOffset}px`,
+                }}
+                onClick={() => {
+                  onTempoClick(tempo);
+                }}
+                ref={(el) => {
+                  if (el) {
+                    tempoRefs.current[tempo.id] = el;
+                    setTempoGeometryWidth(tempo, el.offsetWidth);
+                    setTempoOverlaps(tempo) // Não precisava esperar renderizar para calcular isso...
+                  }
+                }}
+              >
+                <span>
+                  ({tempo.id}) - <strong>{format(tempo.startTimestamp, "HH:mm")}</strong> to{" "}
+                  <strong>{format(tempo.endTimestamp, "HH:mm")}</strong>: {tempo.name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
       </div>
     );
   };
 
 
    return(
-    <div>
+    <div className = "col-08">
         {calendarDayBody()}
     </div>
     )

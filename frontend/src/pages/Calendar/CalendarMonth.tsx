@@ -9,17 +9,17 @@ import {/*useEffect,*/ useMemo} from "react"
 
 import classNames from 'classnames';
 
-type OnTaskClick = (task: Task) => void;
-type SetModeAsDay = (date: Date) => void;
-type OnNewTaskClick = () => void;
+type OnTempoClick = (tempo: Tempo) => void;
+type SetGridAsDay = (date: Date) => void;
+type OnNewTempoClick = () => void;
 
-interface ModeState {
-  mode: "Month" | "Week" | "Day"
+interface GridState {
+  grid: "Month" | "Week" | "Day"
   param: number
   day: Date
 }
 
-interface Task {
+interface Tempo {
   id: number
   name: string
   startTimestamp: Date;
@@ -31,11 +31,11 @@ interface Task {
 }
 
 interface CalendarMonthProps{
-  mode: ModeState,
-  tasks: Task[] ,
-  onTaskClick: OnTaskClick ,
-  setModeAsDay: SetModeAsDay,
-  onNewTaskClick: OnNewTaskClick,
+  grid: GridState,
+  tempos: Tempo[] ,
+  onTempoClick: OnTempoClick ,
+  setGridAsDay: SetGridAsDay,
+  onNewTempoClick: OnNewTempoClick,
 }
 
 //  --------- UTILS --------- //
@@ -44,79 +44,63 @@ function getWeek(i: Date) {
   return (i.getDay() === 0) ? getISOWeek(i) + 1 : getISOWeek(i);
 }
 
-function CalendarMonth({mode, tasks,onTaskClick, setModeAsDay, onNewTaskClick}:CalendarMonthProps) {
+function CalendarMonth({grid, tempos, onTempoClick, setGridAsDay, onNewTempoClick}: CalendarMonthProps) {
 
   // ------ HEADER ----------- //
 
-  const calendarMonthHead = [
-    
-    <div key="weekHeader" className="weekNumber">
-      <p> Week </p>
-    </div>,
 
-    ...["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name) => (
-      <div
-        key={"weekHeader"+name}
-        className={classNames("calHeader", "showColumn")}
-      >
-        <p>{name}</p>
-      </div>
-    ))
-  ];
-
-
-  const DayInMonthContent = (day: Date, dayTasks: Task[], mode: ModeState, onTaskClick: OnTaskClick) => {
+  const DayInMonthContent = (day: Date, dayTempos: Tempo[], grid: GridState, onTempoClick: OnTempoClick) => {
 
     return([
 
         <div key="dateTitle" className="dateTitle">
-          <a onClick={() => setModeAsDay(day)}> 
+          <a onClick={() => setGridAsDay(day)}> 
             <strong>
               {format(day, "dd/MM/yyyy")}
             </strong>
           </a>
          <a onClick={() => {
-            onNewTaskClick()
+            onNewTempoClick()
           }}>          
             (+)
           </a>
         </div>,          
 
         <div key="dateContent" className="dateContent">
-          {(mode.mode == "Week" && mode.param != getWeek(day)) ? (
-            dayTasks.length === 0 ? (
+          {(grid.grid == "Week" && grid.param != getWeek(day)) ? (
+            dayTempos.length === 0 ? (
               ""
             ) : (
               <>
-                {dayTasks.slice(0, 3).map(task => (
-                  <div key={"task__"+ task.id} className="calendarTask">
-                    {format(task.startTimestamp, "HH:mm")}
+                {dayTempos.slice(0, 3).map(tempo => (
+                  <div key={"tempo__"+ tempo.id} className="calendarTempo">
+                    {format(tempo.startTimestamp, "HH:mm")}
                     <span
                       style={{ color: "blue", cursor: "pointer" }}
-                      onClick={() => onTaskClick(task)}
+                      onClick={() => onTempoClick(tempo)}
                     >        
-                      ({task.id}): {task.name}
+                      ({tempo.id}): {tempo.name}
                     </span>
 
                   </div>
                 ))}
-                {dayTasks.length > 3 && (
-                  <div>+{dayTasks.length - 3} more</div>
+                {dayTempos.length > 3 && (
+                  <div>+{dayTempos.length - 3} more</div>
                 )}
               </>
             )
           ) : (
-            dayTasks.length === 0 ? (
+            dayTempos.length === 0 ? (
               ""
             ) : (
-              dayTasks.map(task => (
-                <div key={"task__"+ task.id} className="calendarTask">
-                  {format(task.startTimestamp, "HH:mm")}
+              dayTempos.map(tempo => (
+                <div key={"tempo__"+ tempo.id} className="calendarTempo">
+                  {format(tempo.startTimestamp, "HH:mm")}
                   <a
                     href="#"
-                    onClick={() => onTaskClick(task)}
+                    onClick={() => onTempoClick(tempo)}
                   >        
-                    ({task.id}): {task.name}
+                    ({tempo.id}): {tempo.name}
                   </a>
 
                 </div>
@@ -131,7 +115,7 @@ function CalendarMonth({mode, tasks,onTaskClick, setModeAsDay, onNewTaskClick}:C
 
 const calendarMonthBody = useMemo(() => {
 
-  const monthStart = startOfMonth(mode.day);
+  const monthStart = startOfMonth(grid.day);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
   const endDate = endOfWeek(monthEnd);
@@ -144,12 +128,12 @@ const calendarMonthBody = useMemo(() => {
     const week = [];
 
     for (let i = 0; i < 7; i++) {
-      const dayTasks = tasks.filter(
-        (task) => new Date(task.startTimestamp).toDateString() === day.toDateString()
+      const dayTempos = tempos.filter(
+        (tempo) => new Date(tempo.startTimestamp).toDateString() === day.toDateString()
       );
       week.push({
         day: day,
-        content: DayInMonthContent(day, dayTasks, mode, onTaskClick),
+        content: DayInMonthContent(day, dayTempos, grid, onTempoClick),
       });
       day = addDays(day, 1);
     }
@@ -162,10 +146,7 @@ const calendarMonthBody = useMemo(() => {
       // Week number div
       <div
         key={weekKey}
-        className={classNames([
-          "weekNumber",
-          mode.mode !== "Week" ? "showRow" : mode.param === week.weekNumber ? "focusRow" : "hideRow",
-        ])}
+        className="calendar-cell label"
       >
         {week.weekNumber}
       </div>,
@@ -180,13 +161,12 @@ const calendarMonthBody = useMemo(() => {
           id={format(day.day, "yyyyMMdd").toString()}
 
           className={classNames([
-            "showColumn",
-            "showRow",
-            day.day.getMonth() === mode.day.getMonth() ? "dayInMonthCal" : "dayOutMonthCal",
+            "calendar-cell",
+            day.day.getMonth() === grid.day.getMonth() ? "selectedMonth" : "notSelectedMonth"
           ])}
 
           onClick={(e) => {
-            if (e.target === e.currentTarget) {onNewTaskClick()}
+            if (e.target === e.currentTarget) {onNewTempoClick()}
           }}
         >
           {day.content}
@@ -194,136 +174,13 @@ const calendarMonthBody = useMemo(() => {
       )}),
     ];
   });
-}, [mode.day, tasks]);
+}, [grid.day, tempos]);
 
-
-//   // ------------- CONTROLE DO FORMS ------------- //
-//   const { formValues, handleInputChange, /*getFormattedData */} = useForm<FormData>(
-//     {
-//       id: id ? id : 0,
-//       name: initialTask.name || "",
-//       startDay: initialTask.startTimestamp ? format(initialTask.startTimestamp, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-//       startTime: initialTask.startTimestamp ? format(initialTask.startTimestamp, "HH:mm") : "",
-//       endDay: initialTask.endTimestamp ? format(initialTask.endTimestamp, "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
-//       endTime: initialTask.endTimestamp ? format(initialTask.endTimestamp, "HH:mm") : "",
-//       place: initialTask.place || "",
-//       fullDay: initialTask.fullDay || false,
-//       description: initialTask.description || "",
-//     },
-//     formatTaskForAPI
-//   );
-
-//   // --------- DEBUG ------------ //
-
-//   useEffect(() => {
-//     console.log(formValues)
-//   },[])
-
-
-//   // ------------------- CONTROLE DO FETCH ----------------
-
-//   const { data, fetchData:createTask } = useFetch('http://localhost:8000/createTask', {
-//     method: "POST",
-//     credentials: "include",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(formatTaskForAPI(formValues))
-//   }) 
-
-//   const { data:data_updated, fetchData:updateTask } = useFetch('http://localhost:8000/updateTask', {
-//       method: "PUT",
-//       credentials: "include",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify(formatTaskForAPI(formValues))
-//     })
-
-//   // -------------- USE EFFECTS ---------------------- / /
-
-
-//   // --------------EVENT HANDLERS----------------------
-
-
-//   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-//     event.preventDefault()
-//     formValues.id!=0 ? await updateTask() : await createTask()
-//     closeModal()
-//   }
-
-//   useEffect(() => {
-//     triggerRender()
-//   },[data, data_updated])
-
-//   return (
-
-//     <div>
-
-//       <div id="modalDiv" className="modal-shown">
-
-//         {/*Modal Container*/}
-//         <form className="modal-content" onSubmit={handleSubmit}>
-//             <p className="modal-title">Novo evento</p>
-
-//             <input name="name" placeholder="Título do Evento" value={formValues.name} onChange={handleInputChange} type="text" /><br />
-
-//             <div className="event-details">
-//               <section className="event-duration">
-//                 <div>
-//                   <label> Hora Início </label>
-//                   <input
-//                     name="startDay" onChange={handleInputChange} type="date"
-//                     value={formValues.startDay}
-//                   />
-
-//                   {formValues.fullDay?
-//                     "":
-//                     <input name="startTime" onChange={handleInputChange} type="time"
-//                       value={formValues.startTime}
-//                     />
-//                   }
-//                 </div>
-               
-//                 <div>
-//                   <label> Hora Fim </label>
-//                   <input name="endDay" onChange={handleInputChange} type="date"
-//                   value={formValues.endDay}/>
-//                   {formValues.fullDay? "":<input name="endTime" onChange={handleInputChange} type="time" 
-//                   value={formValues.endTime} />}
-//                 </div>
-//               </section>
-              
-//               <label>
-//                 <input
-//                   name="fullDay"
-//                   type="checkbox"
-//                   onChange={handleInputChange}
-//                   // value={formValues.fullDay}/*/
-//                   checked={formValues.fullDay}
-//                 />
-//                 Dia Inteiro
-//               </label><br/>
-
-//               <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
-//               <input name="description" placeholder="Descrição" value={formValues.description} onChange={handleInputChange} type="text"/><br />
-
-//             </div>
-//             <div className="form-footer">
-//               <button type="button" onClick={closeModal}>Fechar</button>
-//               <button type="submit">Salvar</button>
-
-//             </div>
-//           </form>
-//         <br />
-
-//       </div>
-//     </div>
-
-//   );
-// };
 
   return(
-    <div className = "calendarGrid">
-      {calendarMonthHead}
+    <>
       {calendarMonthBody}
-    </div>
+    </>
     )
 }
 

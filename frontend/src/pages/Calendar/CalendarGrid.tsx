@@ -5,51 +5,56 @@ import { addDays, addMonths, addYears } from "date-fns";
 import useFetch from "../../hooks/useFetch";
 import useModal from "../../hooks/useModal";
 
-import TaskFormModal from "./TaskFormModal";
+import TempoFormModal from "./TempoFormModal";
 import CalendarMonth from "./CalendarMonth";
 import CalendarDay from "./CalendarDay";
 
-interface Task {
-  id: number
-  taskName: string
-  startTimestamp: Date;
+interface TempoBase {
+  name: string
+  startTimestamp: Date
   endTimestamp: Date
   place: string
   fullDay: boolean
   description: string
   status: string
+  parentId? : number
 }
 
-interface ModeState {
-  mode: "Month" | "Week" | "Day"
+interface TempoRequest extends TempoBase {
+  //
+}
+
+interface TempoResponse extends TempoBase {
+  id: number
+}
+
+interface GridState {
+  grid: "Month" | "Week" | "Day"
   param: number
   day: Date
 }
 
+type OnTempoClick = (tempo: Tempo) => void;
+type OnNewTempoClick = () => void;
 
-type OnTaskClick = (task: Task) => void;
 
+
+// ---------------------------------------------------------------
 
 function CalendarGrid(){
 
-  const [mode, setMode] = useState<ModeState>({
-    mode: "Month",
+  const [grid, setGrid] = useState<GridState>({
+    grid: "Month",
     param: -1,
     day: new Date(Date.now())
   })
 
-  const [tasks, setTasks] = useState<Task[]>([])
-
-  // --------------- DEBUG ------------------------ //
-  // useEffect(() => {
-  //   console.log("Re-rendering CalendarGrid");
-  //   console.log("tasks:", tasks);
-  //   console.log("mode:", mode);
-  // }, [tasks, mode]);
+  const [tempos, setTempos] = useState<Tempo[]>([])
 
   // ------------------- FETCHES ---------------- //
 
-  const { data, /*error, isLoading,*/ fetchData } = useFetch('http://localhost:8000/tempo/getAll', {
+  const { data, /*error, isLoading,*/ fetchData } = useFetch(
+    'http://localhost:8000/tempo/getAll', {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -59,22 +64,23 @@ function CalendarGrid(){
     fetchData();    
   }, []);
 
-  // Update tasks only if data changes
+  // Update tempos only if data changes
   useEffect(() => {
     if (data) {
-      setTasks(data);
+      setTempos(
+        data.map(t => ({
+          ...t,
+          startTimestamp: new Date(t.startTimestamp),
+          endTimestamp: new Date(t.endTimestamp) 
+        }))
+      );
     }
   }, [data]);
-
-  // useEffect(() => {
-  //   console.log("Mode updated: ", mode);    
-  // }, [mode]);
-
 
   // ----------------   CONTROLE DE MODAL ------------------
 
   const { isOpen, openModal, closeModal/*, toggleModal*/ } = useModal()
-  const [selectedTask, setSelectedTask] = useState<Task>({
+  const [selectedTempo, setSelectedTempo] = useState<Tempo>({
     id: 0,
     name: "",
     startTimestamp: new Date(),
@@ -85,8 +91,8 @@ function CalendarGrid(){
     status: "",
   })
 
-  function resetSelectedTask(){
-    setSelectedTask({
+  function resetSelectedTempo(){
+    setSelectedTempo({
       id: 0,
       name: "",
       startTimestamp: new Date(),
@@ -101,33 +107,32 @@ function CalendarGrid(){
 
   // ------------------ EVENT HANDLERS ---------------------------
 
-  function setModeAsDay (day: Date):void {
-    setMode({
-      mode: "Day",
+  function setGridAsDay (day: Date):void {
+    setGrid({
+      grid: "Day",
       param: 0,
       day: new Date (day),
     })
     return
   }
 
-  function setModeAsMonth():void {
-    let month = mode.day.getMonth()
-    setMode({
-      mode: "Month",
+  function setGridAsMonth():void {
+    let month = grid.day.getMonth()
+    setGrid({
+      grid: "Month",
       param: month,
-      day: new Date (mode.day),
+      day: new Date (grid.day),
     })
     return
   }
 
-  const onTaskClick:OnTaskClick = (task: Task) => {
-
-    setSelectedTask(task)
+  const onTempoClick:OnTempoClick = (tempo: Tempo) => {
+    setSelectedTempo(tempo)
     openModal();
   }
 
-  const onNewTaskClick = () => { 
-    resetSelectedTask()
+  const onNewTempoClick:OnNewTempoClick = () => { 
+    resetSelectedTempo()
     openModal()
   }
 
@@ -146,6 +151,8 @@ function CalendarGrid(){
     return () => window.removeEventListener('click', handleClickOutModal);
   }, [closeModal]);
 
+  // -------
+
 
   const triggerRender = () => {
     fetchData();
@@ -158,36 +165,102 @@ function CalendarGrid(){
     'OUT', 'NOV', 'DEZ',
   ]
 
-function changeDay(delta: number) {
-  setMode((prev) => {
-    return {...prev, day: addDays(prev.day, delta)}
-  });
-}
+  function changeDay(delta: number) {
+    setGrid((prev) => {
+      return {...prev, day: addDays(prev.day, delta)}
+    });
+  }
 
-function changeMonth(delta: number) {
-  setMode((prev) => {
-    return {...prev, day: addMonths(prev.day, delta)}
-  });
-}
+  function changeMonth(delta: number) {
+    setGrid((prev) => {
+      return {...prev, day: addMonths(prev.day, delta)}
+    });
+  }
 
-function changeYear(delta: number) {
-  setMode((prev) => {
-    return {...prev, day: addYears(prev.day, delta)}
-  });
-}
+  function changeYear(delta: number) {
+    setGrid((prev) => {
+      return {...prev, day: addYears(prev.day, delta)}
+    });
+  }
+
+  const GridHeader = () => {
+
+    // ------ HEADER ----------- //
+
+    let headerContent;
+
+    if (grid.grid === "Month") {
+      headerContent = (
+        <>
+          <div key="weekHeader" className="calendar-header">
+            <p>Week</p>
+          </div>
+
+          {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name) => (
+            <div key={"weekHeader" + name} className="calendar-header">
+              <p>{name}</p>
+            </div>
+          ))}
+        </>
+      );
+    } else if (grid.grid === "Day") {
+      headerContent = (
+        <div key="dayHeader" className="calendar-header col-08">
+          <h2>
+            <span onClick={() => changeDay(-1)}> - </span>
+            {format(grid.day, "dd/MM/yyyy")}
+            <span onClick={() => changeDay(+1)}> + </span>
+          </h2>
+        </div>        
+      );
+    }
+    
+    return (
+      <>
+        {headerContent}
+      </>
+    )
+  };
+
+
+  const GridBody = () => {
+    return(
+    grid.grid == "Month"?
+        <CalendarMonth grid={grid} tempos={tempos} onTempoClick={onTempoClick} setGridAsDay={setGridAsDay} onNewTempoClick={onNewTempoClick}/>
+        : grid.grid == "Day"?
+        <>
+          <CalendarDay grid={grid} tempos={tempos} onTempoClick={onTempoClick} />
+        </>
+        :
+        ""
+    )
+  }
+
+
+  // --------------- DEBUG ------------------------ //
+  // useEffect(() => {
+  //   console.log("tempos:", tempos);
+  // }, [tempos]);
+
+  // useEffect(() => {
+  //   console.log("grid:", grid);
+  // }, [grid]);
+
+  // useEffect(() => {
+  //   console.log("SelectedTempo:", selectedTempo);
+  // }, [selectedTempo]);
 
 
   // ----- RETURN -------- //
 
   return (
-    <>
-
-      {/* HEADER */}
+    <div>
+      {/* PRE-HEADER*/}
       <div className="card-container">
         <h1 style={{ margin: "0px 0px 0px 20px", textAlign: "left", display: "flex", gap: "40px", fontSize: "2em" }}>
           {/* Year Section */}
           <div style={{ display: "flex", width: "100px", alignItems: "center" }}>
-            <span>{mode.day.getFullYear()}</span>
+            <span>{grid.day.getFullYear()}</span>
             <div style={{ display: "flex", flexDirection: "column", marginLeft: "30px", fontSize: "0.5em", alignItems: "center" }}>
               <span onClick={() => changeYear(+1)} style={{ cursor: "pointer" }}>+</span>
               <span onClick={() => changeYear(-1)} style={{ cursor: "pointer" }}>-</span>
@@ -196,8 +269,8 @@ function changeYear(delta: number) {
 
           {/* Month Section with Fixed Width */}
           <div style={{ display: "flex", alignItems: "center"}}>
-            <span onClick={() => setModeAsMonth()} style={{ width: "140px", textAlign: "center" }}>
-              {monthNumberToLabelMap[mode.day.getMonth()]}
+            <span onClick={() => setGridAsMonth()} style={{ width: "140px", textAlign: "center",  cursor: "pointer"  }}>
+              {monthNumberToLabelMap[grid.day.getMonth()]}
             </span>
             <div style={{ display: "flex", flexDirection: "column", marginLeft: "10px", fontSize: "0.5em", alignItems: "center" }}>
               <span onClick={() => changeMonth(+1)} style={{ cursor: "pointer" }}>+</span>
@@ -205,45 +278,38 @@ function changeYear(delta: number) {
             </div>
           </div>
         </h1>
-      </div>    
+      </div>   
 
-      {/* MONTHGRID */}
       <div className = "card-container">
-        {mode.mode == "Month"? 
-        <CalendarMonth mode={mode} tasks={tasks} onTaskClick={onTaskClick} setModeAsDay={setModeAsDay} onNewTaskClick={onNewTaskClick}/>
-        : mode.mode == "Day"?
-        <>
-          <div key="dayHeader">
-            <h2>
-              <span onClick={()=>changeDay(-1)}> - </span>
-              {format(mode.day, "dd/MM/yyyy")}
-              <span onClick={()=>changeDay(+1)}> + </span>
-            </h2>
-          </div>
-          <CalendarDay mode={mode} tasks={tasks} onTaskClick={onTaskClick} />
-        </>
-        :
-        ""
-        }
+
+        <div className = "calendar-container">
+
+          {/*HEADER*/}
+          <GridHeader />
+
+          {/*BODY*/}            
+          <GridBody />        
+        </div>
+        
       </div>
 
       {/*MODAL*/}
       <div className={isOpen ? "modal-shown" : "modal-hidden"}>
         {
-          <TaskFormModal
-            key = {selectedTask.id}
-            id = {selectedTask.id}
+          <TempoFormModal
+            key = {selectedTempo.id}
+            id = {selectedTempo.id}
             closeModal={() => {
-              resetSelectedTask();   // Clear the selected event
+              resetSelectedTempo();   // Clear the selected event
               closeModal();             // Close the modal
             }}
             triggerRender = {triggerRender}
-            initialTask = {selectedTask}
+            initialTempo = {selectedTempo}
           />
         }
       </div>
       
-    </>
+    </div>
 
   );
 };

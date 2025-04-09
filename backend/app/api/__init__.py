@@ -3,7 +3,7 @@ from ..api import friend, auth, tempo, profile, notification, post, group
 
 router = APIRouter()
 
-router.include_router(auth.router, prefix="/account", tags=["login"]) # prefix="/auth"
+router.include_router(auth.router, prefix="/account", tags=["login"])
 
 router.include_router(profile.router, prefix="/profile", tags=["profile"])
 router.include_router(friend.router, prefix="/friend", tags=["friends"])

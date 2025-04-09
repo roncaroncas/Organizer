@@ -5,7 +5,7 @@ from typing import List
 
 from datetime import datetime ### SOLUÇÃO TEMPORAAAAARIA!!! TEM QUE TIRAR SAPORRA!
 
-from app.models import Tempo
+from app.models import TempoRequest, TempoResponse
 
 from app.database.queries.auth_queries import getUserIdByToken
 from app.database.queries.tempo_queries import (
@@ -18,7 +18,7 @@ from app.database.queries.tempo_queries import (
 router = APIRouter()
 
 @router.get("/getAll")
-async def my_tempos(request: Request) -> List[Tempo]:
+async def my_tempos(request: Request) -> List[TempoResponse]:
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -28,10 +28,12 @@ async def my_tempos(request: Request) -> List[Tempo]:
     # GET ALL TEMPOS LINKED TO USER ID
     rows = await getAllTemposByUserId(userId)
 
+    logger.debug(rows)
+
     # CONVERT TEMPOS TO MODEL
     tempos = []
     for r in rows:
-        tempos.append(Tempo(
+        tempos.append(TempoResponse(
             id= r['id'], name= r['name'], startTimestamp= r['startTimestamp'].strftime('%Y-%m-%d %H:%M:%S'),
             endTimestamp= r['endTimestamp'].strftime('%Y-%m-%d %H:%M:%S'), place= r['place'], fullDay= r['fullDay'],
             description= r['description'], status=r['text']))
@@ -39,7 +41,7 @@ async def my_tempos(request: Request) -> List[Tempo]:
     return (tempos)
 
 @router.get("/getAllWithParent")
-async def my_tempos(request: Request) -> List[Tempo]:
+async def my_tempos(request: Request) -> List[TempoResponse]:
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -49,10 +51,12 @@ async def my_tempos(request: Request) -> List[Tempo]:
     # GET ALL TEMPOS LINKED TO USER ID
     rows = await getAllTemposWithParentByUserId(userId)
 
+
+
     # CONVERT TEMPOS TO MODEL
     tempos = []
     for r in rows:
-        tempos.append(Tempo(
+        tempos.append(TempoResponse(
             id= r['id'], name= r['name'], startTimestamp= r['startTimestamp'].strftime('%Y-%m-%d %H:%M:%S'),
             endTimestamp= r['endTimestamp'].strftime('%Y-%m-%d %H:%M:%S'), place= r['place'], fullDay= r['fullDay'],
             description= r['description'], status=r['text'], parentId=r['parentId']))
@@ -61,7 +65,7 @@ async def my_tempos(request: Request) -> List[Tempo]:
 
     
 @router.post("/create")
-async def create_tempo(task: Tempo, request: Request) -> (bool):
+async def create_tempo(tempo: TempoRequest, request: Request) -> (bool):
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -69,16 +73,16 @@ async def create_tempo(task: Tempo, request: Request) -> (bool):
         raise HTTPException(status_code=401, detail="Not logged in")
 
     #CRIANDO TEMPO
-    timestamp_startTime = datetime.strptime(task.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-    timestamp_endTime = datetime.strptime(task.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_startTime = datetime.strptime(tempo.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_endTime = datetime.strptime(tempo.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
 
     tempoId = await createNewTempo(
-        name = task.name,
+        name = tempo.name,
         startTimestamp = timestamp_startTime,
         endTimestamp = timestamp_endTime,
-        place = task.place,
-        fullDay = task.fullDay,
-        description = task.description,
+        place = tempo.place,
+        fullDay = tempo.fullDay,
+        description = tempo.description,
         )
 
     # CONECTANDO O TEMPO AO USUARIO
@@ -88,7 +92,7 @@ async def create_tempo(task: Tempo, request: Request) -> (bool):
     return True
 
 @router.put("/update")
-async def update_tempo(task: Tempo, request: Request) -> (bool):
+async def update_tempo(tempo: TempoRequest, request: Request) -> (bool):
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -98,56 +102,56 @@ async def update_tempo(task: Tempo, request: Request) -> (bool):
 
     #ATUALIZANDO TEMPO
 
-    timestamp_startTime = datetime.strptime(task.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-    timestamp_endTime = datetime.strptime(task.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_startTime = datetime.strptime(tempo.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
+    timestamp_endTime = datetime.strptime(tempo.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
     
     await updateTempo(
-        name= task.name,
+        name= tempo.name,
         startTimestamp= timestamp_startTime,
         endTime= timestamp_endTime,
-        place= task.place,
-        fullDay= task.fullDay,
-        description= task.description,
-        id= task.id,
+        place= tempo.place,
+        fullDay= tempo.fullDay,
+        description= tempo.description,
+        id= tempo.id,
         )
 
     #RETURN
     return True
 
 
-# @router.get("/task/{taskId}")
-# async def get_tempo_by_id(taskId: int, request: Request):
+# @router.get("/tempo/{tempoId}")
+# async def get_tempo_by_id(tempoId: int, request: Request):
 
-#     tempo = await getTempoById(taskId)
+#     tempo = await getTempoById(tempoId)
     
 #     return tempo
 
 
 # -----------------     OLD CODE:
 
-# @router.get("/task/{taskId}/users")
-# async def get_task_by_id_user(taskId: int, request: Request):
+# @router.get("/tempo/{tempoId}/users")
+# async def get_tempo_by_id_user(tempoId: int, request: Request):
 
 #     query = (f"SELECT u.id, u.name " 
 #         f"FROM usersTempos ut "
 #         f"LEFT JOIN users u "
 #         f"ON u.id = ut.userId "
-#         f"WHERE ut.taskId = ?")
+#         f"WHERE ut.tempoId = ?")
 
-#     taskData = db.cursor.execute(query, [taskId]).fetchall()
+#     tempoData = db.cursor.execute(query, [tempoId]).fetchall()
     
-#     return taskData
+#     return tempoData
 
-# @router.post("/task/{taskId}/addUser/{userId}")
-# async def add_user_to_task_by_id(taskId: int, userId: int, request: Request):
+# @router.post("/tempo/{tempoId}/addUser/{userId}")
+# async def add_user_to_tempo_by_id(tempoId: int, userId: int, request: Request):
 
 #     # logger.debug(userId)
 
 #     query = (f"INSERT INTO usersTempos "
-#         f"(userId, taskId) "
+#         f"(userId, tempoId) "
 #         f"VALUES (?, ?)")
 
-#     val = [userId, taskId]
+#     val = [userId, tempoId]
 #     db.cursor.execute(query, val)
 #     db.connection.commit()
     

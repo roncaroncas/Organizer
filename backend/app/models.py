@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
+# --------------------------------------
+
 class User(BaseModel):  #FROM users
     id: Optional[int] = None
     name: Optional[str] = None
@@ -10,8 +12,12 @@ class User(BaseModel):  #FROM users
     username: Optional[str] = None
     email: Optional[str] = None
 
+# --------------------------------------
+
 class Token(BaseModel):
     token: str
+
+# --------------------------------------
 
 class Friend(BaseModel): #Friendship
     friendId: int
@@ -19,27 +25,34 @@ class Friend(BaseModel): #Friendship
     status: Optional[str]
     statusNmbr: Optional[int]
 
+# --------------------------------------
+
 class Group(BaseModel): #Groups
     id: int = None
     name: Optional[str] = None
     description: Optional[str] = None
     users: Optional[List[User]] = None
 
-class Tempo(BaseModel):
-    id: Optional[int] = None
+# ---------- TEMPO ---------------------
+
+class TempoBase(BaseModel):
     name: str
-    startTimestamp: str   #salvo em timestamp!
-    endTimestamp: str   #salvo em timestamp!
-    place: Optional[str]
+    startTimestamp: datetime
+    endTimestamp: datetime
+    place: str
     fullDay: bool
     description: str
     status: Optional[str] = None
+    statudId: Optional[int] = None
     parentId: Optional[int] = None
 
-# class GroupTask(BaseModel):
-#     id: Optional[int]
-#     name: str
-#     parentId: Optional[int]
+class TempoRequest(TempoBase):
+    pass
+
+class TempoResponse(TempoBase):
+    id: int
+
+# --------------------------------------
 
 class Post(BaseModel):
     id: Optional[int] = None
@@ -50,12 +63,20 @@ class Post(BaseModel):
     timestamp: Optional[datetime] = None
     type: Optional[str] = None
 
+# --------------------------------------
+
 class Notification(BaseModel):
     id: Optional[int] = None
     name: Optional[str] = None
     statusId: Optional[int] = None
+    
+# --------------------------------------
 
 class Profile(BaseModel):
     id: int
     name: str
     birthday: Optional[datetime]
+    
+# --------------------------------------
+    
+# --------------------------------------
