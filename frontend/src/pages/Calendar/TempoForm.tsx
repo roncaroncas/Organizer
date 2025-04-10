@@ -5,11 +5,7 @@ import {useEffect, useState} from "react"
 import useForm from "../../hooks/useForm"
 import useFetch from "../../hooks/useFetch"
 
-
-
 //  ------- INTERFACES ------- //
-
-// -------------------
 
 interface TempoBase {
   name: string
@@ -41,9 +37,9 @@ interface TempoFormData extends Omit<TempoBase, 'startTimestamp' | 'endTimestamp
 // -------------------
 
 interface TempoModalProps {
-  initialTempo: TempoBase
+  loadedTempo: TempoBase
   id: number
-  closeModal: () => void;
+  onClose: () => void;
   triggerRender: () => void
 }
 
@@ -80,22 +76,25 @@ const formatTempoForAPI = (values: TempoFormData): Tempo => {
   return t;
 };
 
-
-function TempoFormModal({id, closeModal,  triggerRender, initialTempo = {}}: TempoModalProps) {
+function TempoForm({
+  id,
+  onClose = () => {},
+  triggerRender = () => {},
+  loadedTempo = {},
+}: TempoModalProps) {
   
-
   // ------------- CONTROLE DO FORMS ------------- //
-  const { formValues, handleInputChange, /*getFormattedData */} = useForm<TempoFormData>(
+  const { formValues, handleInputChange, getFormattedData} = useForm<TempoFormData>(
     {
       id: id ? id : 0,
-      name: initialTempo.name || "",
-      startDay: initialTempo.startTimestamp ? format(initialTempo.startTimestamp, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-      startTime: initialTempo.startTimestamp ? format(initialTempo.startTimestamp, "HH:mm") : "",
-      endDay: initialTempo.endTimestamp ? format(initialTempo.endTimestamp, "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
-      endTime: initialTempo.endTimestamp ? format(initialTempo.endTimestamp, "HH:mm") : "",
-      place: initialTempo.place || "",
-      fullDay: initialTempo.fullDay || false,
-      description: initialTempo.description || "",
+      name: loadedTempo.name || "",
+      startDay: loadedTempo.startTimestamp ? format(loadedTempo.startTimestamp, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+      startTime: loadedTempo.startTimestamp ? format(loadedTempo.startTimestamp, "HH:mm") : "",
+      endDay: loadedTempo.endTimestamp ? format(loadedTempo.endTimestamp, "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
+      endTime: loadedTempo.endTimestamp ? format(loadedTempo.endTimestamp, "HH:mm") : "",
+      place: loadedTempo.place || "",
+      fullDay: loadedTempo.fullDay || false,
+      description: loadedTempo.description || "",
     },
     formatTempoForAPI
   );
@@ -107,29 +106,27 @@ function TempoFormModal({id, closeModal,  triggerRender, initialTempo = {}}: Tem
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(formatTempoForAPI(formValues))
+    body: JSON.stringify(getFormattedData)
   })
 
   const { data:data_updated, fetchData:updateTempo } = useFetch('http://localhost:8000/tempo/update', {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formatTempoForAPI(formValues))
+      body: JSON.stringify(getFormattedData)
     })
 
   // --------------EVENT HANDLERS----------------------
 
-
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     formValues.id!=0 ? await updateTempo() : await createTempo()
-    closeModal()
+    onClose()
   }
 
   useEffect(() => {
     triggerRender()
   },[data, data_updated])
-
 
   // ---------------------- 
 
@@ -154,28 +151,27 @@ function TempoFormModal({id, closeModal,  triggerRender, initialTempo = {}}: Tem
 
   // --------- DEBUG ------------ //
 
-  useEffect(() => {
-    if (formValues){
-      console.log(formValues)
-    }
-  },[formValues])
+  // useEffect(() => {
+  //   if (formValues){
+  //     console.log(formValues)
+  //   }
+  // },[formValues])
 
   // ----------------------
 
   return (
 
-    <div id="modalDiv" className="modal-shown">
-
+    <>
       {/*Modal Container*/}
-      <form className="modal-container" onSubmit={handleSubmit}>
+      <form className="tempoForm-container" onSubmit={handleSubmit}>
 
-        <div className="modal-section modal-section-col-12"> 
+        <div className="tempoForm-section section-col-12"> 
           <label><h3>Novo evento</h3>
             <input name="name" placeholder="Título do Evento" value={formValues.name} onChange={handleInputChange} type="text" /><br />
           </label>
         </div>
 
-        <div className="modal-section modal-section-col-08">
+        <div className="tempoForm-section section-col-08">
           <section className="event-duration">
             <div>
               <label> Hora Início </label>
@@ -211,7 +207,7 @@ function TempoFormModal({id, closeModal,  triggerRender, initialTempo = {}}: Tem
           </label>
         </div>
 
-        <div className="modal-section modal-section-col-04">         
+        <div className="tempoForm-section section-col-04">         
 
           {/*// USERS */}
           <div className="event-users">
@@ -235,7 +231,7 @@ function TempoFormModal({id, closeModal,  triggerRender, initialTempo = {}}: Tem
           </div>
         </div>
 
-        <div className="modal-section modal-section-col-12">         
+        <div className="tempoForm-section section-col-12">         
             <label>Local
               <input name="place" placeholder="Local" value={formValues.place} onChange={handleInputChange} type="text" /><br />
             </label>
@@ -245,20 +241,19 @@ function TempoFormModal({id, closeModal,  triggerRender, initialTempo = {}}: Tem
             </label>
         </div>
         
-        <div className="modal-section modal-section-col-12">         
+        <div className="tempoForm-section section-col-12">         
           <div className="form-footer">
-            <button className= "btn cancel" type="button" onClick={closeModal}>Fechar</button>
+            <button className= "btn cancel" type="button" onClick={onClose}>Fechar</button>
             <button className= "btn accept" type="submit">Salvar</button>
           </div>
         </div>
 
       </form>
 
-      <br/>
 
-    </div>
+    </>
 
   );
 };
 
-export default TempoFormModal;
+export default TempoForm;

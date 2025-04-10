@@ -41,7 +41,7 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   top: 0;
   left: 0;
   right: 0;
-  background: #ff7a3d;
+  background: #ff7400;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -180,15 +180,15 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   width: 20%;
   height: calc(100vh - 60px);
   overflow-y: auto;
-  background-color: #ff8c42; /* deep orange */
-  color: #ffffff;
+  background-color: #FFEFE2; /* deep orange */
+  color: #333333;
   padding: 20px;
   box-sizing: border-box;
 }
 
 .calendarbody .sidebar-section {
   margin-bottom: 15px;
-   border-bottom: 1px solid #ff9800; /* light orange border */
+  border-bottom: 1px solid #ff9800; /* light orange border */
   padding-bottom: 10px;
 }
 
@@ -196,7 +196,7 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   width: 100%;
   background: none;
   border: none;
-  color: #ffffff;
+  color: #333333;
   font-size: 16px;
   font-weight: bold;
   text-align: left;
@@ -205,7 +205,6 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
 
 .calendarbody .section-content {
   margin-top: 10px;
-  background-color: #ffb74d; /* soft orange background */
   padding: 10px;
   border-radius: 4px;
 }
@@ -217,10 +216,9 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   box-sizing: border-box;
   height: calc(100vh - 60px);
   overflow-y: auto;
-  background-color: #fff3e0; /* very light orange */
+  background-color: #fff3e0;
   color: #333333;
 }
-
 
 /* ---------- BUTTON STYLES ------------ */
 
@@ -297,62 +295,63 @@ button:focus, button:focus-visible {
 }
 
 .modal-shown {
-  display: flex; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
+  display: flex;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
 }
 
-/* Modal Content */
-.modal-container {
+/* Tempo Form Content */
+.tempoForm-container {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: repeat(13,1fr);
+
+  overflow: auto;
   background-color: #fefefe;
-  margin: 20px 20%; 
+  width: 100%;
+  height: 85%;
+  margin: 20px 20%;
   padding: 20px;
   border: 1px solid #888;
   border-radius: 15px;
 }
 
-.modal-section{
-  border: 1px dashed #ccc;
+.tempoForm-section{
+  border: 1px dashed #ccc; /*FOR DEBUGGIN*/
   border-radius: 5px;
   margin: 5px 0px;
   padding: 5px 20px;
 }
 
-.modal-section-col-01{
+.section-col-01{
   grid-column: span 1;
 }
-.modal-section-col-02{
+.section-col-02{
   grid-column: span 2;
 }
-.modal-section-col-03{
+.section-col-03{
   grid-column: span 3;
 }
-.modal-section-col-04{
+.section-col-04{
   grid-column: span 4;
 }
-.modal-section-col-06{
+.section-col-06{
   grid-column: span 6;
 }
-.modal-section-col-08{
+.section-col-08{
   grid-column: span 8;
 }
-.modal-section-col-09{
+.section-col-09{
   grid-column: span 9;
 }
-.modal-section-col-12{
+.section-col-12{
   grid-column: span 12;
 }
-
 
 .event-details{
   display: flex;
@@ -454,7 +453,7 @@ table th {
 
 .calendar-container .calendar-header {
   text-align: center;
-  background-color: #FF6347;
+  background-color: #ff9a00;
   color: #FFF8E7;
 }
 
@@ -475,18 +474,18 @@ table th {
 .calendar-container .label {
   width: auto;
   color: #FFF8E7;
-  background-color: #FF6347;
+  background-color: #ff9a00;
   text-align: center;
   justify-content: flex-end;
 }
 
 .calendar-container .selectedMonth {
-  background-color: #FFA500;
-  color: #FFF8E7;
+  background-color: #ffe07f;
+  color: #333333;
 }
 
 .calendar-container .notSelectedMonth {
-  background-color: #FFDAB9;
+  background-color: #fff2cc;
   color: #4A4A4A;
 }
 
@@ -591,7 +590,6 @@ table th {
 
 
 .card-container {
-  max-width: 1200px;
   padding: 5px;
   background-color: #f9f9f9;
   border-radius: 8px;
