@@ -3,12 +3,11 @@ from app.database.connection import db
 from app.config import logger
 from typing import List
 
-from datetime import datetime ### SOLUÇÃO TEMPORAAAAARIA!!! TEM QUE TIRAR SAPORRA!
-
 from app.models import TempoRequest, TempoResponse
 
 from app.database.queries.auth_queries import getUserIdByToken
 from app.database.queries.tempo_queries import (
+    getTempoById,
     getAllTemposByUserId,
     getAllTemposWithParentByUserId,
     createNewTempo,
@@ -16,6 +15,39 @@ from app.database.queries.tempo_queries import (
     updateTempo)
 
 router = APIRouter()
+
+@router.get("/get/{tempoId}")
+async def get_tempo_by_id(request: Request, tempoId: int) -> TempoResponse:
+
+    # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    # Check if USER have access to TEMPO ID
+    # pffff kkkkk depois eu faço
+
+    # GET ALL TEMPOS LINKED TO USER ID
+    row = await getTempoById(userId, tempoId)
+
+    logger.debug(row)
+    
+    if not(row):
+        raise HTTPException(status_code=403, detail="Tempo doesnt exist or not authorized")
+
+    # CONVERT TEMPO TO MODEL
+    tempo = TempoResponse(
+        id= row['id'], 
+        name= row['name'], 
+        startTimestamp= row['startTimestamp'].isoformat(),
+        endTimestamp= row['endTimestamp'].isoformat(),
+        place= row['place'], 
+        fullDay= row['fullDay'],
+        description= row['description'], 
+        status=row['text']
+    )
+
+    return (tempo)
 
 @router.get("/getAll")
 async def my_tempos(request: Request) -> List[TempoResponse]:
@@ -34,9 +66,15 @@ async def my_tempos(request: Request) -> List[TempoResponse]:
     tempos = []
     for r in rows:
         tempos.append(TempoResponse(
-            id= r['id'], name= r['name'], startTimestamp= r['startTimestamp'].strftime('%Y-%m-%d %H:%M:%S'),
-            endTimestamp= r['endTimestamp'].strftime('%Y-%m-%d %H:%M:%S'), place= r['place'], fullDay= r['fullDay'],
-            description= r['description'], status=r['text']))
+            id= r['id'], 
+            name= r['name'], 
+            startTimestamp= r['startTimestamp'].isoformat(),
+            endTimestamp= r['endTimestamp'].isoformat(),
+            place= r['place'], 
+            fullDay= r['fullDay'],
+            description= r['description'], 
+            status=r['text']
+        ))
 
     return (tempos)
 
@@ -57,9 +95,15 @@ async def my_tempos(request: Request) -> List[TempoResponse]:
     tempos = []
     for r in rows:
         tempos.append(TempoResponse(
-            id= r['id'], name= r['name'], startTimestamp= r['startTimestamp'].strftime('%Y-%m-%d %H:%M:%S'),
-            endTimestamp= r['endTimestamp'].strftime('%Y-%m-%d %H:%M:%S'), place= r['place'], fullDay= r['fullDay'],
-            description= r['description'], status=r['text'], parentId=r['parentId']))
+            id= r['id'], 
+            name= r['name'], 
+            startTimestamp= r['startTimestamp'].isoformat(),
+            endTimestamp= r['endTimestamp'].isoformat(),
+            place= r['place'], 
+            fullDay= r['fullDay'],
+            description= r['description'], 
+            status=r['text']
+        ))
 
     return (tempos)   
 
@@ -72,14 +116,11 @@ async def create_tempo(tempo: TempoRequest, request: Request) -> (bool):
     if not(userId):
         raise HTTPException(status_code=401, detail="Not logged in")
 
-    #CRIANDO TEMPO
-    timestamp_startTime = datetime.strptime(tempo.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-    timestamp_endTime = datetime.strptime(tempo.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-
+  
     tempoId = await createNewTempo(
         name = tempo.name,
-        startTimestamp = timestamp_startTime,
-        endTimestamp = timestamp_endTime,
+        startTimestamp = tempo.startTimestamp,
+        endTimestamp = tempo.endTimestamp,
         place = tempo.place,
         fullDay = tempo.fullDay,
         description = tempo.description,
@@ -98,17 +139,13 @@ async def update_tempo(tempo: TempoRequest, request: Request) -> (bool):
     userId = await getUserIdByToken(str(request.cookies.get("token")))
     if not(userId):
         raise HTTPException(status_code=401, detail="Not logged in")
+ 
+    logger.debug(tempo)
 
-
-    #ATUALIZANDO TEMPO
-
-    timestamp_startTime = datetime.strptime(tempo.startTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-    timestamp_endTime = datetime.strptime(tempo.endTimestamp[:-1], "%Y-%m-%dT%H:%M:%S.%f") ###SOLUÇÃO PALIATIVA< PRECISA PASSAR TUDO PRA DATE!
-    
     await updateTempo(
         name= tempo.name,
-        startTimestamp= timestamp_startTime,
-        endTime= timestamp_endTime,
+        startTimestamp= tempo.startTimestamp,
+        endTimestamp= tempo.endTimestamp,
         place= tempo.place,
         fullDay= tempo.fullDay,
         description= tempo.description,
@@ -118,41 +155,3 @@ async def update_tempo(tempo: TempoRequest, request: Request) -> (bool):
     #RETURN
     return True
 
-
-# @router.get("/tempo/{tempoId}")
-# async def get_tempo_by_id(tempoId: int, request: Request):
-
-#     tempo = await getTempoById(tempoId)
-    
-#     return tempo
-
-
-# -----------------     OLD CODE:
-
-# @router.get("/tempo/{tempoId}/users")
-# async def get_tempo_by_id_user(tempoId: int, request: Request):
-
-#     query = (f"SELECT u.id, u.name " 
-#         f"FROM usersTempos ut "
-#         f"LEFT JOIN users u "
-#         f"ON u.id = ut.userId "
-#         f"WHERE ut.tempoId = ?")
-
-#     tempoData = db.cursor.execute(query, [tempoId]).fetchall()
-    
-#     return tempoData
-
-# @router.post("/tempo/{tempoId}/addUser/{userId}")
-# async def add_user_to_tempo_by_id(tempoId: int, userId: int, request: Request):
-
-#     # logger.debug(userId)
-
-#     query = (f"INSERT INTO usersTempos "
-#         f"(userId, tempoId) "
-#         f"VALUES (?, ?)")
-
-#     val = [userId, tempoId]
-#     db.cursor.execute(query, val)
-#     db.connection.commit()
-    
-#     return True

@@ -104,8 +104,8 @@ CREATE TABLE public.post (
     id integer NOT NULL,
     "authorId" integer NOT NULL,
     "groupId" integer,
-    text character varying(256)[],
-    "timestamp" time without time zone
+    "timestamp" timestamp without time zone DEFAULT now(),
+    text character varying(256)
 );
 
 
@@ -136,8 +136,8 @@ ALTER SEQUENCE public.post_id_seq OWNED BY public.post.id;
 CREATE TABLE public.tempo (
     id integer NOT NULL,
     name character varying(128),
-    "startTime" timestamp without time zone,
-    "endTime" timestamp without time zone,
+    "startTimestamp" timestamp with time zone,
+    "endTimestamp" timestamp with time zone,
     "fullDay" boolean,
     place character varying(128),
     description character varying(256)
@@ -169,8 +169,8 @@ ALTER SEQUENCE public.tempo_id_seq OWNED BY public.tempo.id;
 --
 
 CREATE TABLE public.tempo_tempo (
-    "tempoChild" integer NOT NULL,
-    "tempoParent" integer NOT NULL
+    "childId" integer NOT NULL,
+    "parentId" integer NOT NULL
 );
 
 
@@ -238,8 +238,28 @@ CREATE TABLE public.user_tempo (
 CREATE TABLE public.user_user (
     "userId1" integer NOT NULL,
     "userId2" integer NOT NULL,
-    status integer
+    "statusId" integer
 );
+
+
+--
+-- Name: user_user_symmetrical; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.user_user_symmetrical AS
+ SELECT user_user."userId1",
+    user_user."userId2",
+    user_user."statusId"
+   FROM public.user_user
+UNION ALL
+ SELECT user_user."userId2" AS "userId1",
+    user_user."userId1" AS "userId2",
+        CASE
+            WHEN (user_user."statusId" = 10) THEN 11
+            WHEN (user_user."statusId" = 11) THEN 10
+            ELSE user_user."statusId"
+        END AS "statusId"
+   FROM public.user_user;
 
 
 --
@@ -349,7 +369,7 @@ ALTER TABLE ONLY public.tempo
 --
 
 ALTER TABLE ONLY public.tempo_tempo
-    ADD CONSTRAINT tempo_tempo_pkey PRIMARY KEY ("tempoChild", "tempoParent");
+    ADD CONSTRAINT tempo_tempo_pkey PRIMARY KEY ("childId", "parentId");
 
 
 --
@@ -374,6 +394,14 @@ ALTER TABLE ONLY public.user_group
 
 ALTER TABLE ONLY public.user_tempo
     ADD CONSTRAINT user_tempo_pkey PRIMARY KEY ("userId", "tempoId");
+
+
+--
+-- Name: user_user user_user_order_check; Type: CHECK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE public.user_user
+    ADD CONSTRAINT user_user_order_check CHECK (("userId1" < "userId2")) NOT VALID;
 
 
 --
@@ -404,7 +432,7 @@ ALTER TABLE ONLY public.post
 --
 
 ALTER TABLE ONLY public.tempo_tempo
-    ADD CONSTRAINT "tempo_tempo_tempoChild" FOREIGN KEY ("tempoChild") REFERENCES public.tempo(id);
+    ADD CONSTRAINT "tempo_tempo_tempoChild" FOREIGN KEY ("childId") REFERENCES public.tempo(id);
 
 
 --
@@ -412,7 +440,7 @@ ALTER TABLE ONLY public.tempo_tempo
 --
 
 ALTER TABLE ONLY public.tempo_tempo
-    ADD CONSTRAINT "tempo_tempo_tempoParent" FOREIGN KEY ("tempoParent") REFERENCES public.tempo(id);
+    ADD CONSTRAINT "tempo_tempo_tempoParent" FOREIGN KEY ("parentId") REFERENCES public.tempo(id);
 
 
 --

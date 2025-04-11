@@ -2,6 +2,31 @@ from app.database.connection import db
 
 # GET
 
+async def getTempoById(userId, tempoId):
+
+	query = ('''
+		SELECT
+			t."id",
+			t."name",
+			t."startTimestamp",
+			t."endTimestamp",
+			t."place",
+			t."fullDay",
+			t."description",
+			l."text"
+		FROM "tempo" AS t 
+		INNER JOIN "user_tempo" AS ut ON ut."tempoId" = t."id" 
+		INNER JOIN "user" AS u ON u."id" = ut."userId" 
+		LEFT JOIN "lookup" AS l ON l."id" = ut."statusId" 
+		WHERE t."id" = $1 AND u."id" = $2
+		''')
+
+	val = [tempoId, userId]
+
+	row = await db.fetchrow(query, val)
+
+	return row
+
 async def getAllTemposByUserId(userId):
 
 	query = ('''
@@ -18,7 +43,7 @@ async def getAllTemposByUserId(userId):
 		LEFT JOIN "user_tempo" AS ut ON ut."tempoId" = t."id" 
 		LEFT JOIN "user" AS u ON u."id" = ut."userId" 
 		LEFT JOIN "lookup" AS l ON l."id" = ut."statusId" 
-		WHERE u.id = $1
+		WHERE u."id" = $1
 		''')
 
 	val = [userId]
@@ -84,7 +109,7 @@ async def connectTempoToUser(tempoId, userId):
 
 # UPDATE
 
-async def updateTempo(name, startTime, endTime, place, fullDay, description, id):
+async def updateTempo(name, startTimestamp, endTimestamp, place, fullDay, description, id):
 
 	query = ('''
 		UPDATE "tempo" 
@@ -92,6 +117,6 @@ async def updateTempo(name, startTime, endTime, place, fullDay, description, id)
 		WHERE id = $7
 		''')
 
-	val = [name, startTime, endTime, place, fullDay, description, id]
+	val = [name, startTimestamp, endTimestamp, place, fullDay, description, id]
 
 	await db.execute(query, val)

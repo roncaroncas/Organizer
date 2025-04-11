@@ -47,7 +47,7 @@ class TempoBase(BaseModel):
     parentId: Optional[int] = None
 
 class TempoRequest(TempoBase):
-    pass
+    id: Optional[int] = None
 
 class TempoResponse(TempoBase):
     id: int
