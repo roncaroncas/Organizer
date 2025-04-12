@@ -221,8 +221,8 @@ function CalendarGrid({
 
   return (
     <>
-      {/* PRE-HEADER*/}
-      <GridPreHeader/>  {/*ISSO AQUI NAO DEVIA EXISTIR PARÇA*/}
+      {/* PRE-HEADER*/} {/*ISSO AQUI NAO DEVIA EXISTIR PARÇA*/}
+      <GridPreHeader/>  
 
       <div className = "card-container">
         <div className = "calendar-container">
