@@ -62,8 +62,14 @@ const useForm = <T extends Record<string, any>>(
     return formatForAPI ? formatForAPI(formValues) : formValues;
   };
 
+
+
   const resetForm = () => {
     setFormValues(initialValues);
+  };
+
+  const setForm = (newValues: Partial<T>) => {
+    setFormValues(prev => ({ ...prev, ...newValues }));
   };
 
   return {
@@ -71,6 +77,7 @@ const useForm = <T extends Record<string, any>>(
     handleInputChange,
     getFormattedData,
     resetForm,
+    setForm,
   };
 };
 
