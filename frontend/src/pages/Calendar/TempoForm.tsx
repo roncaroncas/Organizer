@@ -1,6 +1,7 @@
 import { format, addHours } from 'date-fns';
 
 import {useEffect, useState} from "react"
+import { useParams } from 'react-router-dom'
 
 import useForm from "../../hooks/useForm"
 import useFetch from "../../hooks/useFetch"
@@ -84,7 +85,11 @@ function TempoForm({
 }: TempoModalProps) {
   
   // ------------- CONTROLE DO FORMS ------------- //
-  const { formValues, handleInputChange, getFormattedData} = useForm<TempoFormData>(
+
+  const { id: paramId } = useParams<{ id?: string }>();
+  console.log(paramId)
+
+  const { formValues, handleInputChange, getFormattedData, setForm} = useForm<TempoFormData>(
     {
       id: id ? id : 0,
       name: loadedTempo.name || "",
@@ -102,31 +107,68 @@ function TempoForm({
 
   // ------------------- CONTROLE DO FETCH ----------------
 
-  const { data, fetchData:createTempo } = useFetch('http://localhost:8000/tempo/create', {
+  const { data:data_get, fetchData:getTempo } = useFetch('http://localhost:8000/tempo/get/'+paramId, {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" }
+  })
+
+  const { data:data_created, fetchData:createTempo } = useFetch('http://localhost:8000/tempo/create', {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(getFormattedData)
+    body: JSON.stringify(getFormattedData())
   })
 
   const { data:data_updated, fetchData:updateTempo } = useFetch('http://localhost:8000/tempo/update', {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(getFormattedData)
+      body: JSON.stringify(getFormattedData())
     })
 
   // --------------EVENT HANDLERS----------------------
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    console.log("formValues", formValues)
+    console.log("getFormattedData", getFormattedData())
+    console.log("formValues.startTimestamp", formValues.startTimestamp instanceof Date);
+
     formValues.id!=0 ? await updateTempo() : await createTempo()
     onClose()
   }
 
   useEffect(() => {
+    if (paramId){
+      getTempo()
+    }
+  }, [paramId])
+
+useEffect(() => {
+  if (data_get){
+    const start = new Date(data_get.startTimestamp);
+    const end = new Date(data_get.endTimestamp);
+    console.log(start)
+    console.log(end)
+    setForm({
+      id: data_get.id,
+      name: data_get.name || "",
+      startDay: data_get.startTimestamp ? format(new Date(start), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+      startTime: data_get.startTimestamp ? format(new Date(start), "HH:mm") : "",
+      endDay: data_get.endTimestamp ? format(new Date(end), "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
+      endTime: data_get.endTimestamp ? format(new Date(end), "HH:mm") : "",
+      place: data_get.place || "",
+      fullDay: data_get.fullDay || false,
+      description: data_get.description || "",
+    })
+  }
+}, [data_get])
+
+  useEffect(() => {
     triggerRender()
-  },[data, data_updated])
+  },[data_created, data_updated])
 
   // ---------------------- 
 
@@ -166,7 +208,7 @@ function TempoForm({
       <form className="tempoForm-container" onSubmit={handleSubmit}>
 
         <div className="tempoForm-section section-col-12"> 
-          <label><h3>Novo evento</h3>
+          <label><h3>Novo evento {formValues.id}</h3>
             <input name="name" placeholder="Título do Evento" value={formValues.name} onChange={handleInputChange} type="text" /><br />
           </label>
         </div>
