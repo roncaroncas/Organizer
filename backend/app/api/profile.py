@@ -35,3 +35,16 @@ async def get_profile_by_id(id: int, request: Request) -> Profile:
     row = await getOtherProfileData(userId)
 
     return Profile(**dict(row))
+
+@router.get("/getAll")
+async def get_profile_by_id(id: int, request: Request) -> Profile:
+
+     # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    # Get Data
+    row = await getOtherProfileData(userId)
+
+    return Profile(**dict(row))

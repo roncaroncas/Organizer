@@ -78,5 +78,10 @@ class Profile(BaseModel):
     birthday: Optional[datetime]
     
 # --------------------------------------
+
+class SimpleUser(BaseModel):
+    id: Optional[int] = None
+    name: Optional[str] = None
+    username: Optional[str] = None
     
 # --------------------------------------
