@@ -23,9 +23,14 @@ body, ul, li, p {
   list-style: none;
 }
 
-h1,
-h2{
-    text-align: center;
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: default;
+}
+
+h1, h2, h3, h4{
+    text-align: left;
     margin: 0px;
 }
 
@@ -180,16 +185,18 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
   width: 20%;
   height: calc(100vh - 60px);
   overflow-y: auto;
+  scrollbar-gutter: stable;
   background-color: #FFEFE2; /* deep orange */
   color: #333333;
-  padding: 20px;
+  padding: 5px 0px 5px 20px;
   box-sizing: border-box;
+  align-items: center;
 }
 
 .calendarbody .sidebar-section {
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   border-bottom: 1px solid #ff9800; /* light orange border */
-  padding-bottom: 10px;
+  padding-bottom: 5px;
 }
 
 .calendarbody .section-header {
@@ -204,8 +211,7 @@ input::placeholder, input::-moz-placeholder, input::-webkit-input-placeholder, i
 }
 
 .calendarbody .section-content {
-  margin-top: 10px;
-  padding: 10px;
+  padding: 2px 10px;
   border-radius: 4px;
 }
 
@@ -442,17 +448,25 @@ table th {
 .calendar-container {
   display: grid;
   grid-template-columns: 2fr repeat(7, 5fr);
-  grid-gap: 5px;
+  grid-template-rows: 2em;
+  grid-auto-rows: 1fr;
+  grid-gap: 4px;
   margin: auto;
   background-color: #FFF8E7;
-  border: 2px solid #4A4A4A;
-  border-radius: 5px;
+/*  border: 2px solid #4A4A4A;*/
+  border-radius: 8px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .calendar-container .calendar-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   background-color: #ff9a00;
   color: #FFF8E7;
+  height: 100%;
 }
 
 .calendar-container .col-08 {
@@ -462,17 +476,28 @@ table th {
 .calendar-container .calendar-cell {
   overflow-y: hidden;
   scrollbar-width: none;
-  white-space: nowrap; /* Prevents line breaks */
-  height: 8em;
-  width: 100%;
+  white-space: nowrap;
+  width: 100%; 
+  min-height: 8em;
+  height: auto;
+}
+
+.calendar-container .calendar-cell .dateTitle {
+  display: flex;
+  justify-content: center;
 }
 
 .calendar-container .calendar-cell .dateContent {
   overflow-y: auto;
-  height: 100%;
+  height: auto;
   scrollbar-width: none;
 }
 
+.calendar-container .calendar-cell .dateContent .calendarTempo {
+  border: 1px dashed;
+  padding: 2px;
+  border-radius: 5px;
+}
 
 .calendar-container .label {
   width: auto;
@@ -492,38 +517,42 @@ table th {
   color: #4A4A4A;
 }
 
-/*.calendarGrid .showCol{
-  width: 150px;
-  transition: all 0.5s ease
+
+/* ------ Date Displayer -----*/
+
+.container-datedisplayer{
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem
 }
 
-.calendarGrid .hideCol{
-  width: 0px;
-  transition: all 0.5s ease;
+.container-datedisplayer .dmy {
+  text-align: center;
 }
 
-.calendarGrid .focusRow{
-  height: 100%;
-  transition: all 0.5s ease;
+.container-datedisplayer .arrow-button {
+  text-align: center;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem 0.5rem;
 }
 
-.calendarGrid .showRow{
-  height: 10rem;
-  transition: all 0.5s ease;
+.container-datedisplayer .arrow-button:hover {
+  background-color: #ccc;
+  border-radius: 4px;
 }
 
-.calendarGrid .hideRow{
-  height: 0rem;
-  transition: all 0.5s ease;
-}*/
+.container-datedisplayer .dmy-label {
+  font-size: 1.6rem;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-.calendarTask{
-  border: 2px solid;   /*Só para eu identificar os treco*/
-  width: auto; /* Adjust as needed */
-  overflow: hidden; /* Hides overflow */
-  text-overflow: ellipsis; /* Adds "..." for overflow text */
-  white-space: nowrap; /* Prevents line breaks */
-} 
+.container-datedisplayer .dmy-label:hover {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
 
 
 /* ------- CONTAINERS --------------*/
@@ -590,8 +619,6 @@ table th {
   justify-content: center;
 }
 
-
-
 .card-container {
   padding: 5px;
   background-color: #f9f9f9;
@@ -609,7 +636,7 @@ table th {
   margin: 0;
   border: none;
   scrollbar-width: thin;
-  box-sizing: border-box; /* Added for consistency */
+  box-sizing: border-box; 
 }
 
 .time-container {
