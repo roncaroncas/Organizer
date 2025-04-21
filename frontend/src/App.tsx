@@ -8,7 +8,7 @@ import Friends from "./pages/Friends/index";
 import FriendsGroups from "./pages/Groups/index";
 import GroupPage from "./pages/Groups/GroupPage";
 import Calendar from "./pages/Calendar/index";
-import TempoForm from "./pages/Calendar/TempoForm";
+import Tempo from "./pages/Tempo/index";
 import Profile from "./pages/Profile/index";
 import Profile_id from "./pages/Profile/Profile_id";
 
@@ -55,7 +55,7 @@ function App() {
           <Route path="/groups" element = {<FriendsGroups/>} />
           <Route path="/group/:id" element = {<GroupPage/>} />
           <Route path="/calendar" element = {<Calendar/>} />
-          <Route path="/calendar/:id" element = {<TempoForm/>} />
+          <Route path="/calendar/:id" element = {<Tempo/>} />
           {/*<Route path="/taskGroups" element = {<CalendarGroupsManager/>} />*/}
           <Route path="/profile" element = {<Profile/>} />
           <Route path="/profile/:id" element = {<Profile_id/>} />

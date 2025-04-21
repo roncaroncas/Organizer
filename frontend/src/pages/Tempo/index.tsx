@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom'
 
 import useForm from "../../hooks/useForm"
 import useFetch from "../../hooks/useFetch"
+import SearchUserInput from "../../components/SearchUserInput"
 
 //  ------- INTERFACES ------- //
 
@@ -77,7 +78,7 @@ const formatTempoForAPI = (values: TempoFormData): Tempo => {
   return t;
 };
 
-function TempoForm({
+function Tempo({
   id,
   onClose = () => {},
   triggerRender = () => {},
@@ -87,7 +88,7 @@ function TempoForm({
   // ------------- CONTROLE DO FORMS ------------- //
 
   const { id: paramId } = useParams<{ id?: string }>();
-  console.log(paramId)
+  // console.log(paramId)
 
   const { formValues, handleInputChange, getFormattedData, setForm} = useForm<TempoFormData>(
     {
@@ -262,12 +263,21 @@ useEffect(() => {
               )
             })}
             <div className="add-user-section">
-              <input
+              <SearchUserInput
+                placeholder = "Procurar usuario..."
+                // onSelect = {(item) => {setNewUser(item); handleAddUser()}}
+                onSelect={(item) => {
+                  setNewUser(item.name);
+                  console.log("Selected:", newUser);
+                  handleAddUser()
+                }}
+              />
+              {/*<input
                 type="text"
                 placeholder="Adicionar novo usuário"
                 value={newUser}
                 onChange={(e) => setNewUser(e.target.value)}
-              />
+              />*/}
               <button className = "btn accept" type="button" onClick={handleAddUser}>Adicionar</button>
             </div>
           </div>
@@ -298,4 +308,4 @@ useEffect(() => {
   );
 };
 
-export default TempoForm;
+export default Tempo;

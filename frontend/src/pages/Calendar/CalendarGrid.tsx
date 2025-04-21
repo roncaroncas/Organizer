@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
-import { format, /*startOfMonth, endOfMonth, startOfWeek, endOfWeek, getISOWeek*/ } from "date-fns";
-import { addDays, addMonths, addYears } from "date-fns";
+import { useState, useEffect } from "react"
+import { format } from "date-fns"
+import { addDays, addMonths, addYears } from "date-fns"
 
-import useFetch from "../../hooks/useFetch";
-import useModal from "../../hooks/useModal";
+import { useCalendarContext } from "../../context/CalendarContext"
 
-import TempoForm from "./TempoForm";
-import CalendarMonth from "./CalendarMonth";
-import CalendarDay from "./CalendarDay";
+import useFetch from "../../hooks/useFetch"
+import useModal from "../../hooks/useModal"
+
+import TempoForm from "./TempoForm"
+import GridMonth from "./grid/GridMonth"
+import GridWeek from "./grid/GridWeek"
+import GridDay from "./grid/GridDay"
 
 interface TempoBase {
   name: string
@@ -30,135 +33,33 @@ interface TempoResponse extends TempoBase {
 
 interface GridState {
   grid: "Month" | "Week" | "Day"
-  param: number
-  day: Date
 }
 
-type OnTempoClick = (tempo: Tempo) => void;
-type OnNewTempoClick = () => void;
+type OnTempoClick = (tempo: Tempo) => void
+type OnNewTempoClick = () => void
 
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------
 
-function CalendarGrid({
-  isOpen,
-  openModal,
-  closeModal,
-  selectedTempo,
-  setSelectedTempo,
-  resetSelectedTempo,
-  tempos,
-  setTempos,
-  data,
-  fetchData,
-}){
+function CalendarGrid(){
 
-
-  // ----   CONTROLE DO GRID ------ // 
-
-  const [grid, setGrid] = useState<GridState>({
-    grid: "Month",
-    param: -1,
-    day: new Date(Date.now())
-  })
-
-  function setGridAsDay (day: Date):void {
-    setGrid({
-      grid: "Day",
-      param: 0,
-      day: new Date (day),
-    })
-    return
-  }
-
-  function setGridAsMonth():void {
-    let month = grid.day.getMonth()
-    setGrid({
-      grid: "Month",
-      param: month,
-      day: new Date (grid.day),
-    })
-    return
-  }
-
-  function changeDay(delta: number) {
-    setGrid((prev) => {
-      return {...prev, day: addDays(prev.day, delta)}
-    });
-  }
-
-  function changeMonth(delta: number) {
-    setGrid((prev) => {
-      return {...prev, day: addMonths(prev.day, delta)}
-    });
-  }
-
-  function changeYear(delta: number) {
-    setGrid((prev) => {
-      return {...prev, day: addYears(prev.day, delta)}
-    });
-  }
-
-  // ------- EVENT HANDLERS -----
-
-  const onTempoClick:OnTempoClick = (tempo: Tempo) => {
-    setSelectedTempo(tempo)
-    openModal();
-  }
-
-  const onNewTempoClick:OnNewTempoClick = () => { 
-    resetSelectedTempo()
-    openModal()
-  }
-
- // ------------------
-
-  const GridPreHeader = () => {   // ISSO AQUI NEM TINHA QUE EXISTIR IRMOES!
-
-    const monthNumberToLabelMap = [
-      'JAN', 'FEV', 'MAR',
-      'ABR', 'MAI', 'JUN',
-      'JUL', 'AGO', 'SET',
-      'OUT', 'NOV', 'DEZ',
-    ]
-
-    return (
-      <div className="card-container">
-        <h1 style={{ margin: "0px 0px 0px 20px", textAlign: "left", display: "flex", gap: "40px", fontSize: "2em" }}>
-          {/* Year Section */}
-          <div style={{ display: "flex", width: "100px", alignItems: "center" }}>
-            <span>{grid.day.getFullYear()}</span>
-            <div style={{ display: "flex", flexDirection: "column", marginLeft: "30px", fontSize: "0.5em", alignItems: "center" }}>
-              <span onClick={() => changeYear(+1)} style={{ cursor: "pointer" }}>+</span>
-              <span onClick={() => changeYear(-1)} style={{ cursor: "pointer" }}>-</span>
-            </div>
-          </div>
-
-          {/* Month Section with Fixed Width */}
-          <div style={{ display: "flex", alignItems: "center"}}>
-            <span onClick={() => setGridAsMonth()} style={{ width: "140px", textAlign: "center",  cursor: "pointer"  }}>
-              {monthNumberToLabelMap[grid.day.getMonth()]}
-            </span>
-            <div style={{ display: "flex", flexDirection: "column", marginLeft: "10px", fontSize: "0.5em", alignItems: "center" }}>
-              <span onClick={() => changeMonth(+1)} style={{ cursor: "pointer" }}>+</span>
-              <span onClick={() => changeMonth(-1)} style={{ cursor: "pointer" }}>-</span>
-            </div>
-          </div>
-        </h1>
-      </div>  
-    )
-
-  }
-
+  const {
+    refDate, setRefDate,
+    isOpen, openModal, closeModal,
+    grid, setGrid, setGridMode,
+    selectedTempo, setSelectedTempo, resetSelectedTempo,
+    openTempo,
+    tempos, setTempos,
+    data, fetchData,} = useCalendarContext()
 
 
   const GridHeader = () => {
 
     // ------ HEADER ----------- //
 
-    let headerContent;
+    let headerContent
 
-    if (grid.grid === "Month") {
+    if (grid.mode === "Month") {
       headerContent = (
         <>
           <div key="weekHeader" className="calendar-header">
@@ -172,75 +73,74 @@ function CalendarGrid({
           ))}
         </>
 
-      );
-    } else if (grid.grid === "Day") {
+      )
+    } else if (grid.mode === "Week") {
+      headerContent = (
+        <>
+          <div key="weekHeader" className="calendar-header">
+            <p>Week</p>
+          </div>
+
+          {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((name) => (
+            <div key={"weekHeader" + name} className="calendar-header">
+              <p>{name}</p>
+            </div>
+          ))}
+        </>       
+      )
+    } else if (grid.mode === "Day") {
       headerContent = (
         <div key="dayHeader" className="calendar-header col-08">
-          <h2>
-            <span onClick={() => changeDay(-1)}> - </span>
-            {format(grid.day, "dd/MM/yyyy")}
-            <span onClick={() => changeDay(+1)}> + </span>
-          </h2>
+          <span>{format(refDate, "dd/MM/yyyy")}</span>
         </div>        
-      );
+      )
     }
     
+    
     return (
-      <>
-        {headerContent}
-      </>
-    )
-  };
-
-  const GridBody = () => {
-    return(
-    grid.grid == "Month"?
-        <CalendarMonth grid={grid} tempos={tempos} onTempoClick={onTempoClick} setGridAsDay={setGridAsDay} onNewTempoClick={onNewTempoClick}/>
-        : grid.grid == "Day"?
-        <CalendarDay grid={grid} tempos={tempos} onTempoClick={onTempoClick} />
-        :
-        ""
+      <> {headerContent} </>
     )
   }
 
-  // --------------- DEBUG ------------------------ //
-  // useEffect(() => {
-  //   console.log("tempos:", tempos);
-  // }, [tempos]);
+  const GridBody = () => {
 
-  // useEffect(() => {
-  //   console.log("grid:", grid);
-  // }, [grid]);
+    const commonProps = {
+      refDate,
+      setRefDate,
+      setGridMode,
+      tempos,
+      openTempo,
+    }
 
-  // useEffect(() => {
-  //   console.log("SelectedTempo:", selectedTempo);
-  // }, [selectedTempo]);
+
+    const modeComponents = {
+      Month: <GridMonth {...commonProps} />,
+      Day: <GridDay {...commonProps} />,
+      Week: <GridWeek {...commonProps} />
+    }
+
+    return modeComponents[grid.mode] 
+  }
 
 
   // ----- RETURN -------- //
 
   return (
     <>
-      {/* PRE-HEADER*/} {/*ISSO AQUI NAO DEVIA EXISTIR PARÇA*/}
-      <GridPreHeader/>  
+    
+      <div className = "calendar-container">
 
-      <div className = "card-container">
-        <div className = "calendar-container">
+        {/*HEADER*/}
+        <GridHeader />
 
-          {/*HEADER*/}
-          <GridHeader />
+        {/*BODY*/}            
+        <GridBody />
 
-          {/*BODY*/}            
-          <GridBody />
-
-        </div>
       </div>
+      
     </>
 
-  );
-};
+  )
+}
 
-export default CalendarGrid;
-
-
-
+export default CalendarGrid

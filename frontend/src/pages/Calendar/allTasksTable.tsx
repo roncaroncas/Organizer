@@ -12,7 +12,6 @@ interface Task {
   status: string;
 }
 
-
 function AllTasksTable ()  {
 
   // SERVE PARA DEBUGGAR

@@ -9,7 +9,7 @@ import classNames from 'classnames'
 
 function Header() {
 
- const { removeCookie } = useContext(CookieContext);
+  const { removeCookie } = useContext(CookieContext);
   const [openDropdown, setOpenDropdown] = useState<string>("");
 
   function handleLogout() {
@@ -36,8 +36,8 @@ function Header() {
       links: [{ name: "Feed", href: "/feed" }]
     },
     {
-      title: "Tasks",
-      key: "tasks",
+      title: "Tempos",
+      key: "tempos",
       links: [
         { name: "Calendar", href: "/calendar" },
         // { name: "TaskGroups", href: "/taskGroups" }
@@ -73,7 +73,7 @@ function Header() {
   return (
     <div className="header">
       <h1>
-        <a href="/" style={{ color: 'white', textDecoration: 'none' }}>
+        <a href="/" style={{ color: 'white', textDecoration: 'none', cursor: "pointer"}}>
           Tempo
         </a>
       </h1>
