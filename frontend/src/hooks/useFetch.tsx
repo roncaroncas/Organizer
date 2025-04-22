@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 
-function useFetch(url: string, options: RequestInit) {
+function useFetch(url: string, options: RequestInit, getOptions: string = "") {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -9,7 +9,7 @@ function useFetch(url: string, options: RequestInit) {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch(url, options)
+      const response = await fetch(url+getOptions, options)
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
@@ -20,7 +20,7 @@ function useFetch(url: string, options: RequestInit) {
     } finally {
       setIsLoading(false)
     }
-  }, [url, options])
+  }, [url, options, getOptions])
 
   return { data, error, isLoading, fetchData }
 }

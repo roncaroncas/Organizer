@@ -51,9 +51,9 @@ async def getUserIdByToken (token):
 async def createUser (username, password):
 
 	query = '''
-				INSERT INTO "user"
-					("username", "login", "password")
-				VALUES ($1, $1, $2)
+			INSERT INTO "user"
+				("username", "login", "password")
+			VALUES ($1, $2, 0)
 			'''
 
 	val = [username, password]

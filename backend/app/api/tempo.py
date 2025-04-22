@@ -3,7 +3,7 @@ from app.database.connection import db
 from app.config import logger
 from typing import List
 
-from app.models import TempoRequest, TempoResponse
+from app.models import TempoRequest, TempoResponse, SimpleUser
 
 from app.database.queries.auth_queries import getUserIdByToken
 from app.database.queries.tempo_queries import (
@@ -13,6 +13,8 @@ from app.database.queries.tempo_queries import (
     createNewTempo,
     connectTempoToUser,
     updateTempo)
+from app.database.queries.user_queries import (
+    getUserTempoByIds, createUserTempo, deleteUserTempo, getUsersByTempoId)
 
 router = APIRouter()
 
@@ -60,7 +62,7 @@ async def my_tempos(request: Request) -> List[TempoResponse]:
     # GET ALL TEMPOS LINKED TO USER ID
     rows = await getAllTemposByUserId(userId)
 
-    logger.debug(rows)
+    # logger.debug(rows)
 
     # CONVERT TEMPOS TO MODEL
     tempos = []
@@ -132,8 +134,8 @@ async def create_tempo(tempo: TempoRequest, request: Request) -> (bool):
     # RETURN
     return True
 
-@router.put("/update")
-async def update_tempo(tempo: TempoRequest, request: Request) -> (bool):
+@router.put("/update/{tempoId}")
+async def update_tempo(request: Request, tempoId: int, tempo: TempoRequest) -> (bool):
 
     # Check if logged in
     userId = await getUserIdByToken(str(request.cookies.get("token")))
@@ -149,9 +151,49 @@ async def update_tempo(tempo: TempoRequest, request: Request) -> (bool):
         place= tempo.place,
         fullDay= tempo.fullDay,
         description= tempo.description,
-        id= tempo.id,
+        id= tempoId,
         )
+
+    # Connect Users to Tempos!
+    for u in tempo.users:
+        # logger.debug ("u.id: " + str(u.id) + "  tempoId: " + str(tempoId))
+
+        if (await getUserTempoByIds(u.id, tempoId)):
+            #await updateUserTempo(tempoId, u.id)
+            pass
+        else:
+            await createUserTempo(u.id, tempoId)
+
+    # Deleting users!
+    currentUsers = await getUsersByTempoId(tempoId)
+    currentUsersId = {r['id'] for r in currentUsers}
+
+    requestUsersId = {u.id for u in tempo.users}
+
+    user_ids_to_remove = currentUsersId - requestUsersId
+
+    # Step 4: Delete them
+    for user_id in user_ids_to_remove:
+        await deleteUserTempo(user_id, tempoId) 
 
     #RETURN
     return True
+
+@router.get("/get/{tempoId}/users")
+async def get_users_by_tempoId(request: Request, tempoId: int) -> (List[SimpleUser]):
+
+    # Check if logged in
+    userId = await getUserIdByToken(str(request.cookies.get("token")))
+    if not(userId):
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    raw_users = await getUsersByTempoId(tempoId)
+
+    # Convert to list of SimpleUser
+    users = [SimpleUser(**user) for user in raw_users]
+
+    logger.debug(users)
+  
+    #RETURN
+    return users
 

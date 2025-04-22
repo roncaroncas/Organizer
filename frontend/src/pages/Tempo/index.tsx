@@ -44,10 +44,17 @@ interface TempoModalProps {
   onClose: () => void;
   triggerRender: () => void
 }
+// -------------
+
+
+interface SimpleUser {
+  id: number
+  name: string
+}
 
 // -------- FORMATED VALUE FOR API ------- //
 
-const formatTempoForAPI = (values: TempoFormData): Tempo => {
+const formatTempoForAPI = (values: TempoFormData): TempoResponse => {
 
   // MONTANDO startDateTime:
   // Parsing startDate and startTime
@@ -66,7 +73,7 @@ const formatTempoForAPI = (values: TempoFormData): Tempo => {
   const endDayTime = new Date(endDateParts[0], endDateParts[1] - 1, endDateParts[2], endTimeParts[0], endTimeParts[1]);
 
   let t:TempoResponse = {
-    id: values.id,
+    // id: values.id,
     name: values.name,
     startTimestamp: startDayTime,
     endTimestamp: endDayTime,
@@ -84,11 +91,43 @@ function Tempo({
   triggerRender = () => {},
   loadedTempo = {},
 }: TempoModalProps) {
+
+  // Controle dos usuarios // 
+
+
+  const [users, setUsers] = useState<SimpleUser[]>([]);
+
+  const [newUser, setNewUser] = useState({
+    id: 0,
+    name: ""
+  })
+
+  function resetNewUser() {
+    setNewUser({
+      id: 0,
+      name: ""
+    })
+  }
+
+  const handleAddUser = () => {
+    if (newUser.name.trim()) {
+      setUsers([...users, { id: newUser.id, name: newUser.name }]);
+      resetNewUser(); // Clear input after adding
+    }
+  }
+
+  const handleDeleteUser = (id: number) => {
+    setUsers(users.filter(user => user.id !== id));
+  };
+
   
   // ------------- CONTROLE DO FORMS ------------- //
 
+
   const { id: paramId } = useParams<{ id?: string }>();
   // console.log(paramId)
+
+  const tempoId = paramId ?? id;
 
   const { formValues, handleInputChange, getFormattedData, setForm} = useForm<TempoFormData>(
     {
@@ -108,25 +147,40 @@ function Tempo({
 
   // ------------------- CONTROLE DO FETCH ----------------
 
-  const { data:data_get, fetchData:getTempo } = useFetch('http://localhost:8000/tempo/get/'+paramId, {
+  const { data:data_get, fetchData:getTempo } = useFetch('http://localhost:8000/tempo/get/', {
     method: "GET",
     credentials: "include",
-    headers: { "Content-Type": "application/json" }
-  })
+    headers: { "Content-Type": "application/json" },
+  }, tempoId)
 
   const { data:data_created, fetchData:createTempo } = useFetch('http://localhost:8000/tempo/create', {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(getFormattedData())
+    body: JSON.stringify({
+      ...getFormattedData(),
+      users
+    })
   })
 
-  const { data:data_updated, fetchData:updateTempo } = useFetch('http://localhost:8000/tempo/update', {
+  const { data:data_updated, fetchData:updateTempo } = useFetch('http://localhost:8000/tempo/update/', {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(getFormattedData())
-    })
+      body: JSON.stringify({
+      ...getFormattedData(),
+      users
+    })   
+  }, formValues.id)
+
+  // --- FETCH USERS!
+
+  const { data:data_users, fetchData:getTempoUsers } = useFetch('http://localhost:8000/tempo/get/', {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" }  
+  }, tempoId+"/users")
+
 
   // --------------EVENT HANDLERS----------------------
 
@@ -137,35 +191,48 @@ function Tempo({
     console.log("getFormattedData", getFormattedData())
     console.log("formValues.startTimestamp", formValues.startTimestamp instanceof Date);
 
-    formValues.id!=0 ? await updateTempo() : await createTempo()
+    formValues.id!=0
+    ? await updateTempo()
+    : await createTempo()
     onClose()
   }
 
-  useEffect(() => {
-    if (paramId){
-      getTempo()
-    }
-  }, [paramId])
+  // useEffect(() => {
+  //   if (paramId){
+  //     getTempo()
+  //     getTempoUsers()
+  //   }
+  // }, [paramId])
 
-useEffect(() => {
-  if (data_get){
-    const start = new Date(data_get.startTimestamp);
-    const end = new Date(data_get.endTimestamp);
-    console.log(start)
-    console.log(end)
-    setForm({
-      id: data_get.id,
-      name: data_get.name || "",
-      startDay: data_get.startTimestamp ? format(new Date(start), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-      startTime: data_get.startTimestamp ? format(new Date(start), "HH:mm") : "",
-      endDay: data_get.endTimestamp ? format(new Date(end), "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
-      endTime: data_get.endTimestamp ? format(new Date(end), "HH:mm") : "",
-      place: data_get.place || "",
-      fullDay: data_get.fullDay || false,
-      description: data_get.description || "",
-    })
-  }
-}, [data_get])
+  useEffect(() => {
+
+    if (tempoId) {
+      getTempo()
+      getTempoUsers()
+    }
+  }, [paramId, id])
+
+// --------------------------------------
+
+  useEffect(() => {
+    if (data_get){
+      const start = new Date(data_get.startTimestamp);
+      const end = new Date(data_get.endTimestamp);
+      // console.log(start)
+      // console.log(end)
+      setForm({
+        id: data_get.id,
+        name: data_get.name || "",
+        startDay: data_get.startTimestamp ? format(new Date(start), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+        startTime: data_get.startTimestamp ? format(new Date(start), "HH:mm") : "",
+        endDay: data_get.endTimestamp ? format(new Date(end), "yyyy-MM-dd") : format(addHours(new Date(), 1), "yyyy-MM-dd"),
+        endTime: data_get.endTimestamp ? format(new Date(end), "HH:mm") : "",
+        place: data_get.place || "",
+        fullDay: data_get.fullDay || false,
+        description: data_get.description || "",
+      })
+    }
+  }, [data_get])
 
   useEffect(() => {
     triggerRender()
@@ -173,23 +240,20 @@ useEffect(() => {
 
   // ---------------------- 
 
-  const [users, setUsers] = useState([
-    // { id: 1, name: 'Usuário 1' },
-    // { id: 2, name: 'Usuário 2' },
-  ]);
 
-  const [newUser, setNewUser] = useState('')
-
-  const handleAddUser = () => {
-    if (newUser.trim()) {
-      setUsers([...users, { id: users.length + 1, name: newUser }]);
-      setNewUser(''); // Clear input after adding
+  useEffect(() => {
+    if (newUser.name){
+      handleAddUser()
     }
-  }
+  },[newUser])
 
-  const handleDeleteUser = (id: number) => {
-    setUsers(users.filter(user => user.id !== id));
-  };
+  useEffect(() => {
+    if (data_users){
+      // console.log(data_users)
+      setUsers(data_users)
+    }
+  },[data_users])
+ 
 
 
   // --------- DEBUG ------------ //
@@ -265,11 +329,8 @@ useEffect(() => {
             <div className="add-user-section">
               <SearchUserInput
                 placeholder = "Procurar usuario..."
-                // onSelect = {(item) => {setNewUser(item); handleAddUser()}}
                 onSelect={(item) => {
-                  setNewUser(item.name);
-                  console.log("Selected:", newUser);
-                  handleAddUser()
+                  setNewUser(item);
                 }}
               />
               {/*<input

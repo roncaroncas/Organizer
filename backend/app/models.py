@@ -14,6 +14,20 @@ class User(BaseModel):  #FROM users
 
 # --------------------------------------
 
+class SimpleUser(BaseModel):
+    id: Optional[int] = None
+    name: Optional[str] = None
+    username: Optional[str] = None
+    
+# --------------------------------------
+    
+class Profile(BaseModel):
+    id: int
+    name: str
+    birthday: Optional[datetime]
+
+# --------------------------------------
+
 class Token(BaseModel):
     token: str
 
@@ -48,6 +62,7 @@ class TempoBase(BaseModel):
 
 class TempoRequest(TempoBase):
     id: Optional[int] = None
+    users: List[SimpleUser]
 
 class TempoResponse(TempoBase):
     id: int
@@ -72,16 +87,3 @@ class Notification(BaseModel):
     
 # --------------------------------------
 
-class Profile(BaseModel):
-    id: int
-    name: str
-    birthday: Optional[datetime]
-    
-# --------------------------------------
-
-class SimpleUser(BaseModel):
-    id: Optional[int] = None
-    name: Optional[str] = None
-    username: Optional[str] = None
-    
-# --------------------------------------

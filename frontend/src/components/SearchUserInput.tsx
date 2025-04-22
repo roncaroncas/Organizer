@@ -4,7 +4,6 @@ import useFetch from "../hooks/useFetch"
 
 interface SearchUserInputProps {
   placeholder?: string;
-  onSearch: (query: string) => Promise<string[]>;
   onSelect: (item: string) => void;
 }
 
@@ -14,28 +13,30 @@ interface SimpleUser {
   username?: string
 }
 
-export default function SearchUserInput({ placeholder = "Search...", onSearch, onSelect }: SearchUserInputProps) {
+export default function SearchUserInput({ placeholder = "Search...", onSelect }: SearchUserInputProps) {
 
-
+  const [inputSearch, setInputSearch] = useState("");
   const [results, setResults] = useState<SimpleUser[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const debounceRef = useRef<number | null>(null);
 
+  const searchQuery = inputSearch ? `?search=${encodeURIComponent(inputSearch)}` : "";
+
   const { data, fetchData } = useFetch(
-    'http://localhost:8000/user/getAll', {
+    'http://localhost:8000/user/get', {
     method: 'GET',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-  })
+  },
+  searchQuery)
 
-  const [query, setQuery] = useState("");
 
   useEffect(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
-    if (query.trim() === "") {
+    if (inputSearch.trim() === "") {
       setResults([]);
       setShowDropdown(false);
       return;
@@ -43,20 +44,19 @@ export default function SearchUserInput({ placeholder = "Search...", onSearch, o
 
     debounceRef.current = window.setTimeout(async () => {
       await fetchData();
-      console.log("hue")
     }, 300);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [query, onSearch]);
+  }, [inputSearch]);
 
   useEffect(() => {
     if (data) {
-      console.log("entrei no useEffect do setResults")
+      // console.log("entrei no useEffect do setResults")
       setResults(data);
       setShowDropdown(true);
-      console.log("finalizei no useEffect do setResults")
+      // console.log("finalizei no useEffect do setResults")
     }
   }, [data])
 
@@ -67,9 +67,9 @@ export default function SearchUserInput({ placeholder = "Search...", onSearch, o
         type="text"
         className="w-full p-2 border border-gray-300 rounded-md"
         placeholder={placeholder}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={() => query && setShowDropdown(true)}
+        value={inputSearch}
+        onChange={(e) => setInputSearch(e.target.value)}
+        onFocus={() => inputSearch && setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)} // allow click to register
       />
 
